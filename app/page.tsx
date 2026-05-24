@@ -1352,7 +1352,7 @@ export default function Home() {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="neo-btn w-12 h-12 bg-neo-blue flex items-center justify-center text-white "
+                className="neo-btn w-12 h-12 bg-neo-blue flex items-center justify-center text-white footer-social-btn"
                 title="GitHub"
               >
                 <i className="fab fa-github text-xl"></i>
@@ -1361,7 +1361,7 @@ export default function Home() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="neo-btn w-12 h-12 bg-neo-purple flex items-center justify-center text-white"
+                className="neo-btn w-12 h-12 bg-neo-purple flex items-center justify-center text-white footer-social-btn"
                 title="LinkedIn"
               >
                 <i className="fab fa-linkedin-in text-xl"></i>
@@ -1370,7 +1370,7 @@ export default function Home() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="neo-btn w-12 h-12 bg-neo-pink flex items-center justify-center text-white "
+                className="neo-btn w-12 h-12 bg-neo-pink flex items-center justify-center text-white footer-social-btn"
                 title="Instagram"
               >
                 <i className="fab fa-instagram text-xl"></i>
@@ -1379,7 +1379,7 @@ export default function Home() {
                 href="https://wa.me/6281234567890"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="neo-btn w-12 h-12 bg-neo-green flex items-center justify-center text-black "
+                className="neo-btn w-12 h-12 bg-neo-green flex items-center justify-center text-black footer-social-btn"
                 title="WhatsApp"
               >
                 <i className="fab fa-whatsapp text-xl"></i>
