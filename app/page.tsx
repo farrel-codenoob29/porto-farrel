@@ -178,6 +178,136 @@ const SafeImage = ({ src, alt, className }: { src: string; alt: string; classNam
     />
   );
 };
+// Draggable Neobrutalist Shape Component for Hero section
+const DraggableShape = ({
+  initialClass,
+  colorClass,
+  sizeClass,
+  rotateClass,
+  animationDelay,
+}: {
+  initialClass: string;
+  colorClass: string;
+  sizeClass: string;
+  rotateClass: string;
+  animationDelay?: string;
+}) => {
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  const handleStart = (clientX: number, clientY: number) => {
+    if (!elementRef.current) return;
+    const rect = elementRef.current.getBoundingClientRect();
+    let currentX = position?.x ?? 0;
+    let currentY = position?.y ?? 0;
+
+    if (position === null) {
+      const parent = elementRef.current.offsetParent;
+      if (parent) {
+        const parentRect = parent.getBoundingClientRect();
+        currentX = rect.left - parentRect.left;
+        currentY = rect.top - parentRect.top;
+        setPosition({ x: currentX, y: currentY });
+      } else {
+        setPosition({ x: 0, y: 0 });
+      }
+    }
+
+    dragStart.current = {
+      x: clientX - currentX,
+      y: clientY - currentY,
+    };
+    setIsDragging(true);
+  };
+
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!isDragging) return;
+    const newX = clientX - dragStart.current.x;
+    const newY = clientY - dragStart.current.y;
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleEnd = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    handleStart(e.clientX, e.clientY);
+    e.preventDefault();
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) return;
+    handleStart(e.touches[0].clientX, e.touches[0].clientY);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      if (e.cancelable) e.preventDefault();
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+
+    const handleMouseUp = () => {
+      handleEnd();
+    };
+
+    const handleTouchEnd = () => {
+      handleEnd();
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isDragging]);
+
+  const style: React.CSSProperties = position
+    ? {
+        position: "absolute",
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        transform: isDragging ? "scale(1.05) rotate(0deg)" : undefined,
+        zIndex: isDragging ? 50 : 10,
+        cursor: isDragging ? "grabbing" : "grab",
+        animationDelay,
+      }
+    : {
+        cursor: "grab",
+        animationDelay,
+      };
+
+  return (
+    <div
+      ref={elementRef}
+      onMouseDown={onMouseDown}
+      onTouchStart={onTouchStart}
+      style={style}
+      className={`
+        absolute border-4 border-black shadow-neo-lg select-none
+        ${colorClass} ${sizeClass} ${rotateClass}
+        ${position ? "" : initialClass}
+        ${isDragging ? "dragging" : "animate-float"}
+      `}
+    />
+  );
+};
 
 
 
@@ -607,19 +737,28 @@ export default function Home() {
         {/* Dot pattern background */}
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]" />
 
-        {/* Floating Neobrutalist Shapes */}
+        {/* Floating Neobrutalist Shapes (Draggable) */}
         <div className="absolute inset-0 pointer-events-none select-none">
           <div className="pointer-events-auto">
-            <div
-              className="absolute top-16 left-5 md:top-1/3 md:left-1/4 w-16 h-16 md:w-32 md:h-32 bg-neo-pink border-4 border-black shadow-neo-lg animate-float hover:rotate-12 transition-transform duration-300 cursor-default z-0"
+            <DraggableShape
+              initialClass="top-16 left-5 md:top-1/3 md:left-1/4"
+              colorClass="bg-neo-pink"
+              sizeClass="w-16 h-16 md:w-32 md:h-32"
+              rotateClass="hover:rotate-12"
             />
-            <div
-              className="absolute bottom-10 right-5 md:bottom-1/3 md:right-1/4 w-20 h-20 md:w-40 md:h-40 bg-neo-blue border-4 border-black shadow-neo-lg animate-float hover:-rotate-12 transition-transform duration-300 cursor-default z-0"
-              style={{ animationDelay: "1.0s" }}
+            <DraggableShape
+              initialClass="bottom-10 right-5 md:bottom-1/3 md:right-1/4"
+              colorClass="bg-neo-blue"
+              sizeClass="w-20 h-20 md:w-40 md:h-40"
+              rotateClass="hover:-rotate-12"
+              animationDelay="1.0s"
             />
-            <div
-              className="absolute top-20 right-5 md:top-1/2 md:left-1/2 w-14 h-14 md:w-24 md:h-24 bg-neo-green border-4 border-black shadow-neo-lg animate-float hover:rotate-45 transition-transform duration-300 cursor-default z-0"
-              style={{ animationDelay: "2.0s" }}
+            <DraggableShape
+              initialClass="top-20 right-5 md:top-1/2 md:left-1/2"
+              colorClass="bg-neo-green"
+              sizeClass="w-14 h-14 md:w-24 md:h-24"
+              rotateClass="hover:rotate-45"
+              animationDelay="2.0s"
             />
           </div>
         </div>
