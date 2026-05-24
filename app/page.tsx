@@ -427,12 +427,12 @@ export default function Home() {
               <div className="text-neo-orange font-black text-sm sm:text-base">farrel@ubuntu-desktop</div>
               <div className="text-zinc-500 font-bold">---------------------</div>
               <div><span className="text-neo-pink font-bold">OS:</span> Farrel-OS v29.0.108 (Developer Edition)</div>
-              <div><span className="text-neo-pink font-bold">Host:</span> Farrel Diego Akbar Portfolio</div>
+              <div><span className="text-neo-pink font-bold">Host:</span> Farrel Diego Akbar</div>
               <div><span className="text-neo-pink font-bold">Role:</span> Junior Full Stack Developer</div>
               <div><span className="text-neo-pink font-bold">Education:</span> SMK Rekayasa Perangkat Lunak</div>
-              <div><span className="text-neo-pink font-bold">Location:</span> Jakarta, Indonesia</div>
+              <div><span className="text-neo-pink font-bold">Location:</span> Balikpapan, Indonesia</div>
               <div><span className="text-neo-pink font-bold">Shell:</span> bash 5.2.15</div>
-              <div><span className="text-neo-pink font-bold">WM:</span> React / Next.js (Neobrutalism)</div>
+              <div><span className="text-neo-pink font-bold">WM:</span> Next.js (Neobrutalism)</div>
             </div>
             {/* Full biography description statement */}
             <div className="sm:col-span-12 border-t border-zinc-800 pt-3 text-zinc-300 leading-relaxed text-justify text-xs mt-2">
@@ -444,33 +444,55 @@ export default function Home() {
       case "cat knowledge.md":
       case "cat knowledge.txt":
         result = (
-          <div className="p-3 bg-[#2C001E]/40 border-2 border-black rounded text-[11px] space-y-2 mt-2 max-w-lg font-mono select-text text-left">
-            <div className="text-neo-blue font-black border-b border-zinc-800 pb-1 uppercase">
-              [ knowledge.md ]
+          <div className="p-4 bg-[#2C001E]/40 border-2 border-black rounded text-[11px] space-y-3 mt-2 max-w-xl font-mono select-text text-left">
+            <div className="text-neo-blue font-black border-b border-zinc-800 pb-1.5 uppercase flex items-center justify-between">
+              <span>[ knowledge.md ]</span>
+              <span className="text-[9px] text-zinc-500 font-normal">UTF-8 / Markdown</span>
             </div>
-            <div className="space-y-2 text-zinc-300">
-              <p className="font-bold text-white">
-                {lang === "id" 
-                  ? "● Sekolah Menengah Kejuruan (SMK) - Rekayasa Perangkat Lunak" 
-                  : "● Vocational High School - Software Engineering"}
-              </p>
-              <p className="text-zinc-400 pl-4">
-                {lang === "id"
-                  ? "Mempelajari dasar-dasar pemrograman web, algoritma terstruktur, basis data (SQL), pemecahan masalah logika, dan arsitektur perangkat lunak."
-                  : "Learned fundamental web programming, structured algorithms, databases (SQL), logical problem solving, and software architecture."}
-              </p>
-              
-              <p className="font-bold text-white mt-3">
-                {lang === "id" 
-                  ? "● Spesialisasi Mandiri & Sertifikasi Profesional" 
-                  : "● Self-Directed Specialization & Professional Certificates"}
-              </p>
-              <ul className="list-disc pl-8 space-y-1 text-zinc-400">
-                <li>Cisco CCNA (Routing & Switching Administration)</li>
-                <li>Database Design & SQL Administration (Oracle Academy)</li>
-                <li>Web Development & React Specialist (Udemy, Dicoding)</li>
-                <li>BNSP Sertifikasi Programmer Resmi</li>
-              </ul>
+            <div className="space-y-4 pt-1">
+              {lang === "id" ? (
+                <ul className="space-y-3 pl-4 list-disc text-zinc-300">
+                  <li>
+                    <span className="text-white font-bold">Pengembangan web dasar</span> menggunakan HTML, CSS, dan JavaScript (saat ini sedang mempelajari React sebagai langkah awal ke teknologi frontend modern)
+                  </li>
+                  <li>
+                    <span className="text-white font-bold">Pengembangan backend</span> dengan PHP dan Laravel
+                  </li>
+                  <li>
+                    <span className="text-white font-bold">Optimasi sistem</span> seperti caching, database fallback, DDDM (Database Driven Dynamic Menu), dan integrasi WebSocket real-time
+                  </li>
+                  <li>
+                    <span className="text-white font-bold">Pengembangan aplikasi mobile</span> dengan Flutter & Dart
+                  </li>
+                  <li>
+                    <span className="text-white font-bold">Dasar AI & Machine Learning</span>, termasuk membuat model AI saya sendiri hanya menggunakan Python
+                  </li>
+                  <li className="list-none -ml-4 text-neo-orange font-bold mt-2">
+                    & semoga akan lebih banyak lagi di masa depan!
+                  </li>
+                </ul>
+              ) : (
+                <ul className="space-y-3 pl-4 list-disc text-zinc-300">
+                  <li>
+                    <span className="text-white font-bold">Basic web development</span> using HTML, CSS, and JavaScript (currently learning React as my first step into modern frontend tech)
+                  </li>
+                  <li>
+                    <span className="text-white font-bold">Backend development</span> with PHP and Laravel
+                  </li>
+                  <li>
+                    <span className="text-white font-bold">System optimizations</span> such as caching, database fallbacks, DDDM (Database Driven Dynamic Menu), and real-time WebSocket integration
+                  </li>
+                  <li>
+                    <span className="text-white font-bold">Mobile app development</span> with Flutter & Dart
+                  </li>
+                  <li>
+                    <span className="text-white font-bold">Fundamental AI & Machine Learning</span>, including creating my own AI models using only Python
+                  </li>
+                  <li className="list-none -ml-4 text-neo-orange font-bold mt-2">
+                    & hopefully much more in the future!
+                  </li>
+                </ul>
+              )}
             </div>
           </div>
         );
@@ -512,7 +534,7 @@ export default function Home() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between p-1.5 bg-black border border-zinc-800">
                 <span className="text-neo-pink font-black text-[10px]">LOCATION:</span>
-                <span className="text-white font-bold">JAKARTA, INDONESIA</span>
+                <span className="text-white font-bold">BALIKPAPAN, INDONESIA</span>
               </div>
               
               <div 
@@ -1609,7 +1631,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="text-sm sm:text-base font-black mb-1 uppercase">{t("contact-location-title")}</h4>
-                    <p className="text-black font-black text-sm uppercase">Jakarta, Indonesia</p>
+                    <p className="text-black font-black text-sm uppercase">Balikpapan, Indonesia</p>
                   </div>
                 </div>
 
