@@ -344,6 +344,7 @@ export default function Home() {
 
   // Refs for sliding nav active indicator
   const navRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({
     left: 0,
     width: 0,
@@ -356,6 +357,31 @@ export default function Home() {
   const t = (key: keyof typeof translations["id"]) => {
     return translations[lang][key] || translations["en"][key] || key;
   };
+
+  const handleMouseEnter = (sectionId: string) => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredSection(sectionId);
+    }, 150); // 150ms delay to debounce rapid swiping
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setHoveredSection(null);
+  };
+
+  // Clean up hover timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Hydration fix & Init
   useEffect(() => {
@@ -718,7 +744,7 @@ export default function Home() {
             {/* Navigation Desktop */}
             <nav 
               className="relative hidden lg:flex items-center gap-1"
-              onMouseLeave={() => setHoveredSection(null)}
+              onMouseLeave={handleMouseLeave}
             >
               {/* Sliding dynamic background block */}
               <div
@@ -732,7 +758,7 @@ export default function Home() {
                     navRefs.current[item.id] = el;
                   }}
                   href={`#${item.id}`}
-                  onMouseEnter={() => setHoveredSection(item.id)}
+                  onMouseEnter={() => handleMouseEnter(item.id)}
                   className="relative z-10 px-4 py-2 text-sm lg:text-base font-black text-black uppercase transition-colors duration-300 select-none"
                 >
                   {t(`nav-${item.id}` as any)}
