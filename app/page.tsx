@@ -18,7 +18,7 @@ const translations = {
     "hero-whatsapp": "Chat di WhatsApp",
     "about-title": "Tentang Saya",
     "about-subtitle": "Pengembang Web Profesional",
-    "about-desc": "Saya Farrel Diego Akbar, lulusan dan spesialis Web Development. Saya berspesialisasi dalam membangun pengalaman digital yang luar biasa dan memelihara aplikasi web yang kuat. Sebagai Pengembang Web, saya menggabungkan keahlian teknis pemrograman modern dan desain web responsif untuk memberikan solusi komprehensif. Saya menyukai pemecahan masalah kreatif dan terus mengikuti perkembangan teknologi terbaru.",
+    "about-desc": "Saya Farrel Diego Akbar, lulusan Sekolah Menengah Kejuruan Jurusan Rekayasa Perangkat Lunak dari Indonesia. Saya berspesialisasi dalam membangun antarmuka digital yang interaktif dan memelihara sistem backend yang tangguh. Sebagai Junior Full Stack Developer, saya menggabungkan keahlian logika server modern dan desain web responsif untuk memberikan solusi komprehensif. Saya menyukai pemecahan masalah kreatif dan terus mengikuti perkembangan teknologi terbaru.",
     "about-hire": "Hubungi Saya",
     "projects-title": "Proyek Saya",
     "btn-details": "Detail",
@@ -94,7 +94,7 @@ const translations = {
     "hero-whatsapp": "Chat on WhatsApp",
     "about-title": "About Me",
     "about-subtitle": "Professional Web Developer",
-    "about-desc": "I am Farrel Diego Akbar, a Web Development graduate and specialist. I specialize in building outstanding digital experiences and maintaining robust web applications. As a Web Developer, I combine technical expertise in modern programming and responsive design to deliver comprehensive solutions. I enjoy creative problem-solving and keeping up with the latest technologies.",
+    "about-desc": "I am Farrel Diego Akbar, a vocational high school graduate majoring in Software Engineering from Indonesia. I specialize in building interactive digital interfaces and maintaining robust backend systems. As a Junior Full Stack Developer, I combine expertise in modern server logic and responsive web design to deliver comprehensive solutions. I am passionate about creative problem-solving and staying up-to-date with the latest technological trends.",
     "about-hire": "Hire Me",
     "projects-title": "My Projects",
     "btn-details": "Details",
@@ -309,16 +309,6 @@ const DraggableShape = ({
   );
 };
 
-const CensoredText = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <span className="relative inline-block mx-1 group cursor-crosshair">
-      <span className="absolute inset-0 bg-black transition-transform duration-300 origin-left scale-x-100 group-hover:scale-x-0 z-10" />
-      <span className="relative z-0 bg-transparent text-black group-hover:bg-neo-yellow px-1 transition-colors duration-300 font-black">
-        {children}
-      </span>
-    </span>
-  );
-};
 
 const navItems = [
   { id: "home", color: "#FFD600" },
@@ -352,6 +342,217 @@ export default function Home() {
 
   // Form State
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
+
+  // Terminal Simulator State
+  const [terminalHistory, setTerminalHistory] = useState<Array<{ command: string; result: React.ReactNode }>>([]);
+  const [terminalInput, setTerminalInput] = useState("");
+  const [isTypingSimulated, setIsTypingSimulated] = useState(false);
+  const terminalViewportRef = useRef<HTMLDivElement>(null);
+
+  // Initialize terminal greeting based on current language
+  useEffect(() => {
+    if (mounted) {
+      setTerminalHistory([
+        {
+          command: "system --init",
+          result: (
+            <div className="space-y-1 text-zinc-400 font-mono text-xs select-text">
+              <div>FARREL-OS [Version 1.0.0]</div>
+              <div>(c) 2026 Farrel Diego Akbar. All rights reserved.</div>
+              <div className="text-neo-yellow font-black mt-2">
+                {lang === "id" 
+                  ? "Ketik 'help' atau klik tombol shortcut di bawah untuk interaksi." 
+                  : "Type 'help' or click the shortcut buttons below to interact."}
+              </div>
+            </div>
+          ),
+        },
+      ]);
+    }
+  }, [lang, mounted]);
+
+  // Auto-scroll terminal viewport
+  useEffect(() => {
+    if (terminalViewportRef.current) {
+      terminalViewportRef.current.scrollTop = terminalViewportRef.current.scrollHeight;
+    }
+  }, [terminalHistory]);
+
+  const executeTerminalCommand = (cmd: string) => {
+    const trimmed = cmd.trim();
+    if (!trimmed) return;
+
+    let result: React.ReactNode = null;
+    const lowerCmd = trimmed.toLowerCase();
+
+    if (lowerCmd === "clear") {
+      setTerminalHistory([]);
+      setTerminalInput("");
+      return;
+    }
+
+    switch (lowerCmd) {
+      case "help":
+        result = (
+          <div className="space-y-1 text-neo-yellow font-mono text-xs select-text">
+            <p className="font-black">{lang === "id" ? "Perintah yang didukung:" : "Supported commands:"}</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 max-w-xs mt-1 font-mono text-[11px] text-white">
+              <div>• whoami</div>
+              <div>• cat education.txt</div>
+              <div>• ls skills/</div>
+              <div>• run contact.sh</div>
+              <div>• clear</div>
+            </div>
+          </div>
+        );
+        break;
+      case "whoami":
+        result = (
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-3 bg-zinc-900 border-2 border-black rounded mt-2 font-mono select-text text-left">
+            <div className="flex-shrink-0 w-20 h-20 border-4 border-black bg-black overflow-hidden relative shadow-[3px_3px_0px_0px_rgba(255,255,255,0.15)]">
+              <SafeImage
+                src="/img/profil.jpg"
+                alt="Farrel Diego Akbar"
+                className="w-full h-full object-cover grayscale contrast-125"
+              />
+            </div>
+            <div className="flex-1 space-y-1">
+              <div className="text-sm font-black text-white uppercase tracking-tight">
+                Farrel Diego Akbar
+              </div>
+              <div className="text-[10px] bg-neo-pink text-white font-black px-2 py-0.5 inline-block uppercase">
+                {t("about-subtitle")}
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-relaxed text-justify mt-1">
+                {t("about-desc")}
+              </p>
+            </div>
+          </div>
+        );
+        break;
+      case "cat education.txt":
+        result = (
+          <div className="p-3 bg-zinc-900 border-2 border-black rounded text-[11px] space-y-2 mt-2 max-w-md font-mono select-text text-left">
+            <div className="text-neo-blue font-black border-b border-zinc-800 pb-1 uppercase">
+              [ education.txt ]
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              <span className="text-zinc-500 font-black">INSTITUTION:</span>
+              <span className="col-span-2 text-white font-black">STIE Pancasetia</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              <span className="text-zinc-500 font-black">SPECIALTY:</span>
+              <span className="col-span-2 text-white font-black">Web Development Specialist</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              <span className="text-zinc-500 font-black">STATUS:</span>
+              <span className="col-span-2 text-neo-green font-black">✓ Graduated / Lulus</span>
+            </div>
+          </div>
+        );
+        break;
+      case "ls skills/":
+        result = (
+          <div className="p-3 bg-zinc-900 border-2 border-black rounded mt-2 space-y-2 max-w-md font-mono select-text text-left">
+            <div className="text-neo-green font-black border-b border-zinc-800 pb-1 uppercase">
+              {lang === "id" ? "[ KEAHLIAN / TEKNOLOGI ]" : "[ CORE SKILLS / TECH ]"}
+            </div>
+            <div className="flex flex-wrap gap-1.5 pt-1 text-[10px] text-white">
+              <span className="bg-[#E34F26] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">HTML5</span>
+              <span className="bg-[#1572B6] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">CSS3</span>
+              <span className="bg-[#F7DF1E] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">JavaScript</span>
+              <span className="bg-[#06B6D4] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">Tailwind</span>
+              <span className="bg-[#61DAFB] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">React</span>
+              <span className="bg-black text-white px-1.5 py-0.5 font-black border border-zinc-700 shadow-[1px_1px_0px_0px_#000]">Next.js</span>
+              <span className="bg-[#FF2D20] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">Laravel</span>
+              <span className="bg-[#4479A1] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">MySQL</span>
+              <span className="bg-[#8338EC] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">Supabase</span>
+            </div>
+            <p className="text-[9px] text-zinc-500 italic mt-2">
+              * {lang === "id" ? "Scroll ke bawah untuk melihat panel keahlian." : "Scroll down to see the skills panel."}
+            </p>
+          </div>
+        );
+        break;
+      case "run contact.sh":
+      case "sh contact.sh":
+        result = (
+          <div className="p-3 bg-zinc-900 border-2 border-black rounded text-[11px] space-y-2.5 mt-2 max-w-md font-mono select-text text-left">
+            <div className="text-neo-orange font-black border-b border-zinc-800 pb-1 uppercase flex items-center justify-between">
+              <span>[ contact.sh ]</span>
+              <span className="text-[9px] text-neo-green font-black animate-pulse">● RUNNING</span>
+            </div>
+            
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between p-1.5 bg-black border border-zinc-800">
+                <span className="text-neo-pink font-black text-[10px]">LOCATION:</span>
+                <span className="text-white font-bold">JAKARTA, INDONESIA</span>
+              </div>
+              
+              <div 
+                className="flex items-center justify-between p-1.5 bg-black border border-zinc-800 cursor-pointer hover:bg-neo-blue hover:text-white transition-colors group"
+                onClick={() => {
+                  navigator.clipboard.writeText("farreldiegoakbar@gmail.com");
+                  showToast(lang === "id" ? "✓ Email disalin ke clipboard!" : "✓ Email copied to clipboard!");
+                }}
+                title="Copy Email"
+              >
+                <span className="text-neo-blue group-hover:text-white font-black text-[10px]">EMAIL:</span>
+                <span className="text-white font-bold underline break-all">farreldiegoakbar@gmail.com</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <a
+                href="#contact"
+                className="neo-btn flex-1 py-1.5 bg-white text-black hover:bg-neo-pink text-[9px] font-black uppercase text-center border-2 border-black"
+              >
+                <i className="fas fa-paper-plane mr-1"></i> {t("about-hire")}
+              </a>
+              <a
+                href="https://wa.me/6281234567890?text=Halo%20Farrel%20Diego%20Akbar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="neo-btn flex-1 py-1.5 bg-neo-green text-black text-[9px] font-black uppercase text-center border-2 border-black"
+              >
+                <i className="fab fa-whatsapp mr-1"></i> WhatsApp
+              </a>
+            </div>
+          </div>
+        );
+        break;
+      default:
+        result = (
+          <div className="text-red-500 font-mono text-xs mt-1 text-left">
+            {lang === "id" 
+              ? `Perintah tidak dikenal: '${trimmed}'. Ketik 'help' untuk daftar perintah.`
+              : `Unknown command: '${trimmed}'. Type 'help' for available commands.`}
+          </div>
+        );
+    }
+
+    setTerminalHistory((prev) => [...prev, { command: trimmed, result }]);
+    setTerminalInput("");
+  };
+
+  const startTypingSimulation = (cmd: string) => {
+    if (isTypingSimulated) return;
+    setIsTypingSimulated(true);
+    setTerminalInput("");
+
+    let currentLength = 0;
+    const interval = setInterval(() => {
+      currentLength++;
+      setTerminalInput(cmd.slice(0, currentLength));
+      if (currentLength >= cmd.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          executeTerminalCommand(cmd);
+          setIsTypingSimulated(false);
+        }, 150);
+      }
+    }, 50);
+  };
 
   // Refs for sliding nav active indicator
   const navRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
@@ -483,7 +684,7 @@ export default function Home() {
   // Job title typing effect trigger
   useEffect(() => {
     if (!mounted) return;
-    const textToType = lang === "id" ? "Pengembang Web" : "Web Developer";
+    const textToType = lang === "id" ? "Programmer & Pengembang" : "Programmer & Developer";
     let currentLength = 0;
     setTypedTitle("");
     setIsTyping(true);
@@ -887,7 +1088,7 @@ export default function Home() {
 
           <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-8 text-black animate-slide-up bg-neo-pink text-white inline-block px-4 py-2 border-4 border-black shadow-neo transform rotate-1 hover:-rotate-1 transition-transform duration-300 cursor-default">
             <span className={`inline-block pr-1 ${isTyping ? "border-r-2 border-white animate-pulse" : ""}`}>
-              {typedTitle || (lang === "id" ? "Pengembang Web" : "Web Developer")}
+              {typedTitle || (lang === "id" ? "Programmer & Pengembang" : "Programmer & Developer")}
             </span>
           </h2>
 
@@ -937,17 +1138,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Section (Redacted Classified Theme) */}
-      <section id="about" className="py-20 sm:py-32 scroll-mt-16 bg-white overflow-hidden about-classified-section relative">
-        {/* Top Tape Ribbon */}
-        <div className="bg-black text-neo-yellow py-3 border-y-4 border-black font-black uppercase text-xs sm:text-sm tracking-widest rotate-1 scale-105 mb-16 select-none warning-marquee-container">
-          <div className="warning-marquee">
-            <span>✦ CLASSIFIED DATA • CONFIDENTIAL DOSSIER • DO NOT DISTRIBUTE • FDA SECURE RECORD SYSTEM • ACCESS RESTRICTED ✦ &nbsp;</span>
-            <span>✦ CLASSIFIED DATA • CONFIDENTIAL DOSSIER • DO NOT DISTRIBUTE • FDA SECURE RECORD SYSTEM • ACCESS RESTRICTED ✦ &nbsp;</span>
-            <span>✦ CLASSIFIED DATA • CONFIDENTIAL DOSSIER • DO NOT DISTRIBUTE • FDA SECURE RECORD SYSTEM • ACCESS RESTRICTED ✦ &nbsp;</span>
-          </div>
-        </div>
-
+      {/* About Section (Terminal Simulator Theme) */}
+      <section id="about" className="py-20 sm:py-32 scroll-mt-16 bg-white overflow-hidden relative">
         <div className="container mx-auto px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-16 text-center uppercase tracking-tighter reveal reveal-up">
             <span className="bg-neo-pink text-white px-8 py-3 border-4 border-black shadow-neo-lg inline-block transform -rotate-1 hover:rotate-1 transition-transform duration-300 cursor-default">
@@ -955,110 +1147,138 @@ export default function Home() {
             </span>
           </h2>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center reveal reveal-up">
-            {/* Left Side: Photo with sliding Classified Panels */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-64 h-64 sm:w-80 sm:h-80 border-8 border-black shadow-neo-xl overflow-hidden bg-black group select-none">
-                <SafeImage
-                  src="/img/profil.jpg"
-                  alt="Farrel Diego Akbar"
-                  className="w-full h-full object-cover grayscale contrast-125 transition-transform duration-500 group-hover:scale-105"
-                />
-                
-                {/* Left Panel */}
-                <div className="absolute top-0 left-0 w-1/2 h-full bg-black border-r-2 border-neo-yellow flex items-center justify-end pr-2 text-white font-black uppercase text-xl sm:text-2xl tracking-widest transition-transform duration-500 ease-out origin-left group-hover:-translate-x-full">
-                  <span>CLASS</span>
+          {/* Grid Layout: Left has command buttons, Right has terminal */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch reveal reveal-up">
+            {/* Command buttons shortcuts - Neobrutalist styling */}
+            <div className="lg:col-span-4 flex flex-col justify-center space-y-4">
+              <div className="bg-white border-4 border-black p-4 shadow-neo flex flex-col space-y-3">
+                <div className="text-xs font-black uppercase text-zinc-500 tracking-wider mb-1 text-left">
+                  {lang === "id" ? "Pilih Perintah Shortcut :" : "Select Shortcut Command:"}
                 </div>
                 
-                {/* Right Panel */}
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-black border-l-2 border-neo-yellow flex items-center justify-start pl-2 text-white font-black uppercase text-xl sm:text-2xl tracking-widest transition-transform duration-500 ease-out origin-right group-hover:translate-x-full">
-                  <span>IFIED</span>
-                </div>
+                <button
+                  onClick={() => startTypingSimulation("whoami")}
+                  disabled={isTypingSimulated}
+                  className="neo-btn px-4 py-3 bg-neo-yellow text-black font-black uppercase text-xs sm:text-sm text-left flex items-center justify-between border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <span>whoami</span>
+                  <i className="fas fa-terminal group-hover:translate-x-1 transition-transform"></i>
+                </button>
                 
-                {/* Censor Label Overlay */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-neo-pink text-white font-black border-2 border-white px-4 py-1.5 uppercase text-xs tracking-wider z-20 shadow-[3px_3px_0px_0px_#000000] rotate-1 group-hover:opacity-0 transition-opacity duration-300">
-                  [ {lang === "id" ? "KLASIFIKASI" : "CLASSIFIED"} ]
-                </div>
+                <button
+                  onClick={() => startTypingSimulation("cat education.txt")}
+                  disabled={isTypingSimulated}
+                  className="neo-btn px-4 py-3 bg-neo-blue text-white font-black uppercase text-xs sm:text-sm text-left flex items-center justify-between border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <span>cat education.txt</span>
+                  <i className="fas fa-file-alt group-hover:translate-x-1 transition-transform"></i>
+                </button>
+                
+                <button
+                  onClick={() => startTypingSimulation("ls skills/")}
+                  disabled={isTypingSimulated}
+                  className="neo-btn px-4 py-3 bg-neo-green text-black font-black uppercase text-xs sm:text-sm text-left flex items-center justify-between border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <span>ls skills/</span>
+                  <i className="fas fa-folder-open group-hover:translate-x-1 transition-transform"></i>
+                </button>
+                
+                <button
+                  onClick={() => startTypingSimulation("run contact.sh")}
+                  disabled={isTypingSimulated}
+                  className="neo-btn px-4 py-3 bg-neo-orange text-white font-black uppercase text-xs sm:text-sm text-left flex items-center justify-between border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <span>run contact.sh</span>
+                  <i className="fas fa-play group-hover:translate-x-1 transition-transform"></i>
+                </button>
+                
+                <button
+                  onClick={() => {
+                    if (!isTypingSimulated) {
+                      executeTerminalCommand("clear");
+                    }
+                  }}
+                  disabled={isTypingSimulated}
+                  className="neo-btn px-4 py-2 bg-zinc-100 text-black font-black uppercase text-xs text-center border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-200 mt-2"
+                >
+                  {lang === "id" ? "Bersihkan Terminal" : "Clear Terminal"}
+                </button>
               </div>
             </div>
-            
-            {/* Right Side: Document Dossier Card */}
-            <div className="lg:col-span-7">
-              <div className="bg-white border-4 border-black shadow-neo-lg p-6 sm:p-8 relative overflow-hidden font-mono text-black">
-                {/* Dossier header stamp */}
-                <div className="flex justify-between items-start border-b-4 border-black pb-4 mb-6 select-none">
-                  <div>
-                    <div className="text-[10px] font-black text-neo-pink uppercase tracking-widest">RECORD DOSSIER</div>
-                    <div className="text-lg font-black uppercase tracking-tighter">FDA-9210-SECURE</div>
+
+            {/* Terminal Mock Window */}
+            <div className="lg:col-span-8 flex flex-col">
+              <div className="bg-black border-4 border-black shadow-neo-lg rounded-none flex-1 flex flex-col min-h-[380px] sm:min-h-[440px]">
+                {/* Terminal window header */}
+                <div className="bg-zinc-900 border-b-4 border-black px-4 py-3 flex items-center justify-between select-none">
+                  {/* Mock Window Action Controls */}
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500 border border-black" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500 border border-black" />
+                    <div className="w-3 h-3 rounded-full bg-green-500 border border-black" />
                   </div>
-                  <div className="border-2 border-red-500 text-red-500 font-black uppercase text-[10px] tracking-wider px-2 py-1 rotate-12 transform">
-                    {lang === "id" ? "BERSIFAT RAHASIA" : "RESTRICTED"}
+                  {/* Active Path Label */}
+                  <div className="text-zinc-400 font-mono text-xs uppercase tracking-wider font-bold">
+                    farrel@developer: ~/about
+                  </div>
+                  {/* Console indicator */}
+                  <div className="text-[10px] text-neo-green font-mono border border-neo-green px-1.5 py-0.5 rounded font-black tracking-widest animate-pulse">
+                    ONLINE
                   </div>
                 </div>
-                
-                {/* Document Content */}
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black mb-1">
-                      {lang === "id" ? "SUBYEK: " : "SUBJECT: "}{" "}
-                      <CensoredText>FARREL DIEGO AKBAR</CensoredText>
-                    </h3>
-                    <div className="text-xs font-black text-gray-500 uppercase">
-                      {lang === "id" ? "PERAN AKTIF: " : "ACTIVE ROLE: "}{" "}
-                      <CensoredText>{t("about-subtitle")}</CensoredText>
+
+                {/* Viewport Console logs */}
+                <div 
+                  ref={terminalViewportRef}
+                  className="flex-1 p-4 overflow-y-auto text-left font-mono space-y-4 max-h-[320px] sm:max-h-[360px] terminal-scrollbar select-text"
+                >
+                  {terminalHistory.map((item, idx) => (
+                    <div key={idx} className="space-y-1">
+                      {item.command && (
+                        <div className="flex items-center text-neo-green font-bold text-xs select-none">
+                          <span className="text-zinc-500 mr-2">farrel@developer:~$</span>
+                          <span className="text-white">{item.command}</span>
+                        </div>
+                      )}
+                      <div className="text-zinc-200 mt-1 select-text">
+                        {item.result}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="border-t-2 border-dashed border-black pt-4">
-                    <p className="text-xs sm:text-sm font-bold leading-relaxed text-justify text-black/90">
-                      {lang === "id" ? "Deksripsi Subyek: " : "Subject Description: "}
-                      Saya <CensoredText>Farrel Diego Akbar</CensoredText>, lulusan dan spesialis <CensoredText>Web Development</CensoredText>. 
-                      Saya berspesialisasi dalam membangun pengalaman <CensoredText>digital yang luar biasa</CensoredText> dan memelihara aplikasi web yang kuat. 
-                      Sebagai Pengembang Web, saya menggabungkan <CensoredText>keahlian teknis pemrograman modern</CensoredText> dan desain web responsif untuk memberikan solusi komprehensif. 
-                      Saya menyukai pemecahan masalah kreatif dan terus mengikuti perkembangan teknologi terbaru.
-                    </p>
-                  </div>
-                  
-                  {/* Metadata Lists */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t-2 border-black border-dashed text-xs font-black uppercase">
-                    <div className="flex items-center gap-2 p-2 bg-neo-bg border-2 border-black cursor-pointer hover:bg-neo-pink hover:text-white transition-colors group">
-                      <span className="text-neo-pink group-hover:text-white">[LOC]</span>
-                      <span><CensoredText>JAKARTA, INDONESIA</CensoredText></span>
-                    </div>
-                    
-                    <div 
-                      className="flex items-center gap-2 p-2 bg-neo-bg border-2 border-black cursor-pointer hover:bg-neo-blue hover:text-white transition-colors group"
-                      onClick={() => {
-                        navigator.clipboard.writeText("farreldiegoakbar@gmail.com");
-                        showToast(lang === "id" ? "✓ Email berhasil disalin ke clipboard!" : "✓ Email copied to clipboard!");
+                  ))}
+                </div>
+
+                {/* Active Interactive Prompt Form */}
+                <div className="bg-zinc-950 border-t-2 border-zinc-900 p-4">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (isTypingSimulated) return;
+                      executeTerminalCommand(terminalInput);
+                    }}
+                    className="flex items-center text-xs font-mono"
+                  >
+                    <span className="text-zinc-500 font-bold mr-2 select-none">farrel@developer:~$</span>
+                    <input
+                      type="text"
+                      value={terminalInput}
+                      onChange={(e) => {
+                        if (!isTypingSimulated) {
+                          setTerminalInput(e.target.value);
+                        }
                       }}
-                      title="Copy Email"
-                    >
-                      <span className="text-neo-blue group-hover:text-white">[MAIL]</span>
-                      <span className="break-all"><CensoredText>farreldiegoakbar@gmail.com</CensoredText></span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end pt-4 border-t-2 border-black">
-                    <a
-                      href="#contact"
-                      className="neo-btn px-6 py-3 bg-black text-white hover:bg-neo-pink border-2 border-black text-xs font-black uppercase tracking-wider text-center"
-                    >
-                      <i className="fas fa-paper-plane mr-2"></i> {t("about-hire")}
-                    </a>
-                  </div>
+                      disabled={isTypingSimulated}
+                      className="flex-1 bg-transparent border-none outline-none text-white font-mono placeholder-zinc-700 disabled:text-zinc-500"
+                      placeholder={isTypingSimulated ? "" : lang === "id" ? "Coba ketik 'help' & tekan enter..." : "try type 'help' & press enter..."}
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
+                    />
+                    <span className="animate-terminal-blink bg-neo-yellow w-2 h-4 ml-1 inline-block select-none" />
+                  </form>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        
-        {/* Bottom Tape Ribbon */}
-        <div className="bg-neo-pink text-white py-3 border-y-4 border-black font-black uppercase text-xs sm:text-sm tracking-widest -rotate-1 scale-105 mt-20 select-none warning-marquee-container">
-          <div className="warning-marquee">
-            <span>✦ FRONTEND SPECIALIST • BACKEND DEVELOPMENT • PROBLEM SOLVER • USER INTERACTION • FULLSTACK ENGINEER ✦ &nbsp;</span>
-            <span>✦ FRONTEND SPECIALIST • BACKEND DEVELOPMENT • PROBLEM SOLVER • USER INTERACTION • FULLSTACK ENGINEER ✦ &nbsp;</span>
-            <span>✦ FRONTEND SPECIALIST • BACKEND DEVELOPMENT • PROBLEM SOLVER • USER INTERACTION • FULLSTACK ENGINEER ✦ &nbsp;</span>
           </div>
         </div>
       </section>

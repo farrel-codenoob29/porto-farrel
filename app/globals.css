@@ -22,6 +22,7 @@
   --animate-scale-in: scale-in 0.5s ease-out;
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-slide-down-rope: slide-down-rope 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  --animate-terminal-blink: terminal-blink 1s infinite;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
@@ -62,6 +63,10 @@
   @keyframes spin-slow {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+  }
+  @keyframes terminal-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 }
 
@@ -378,34 +383,18 @@ body {
     transform: translateX(-50%);
   }
 }
-
-/* Classified Section Cursor & Retro Marquee Tape */
-.about-classified-section {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="black" stroke-width="2"><circle cx="16" cy="16" r="8" stroke="black" stroke-width="2" fill="%23FFD600"/><path d="M16 4v24M4 16h24" stroke="black" stroke-width="2"/></svg>') 16 16, crosshair;
+/* Custom Terminal Scrollbar for visual excellence */
+.terminal-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-.warning-marquee-container {
-  overflow: hidden;
-  width: 100%;
+.terminal-scrollbar::-webkit-scrollbar-track {
+  background: #121212;
 }
-
-.warning-marquee {
-  display: flex;
-  gap: 3rem;
-  animation: warning-marquee 20s linear infinite;
-  width: fit-content;
-  white-space: nowrap;
+.terminal-scrollbar::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 3px;
 }
-
-@keyframes warning-marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+.terminal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555555;
 }
-
-
-
-
