@@ -356,13 +356,15 @@ export default function Home() {
         {
           command: "system --init",
           result: (
-            <div className="space-y-1 text-zinc-400 font-mono text-xs select-text">
-              <div>FARREL-OS [Version 1.0.0]</div>
-              <div>(c) 2026 Farrel Diego Akbar. All rights reserved.</div>
-              <div className="text-neo-yellow font-black mt-2">
+            <div className="space-y-1.5 text-zinc-300 font-mono text-xs select-text text-left">
+              <div>Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-1004-aws x86_64)</div>
+              <div className="text-zinc-500 font-bold"> * Documentation:  https://help.ubuntu.com</div>
+              <div className="text-zinc-500 font-bold"> * Management:     https://landscape.canonical.com</div>
+              <div className="text-zinc-500 font-bold"> * Support:        https://ubuntu.com/pro</div>
+              <div className="mt-2 text-zinc-400 font-bold">
                 {lang === "id" 
-                  ? "Ketik 'help' atau klik tombol shortcut di bawah untuk interaksi." 
-                  : "Type 'help' or click the shortcut buttons below to interact."}
+                  ? "Ketik 'help' atau klik tombol shortcut di sebelah kiri untuk berinteraksi." 
+                  : "Type 'help' or click the shortcut buttons on the left to interact."}
               </div>
             </div>
           ),
@@ -394,66 +396,89 @@ export default function Home() {
     switch (lowerCmd) {
       case "help":
         result = (
-          <div className="space-y-1 text-neo-yellow font-mono text-xs select-text">
-            <p className="font-black">{lang === "id" ? "Perintah yang didukung:" : "Supported commands:"}</p>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 max-w-xs mt-1 font-mono text-[11px] text-white">
-              <div>• whoami</div>
-              <div>• cat education.txt</div>
-              <div>• ls skills/</div>
-              <div>• run contact.sh</div>
-              <div>• clear</div>
+          <div className="space-y-1.5 text-neo-yellow font-mono text-xs select-text text-left">
+            <p className="font-black">{lang === "id" ? "Perintah yang didukung (Ubuntu-aligned):" : "Supported commands (Ubuntu-aligned):"}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-1 font-mono text-[11px] text-white">
+              <div><span className="text-neo-green font-bold">profilefetch</span> - {lang === "id" ? "Tampilkan spek pribadi & OS (neofetch)" : "Show personal specs & OS details (neofetch)"}</div>
+              <div><span className="text-neo-green font-bold">cat knowledge.md</span> - {lang === "id" ? "Lihat riwayat akademik" : "Read academic history"}</div>
+              <div><span className="text-neo-green font-bold">ls skills/</span> - {lang === "id" ? "Tampilkan daftar keahlian" : "List programming skills"}</div>
+              <div><span className="text-neo-green font-bold">./contact.sh</span> - {lang === "id" ? "Jalankan skrip kontak" : "Execute contact options"}</div>
+              <div><span className="text-neo-green font-bold">clear</span> - {lang === "id" ? "Bersihkan riwayat layar" : "Clear the screen history"}</div>
             </div>
           </div>
         );
         break;
       case "whoami":
+      case "profilefetch":
         result = (
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-3 bg-zinc-900 border-2 border-black rounded mt-2 font-mono select-text text-left">
-            <div className="flex-shrink-0 w-20 h-20 border-4 border-black bg-black overflow-hidden relative shadow-[3px_3px_0px_0px_rgba(255,255,255,0.15)]">
-              <SafeImage
-                src="/img/profil.jpg"
-                alt="Farrel Diego Akbar"
-                className="w-full h-full object-cover grayscale contrast-125"
-              />
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 p-4 bg-[#2C001E]/40 border-2 border-black rounded mt-2 font-mono text-left select-text items-center">
+            {/* Profile Picture instead of ASCII art */}
+            <div className="sm:col-span-4 flex justify-center items-center">
+              <div className="w-32 h-32 sm:w-36 sm:h-36 lg:w-40 lg:h-40 border-4 border-black bg-black overflow-hidden relative shadow-[4px_4px_0px_0px_#E95420]">
+                <SafeImage
+                  src="/img/profil.jpg"
+                  alt="Farrel Diego Akbar"
+                  className="w-full h-full object-cover grayscale contrast-125"
+                />
+              </div>
             </div>
-            <div className="flex-1 space-y-1">
-              <div className="text-sm font-black text-white uppercase tracking-tight">
-                Farrel Diego Akbar
-              </div>
-              <div className="text-[10px] bg-neo-pink text-white font-black px-2 py-0.5 inline-block uppercase">
-                {t("about-subtitle")}
-              </div>
-              <p className="text-[11px] text-zinc-300 leading-relaxed text-justify mt-1">
-                {t("about-desc")}
-              </p>
+            {/* Developer Specs */}
+            <div className="sm:col-span-8 space-y-1.5 text-xs sm:text-[13px] text-zinc-300">
+              <div className="text-neo-orange font-black text-sm sm:text-base">farrel@ubuntu-desktop</div>
+              <div className="text-zinc-500 font-bold">---------------------</div>
+              <div><span className="text-neo-pink font-bold">OS:</span> Farrel-OS v29.0.108 (Developer Edition)</div>
+              <div><span className="text-neo-pink font-bold">Host:</span> Farrel Diego Akbar Portfolio</div>
+              <div><span className="text-neo-pink font-bold">Role:</span> Junior Full Stack Developer</div>
+              <div><span className="text-neo-pink font-bold">Education:</span> SMK Rekayasa Perangkat Lunak</div>
+              <div><span className="text-neo-pink font-bold">Location:</span> Jakarta, Indonesia</div>
+              <div><span className="text-neo-pink font-bold">Shell:</span> bash 5.2.15</div>
+              <div><span className="text-neo-pink font-bold">WM:</span> React / Next.js (Neobrutalism)</div>
+            </div>
+            {/* Full biography description statement */}
+            <div className="sm:col-span-12 border-t border-zinc-800 pt-3 text-zinc-300 leading-relaxed text-justify text-xs mt-2">
+              <span className="text-neo-green font-bold">[BIO]: </span>{t("about-desc")}
             </div>
           </div>
         );
         break;
-      case "cat education.txt":
+      case "cat knowledge.md":
+      case "cat knowledge.txt":
         result = (
-          <div className="p-3 bg-zinc-900 border-2 border-black rounded text-[11px] space-y-2 mt-2 max-w-md font-mono select-text text-left">
+          <div className="p-3 bg-[#2C001E]/40 border-2 border-black rounded text-[11px] space-y-2 mt-2 max-w-lg font-mono select-text text-left">
             <div className="text-neo-blue font-black border-b border-zinc-800 pb-1 uppercase">
-              [ education.txt ]
+              [ knowledge.md ]
             </div>
-            <div className="grid grid-cols-3 gap-1">
-              <span className="text-zinc-500 font-black">INSTITUTION:</span>
-              <span className="col-span-2 text-white font-black">STIE Pancasetia</span>
-            </div>
-            <div className="grid grid-cols-3 gap-1">
-              <span className="text-zinc-500 font-black">SPECIALTY:</span>
-              <span className="col-span-2 text-white font-black">Web Development Specialist</span>
-            </div>
-            <div className="grid grid-cols-3 gap-1">
-              <span className="text-zinc-500 font-black">STATUS:</span>
-              <span className="col-span-2 text-neo-green font-black">✓ Graduated / Lulus</span>
+            <div className="space-y-2 text-zinc-300">
+              <p className="font-bold text-white">
+                {lang === "id" 
+                  ? "● Sekolah Menengah Kejuruan (SMK) - Rekayasa Perangkat Lunak" 
+                  : "● Vocational High School - Software Engineering"}
+              </p>
+              <p className="text-zinc-400 pl-4">
+                {lang === "id"
+                  ? "Mempelajari dasar-dasar pemrograman web, algoritma terstruktur, basis data (SQL), pemecahan masalah logika, dan arsitektur perangkat lunak."
+                  : "Learned fundamental web programming, structured algorithms, databases (SQL), logical problem solving, and software architecture."}
+              </p>
+              
+              <p className="font-bold text-white mt-3">
+                {lang === "id" 
+                  ? "● Spesialisasi Mandiri & Sertifikasi Profesional" 
+                  : "● Self-Directed Specialization & Professional Certificates"}
+              </p>
+              <ul className="list-disc pl-8 space-y-1 text-zinc-400">
+                <li>Cisco CCNA (Routing & Switching Administration)</li>
+                <li>Database Design & SQL Administration (Oracle Academy)</li>
+                <li>Web Development & React Specialist (Udemy, Dicoding)</li>
+                <li>BNSP Sertifikasi Programmer Resmi</li>
+              </ul>
             </div>
           </div>
         );
         break;
+      case "ls":
       case "ls skills/":
         result = (
-          <div className="p-3 bg-zinc-900 border-2 border-black rounded mt-2 space-y-2 max-w-md font-mono select-text text-left">
+          <div className="p-3 bg-[#2C001E]/40 border-2 border-black rounded mt-2 space-y-2 max-w-md font-mono select-text text-left">
             <div className="text-neo-green font-black border-b border-zinc-800 pb-1 uppercase">
               {lang === "id" ? "[ KEAHLIAN / TEKNOLOGI ]" : "[ CORE SKILLS / TECH ]"}
             </div>
@@ -474,10 +499,11 @@ export default function Home() {
           </div>
         );
         break;
+      case "./contact.sh":
       case "run contact.sh":
       case "sh contact.sh":
         result = (
-          <div className="p-3 bg-zinc-900 border-2 border-black rounded text-[11px] space-y-2.5 mt-2 max-w-md font-mono select-text text-left">
+          <div className="p-3 bg-[#2C001E]/40 border-2 border-black rounded text-[11px] space-y-2.5 mt-2 max-w-md font-mono select-text text-left">
             <div className="text-neo-orange font-black border-b border-zinc-800 pb-1 uppercase flex items-center justify-between">
               <span>[ contact.sh ]</span>
               <span className="text-[9px] text-neo-green font-black animate-pulse">● RUNNING</span>
@@ -1138,57 +1164,63 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Section (Terminal Simulator Theme) */}
-      <section id="about" className="py-20 sm:py-32 scroll-mt-16 bg-white overflow-hidden relative">
-        <div className="container mx-auto px-4 sm:px-6">
+      {/* About Section (Ubuntu Terminal Theme) */}
+      <section id="about" className="py-20 sm:py-32 scroll-mt-16 hacker-grid-bg border-b-8 border-black overflow-hidden relative">
+        {/* Decorative Grid corner indicators */}
+        <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-neo-green opacity-40 hidden md:block" />
+        <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-neo-green opacity-40 hidden md:block" />
+        <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-neo-green opacity-40 hidden md:block" />
+        <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-neo-green opacity-40 hidden md:block" />
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-16 text-center uppercase tracking-tighter reveal reveal-up">
             <span className="bg-neo-pink text-white px-8 py-3 border-4 border-black shadow-neo-lg inline-block transform -rotate-1 hover:rotate-1 transition-transform duration-300 cursor-default">
               {t("about-title")}
             </span>
           </h2>
 
-          {/* Grid Layout: Left has command buttons, Right has terminal */}
+          {/* Ubuntu Terminal Console Window Screen (Rendered Directly) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch reveal reveal-up">
-            {/* Command buttons shortcuts - Neobrutalist styling */}
+            {/* Command buttons shortcuts bar on the Left */}
             <div className="lg:col-span-4 flex flex-col justify-center space-y-4">
               <div className="bg-white border-4 border-black p-4 shadow-neo flex flex-col space-y-3">
-                <div className="text-xs font-black uppercase text-zinc-500 tracking-wider mb-1 text-left">
+                <div className="text-xs font-black uppercase text-zinc-500 tracking-wider mb-1 text-left select-none">
                   {lang === "id" ? "Pilih Perintah Shortcut :" : "Select Shortcut Command:"}
                 </div>
                 
                 <button
-                  onClick={() => startTypingSimulation("whoami")}
+                  onClick={() => startTypingSimulation("profilefetch")}
                   disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-3 bg-neo-yellow text-black font-black uppercase text-xs sm:text-sm text-left flex items-center justify-between border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className="neo-btn px-4 py-3 bg-neo-yellow text-black border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-between font-black uppercase text-xs sm:text-sm text-left"
                 >
-                  <span>whoami</span>
+                  <span>profilefetch</span>
                   <i className="fas fa-terminal group-hover:translate-x-1 transition-transform"></i>
                 </button>
                 
                 <button
-                  onClick={() => startTypingSimulation("cat education.txt")}
+                  onClick={() => startTypingSimulation("cat knowledge.md")}
                   disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-3 bg-neo-blue text-white font-black uppercase text-xs sm:text-sm text-left flex items-center justify-between border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className="neo-btn px-4 py-3 bg-neo-blue text-white border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-between font-black uppercase text-xs sm:text-sm text-left"
                 >
-                  <span>cat education.txt</span>
+                  <span>cat knowledge.md</span>
                   <i className="fas fa-file-alt group-hover:translate-x-1 transition-transform"></i>
                 </button>
                 
                 <button
                   onClick={() => startTypingSimulation("ls skills/")}
                   disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-3 bg-neo-green text-black font-black uppercase text-xs sm:text-sm text-left flex items-center justify-between border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className="neo-btn px-4 py-3 bg-neo-green text-black border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-between font-black uppercase text-xs sm:text-sm text-left"
                 >
                   <span>ls skills/</span>
                   <i className="fas fa-folder-open group-hover:translate-x-1 transition-transform"></i>
                 </button>
                 
                 <button
-                  onClick={() => startTypingSimulation("run contact.sh")}
+                  onClick={() => startTypingSimulation("./contact.sh")}
                   disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-3 bg-neo-orange text-white font-black uppercase text-xs sm:text-sm text-left flex items-center justify-between border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className="neo-btn px-4 py-3 bg-neo-orange text-white border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-between font-black uppercase text-xs sm:text-sm text-left"
                 >
-                  <span>run contact.sh</span>
+                  <span>./contact.sh</span>
                   <i className="fas fa-play group-hover:translate-x-1 transition-transform"></i>
                 </button>
                 
@@ -1206,24 +1238,32 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Terminal Mock Window */}
+            {/* Terminal Simulator Mock Window on the Right */}
             <div className="lg:col-span-8 flex flex-col">
-              <div className="bg-black border-4 border-black shadow-neo-lg rounded-none flex-1 flex flex-col min-h-[380px] sm:min-h-[440px]">
-                {/* Terminal window header */}
-                <div className="bg-zinc-900 border-b-4 border-black px-4 py-3 flex items-center justify-between select-none">
-                  {/* Mock Window Action Controls */}
+              <div className="bg-[#300A24] border-4 border-black shadow-neo-lg rounded-none flex-1 flex flex-col min-h-[380px] sm:min-h-[440px]">
+                {/* Ubuntu Terminal header bar */}
+                <div className="bg-[#2c001e] border-b-4 border-black px-4 py-3 flex items-center justify-between select-none">
+                  {/* Yaru controls with interactive reset/clear actions */}
                   <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500 border border-black" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500 border border-black" />
-                    <div className="w-3 h-3 rounded-full bg-green-500 border border-black" />
+                    <button 
+                      onClick={() => {
+                        if (!isTypingSimulated) executeTerminalCommand("clear");
+                      }}
+                      className="w-3.5 h-3.5 rounded-full bg-[#E95420] border-2 border-black flex items-center justify-center text-[8px] font-black text-black hover:bg-red-600 transition-colors cursor-pointer"
+                      title="Clear screen history"
+                    >
+                      ×
+                    </button>
+                    <div className="w-3.5 h-3.5 rounded-full bg-yellow-500 border-2 border-black" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-black" />
                   </div>
                   {/* Active Path Label */}
                   <div className="text-zinc-400 font-mono text-xs uppercase tracking-wider font-bold">
-                    farrel@developer: ~/about
+                    farrel@ubuntu-desktop: ~/portfolio
                   </div>
                   {/* Console indicator */}
-                  <div className="text-[10px] text-neo-green font-mono border border-neo-green px-1.5 py-0.5 rounded font-black tracking-widest animate-pulse">
-                    ONLINE
+                  <div className="text-[10px] text-neo-orange font-mono border border-neo-orange px-1.5 py-0.5 rounded font-black tracking-widest animate-pulse">
+                    UBUNTU
                   </div>
                 </div>
 
@@ -1236,7 +1276,7 @@ export default function Home() {
                     <div key={idx} className="space-y-1">
                       {item.command && (
                         <div className="flex items-center text-neo-green font-bold text-xs select-none">
-                          <span className="text-zinc-500 mr-2">farrel@developer:~$</span>
+                          <span className="text-zinc-500 mr-2">farrel@ubuntu-desktop:~$</span>
                           <span className="text-white">{item.command}</span>
                         </div>
                       )}
@@ -1248,7 +1288,7 @@ export default function Home() {
                 </div>
 
                 {/* Active Interactive Prompt Form */}
-                <div className="bg-zinc-950 border-t-2 border-zinc-900 p-4">
+                <div className="bg-[#1C0515] border-t-2 border-zinc-900 p-4">
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -1257,7 +1297,7 @@ export default function Home() {
                     }}
                     className="flex items-center text-xs font-mono"
                   >
-                    <span className="text-zinc-500 font-bold mr-2 select-none">farrel@developer:~$</span>
+                    <span className="text-zinc-500 font-bold mr-2 select-none">farrel@ubuntu-desktop:~$</span>
                     <input
                       type="text"
                       value={terminalInput}
@@ -1274,7 +1314,7 @@ export default function Home() {
                       autoCapitalize="off"
                       spellCheck={false}
                     />
-                    <span className="animate-terminal-blink bg-neo-yellow w-2 h-4 ml-1 inline-block select-none" />
+                    <span className="animate-terminal-blink bg-neo-orange w-2 h-4 ml-1 inline-block select-none" />
                   </form>
                 </div>
               </div>
