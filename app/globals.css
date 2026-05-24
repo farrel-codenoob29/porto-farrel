@@ -379,5 +379,33 @@ body {
   }
 }
 
+/* Classified Section Cursor & Retro Marquee Tape */
+.about-classified-section {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="black" stroke-width="2"><circle cx="16" cy="16" r="8" stroke="black" stroke-width="2" fill="%23FFD600"/><path d="M16 4v24M4 16h24" stroke="black" stroke-width="2"/></svg>') 16 16, crosshair;
+}
+
+.warning-marquee-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.warning-marquee {
+  display: flex;
+  gap: 3rem;
+  animation: warning-marquee 20s linear infinite;
+  width: fit-content;
+  white-space: nowrap;
+}
+
+@keyframes warning-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+
 
 

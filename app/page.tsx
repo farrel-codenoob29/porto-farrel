@@ -309,6 +309,17 @@ const DraggableShape = ({
   );
 };
 
+const CensoredText = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <span className="relative inline-block mx-1 group cursor-crosshair">
+      <span className="absolute inset-0 bg-black transition-transform duration-300 origin-left scale-x-100 group-hover:scale-x-0 z-10" />
+      <span className="relative z-0 bg-transparent text-black group-hover:bg-neo-yellow px-1 transition-colors duration-300 font-black">
+        {children}
+      </span>
+    </span>
+  );
+};
+
 const navItems = [
   { id: "home", color: "#FFD600" },
   { id: "about", color: "#FF006E" },
@@ -926,114 +937,128 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Section (Bento Box Redesign) */}
-      <section id="about" className="py-20 sm:py-32 scroll-mt-16 bg-white overflow-hidden">
+      {/* About Section (Redacted Classified Theme) */}
+      <section id="about" className="py-20 sm:py-32 scroll-mt-16 bg-white overflow-hidden about-classified-section relative">
+        {/* Top Tape Ribbon */}
+        <div className="bg-black text-neo-yellow py-3 border-y-4 border-black font-black uppercase text-xs sm:text-sm tracking-widest rotate-1 scale-105 mb-16 select-none warning-marquee-container">
+          <div className="warning-marquee">
+            <span>✦ CLASSIFIED DATA • CONFIDENTIAL DOSSIER • DO NOT DISTRIBUTE • FDA SECURE RECORD SYSTEM • ACCESS RESTRICTED ✦ &nbsp;</span>
+            <span>✦ CLASSIFIED DATA • CONFIDENTIAL DOSSIER • DO NOT DISTRIBUTE • FDA SECURE RECORD SYSTEM • ACCESS RESTRICTED ✦ &nbsp;</span>
+            <span>✦ CLASSIFIED DATA • CONFIDENTIAL DOSSIER • DO NOT DISTRIBUTE • FDA SECURE RECORD SYSTEM • ACCESS RESTRICTED ✦ &nbsp;</span>
+          </div>
+        </div>
+
         <div className="container mx-auto px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-16 text-center uppercase tracking-tighter reveal reveal-up">
-            <span className="bg-neo-pink text-white px-8 py-3 border-4 border-black shadow-neo-lg inline-block transform rotate-2 hover:-rotate-2 transition-transform duration-300 cursor-default">
+            <span className="bg-neo-pink text-white px-8 py-3 border-4 border-black shadow-neo-lg inline-block transform -rotate-1 hover:rotate-1 transition-transform duration-300 cursor-default">
               {t("about-title")}
             </span>
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-[180px_180px_180px_180px] gap-6 reveal reveal-up">
-            {/* Bento Card 1: Photo Box */}
-            <div className="bento-card bg-white cursor-pointer select-none overflow-hidden h-[300px] md:h-full group flex flex-col items-center justify-center relative p-0 md:col-start-1 md:col-end-2 md:row-start-1 md:row-end-3">
-              <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center reveal reveal-up">
+            {/* Left Side: Photo with sliding Classified Panels */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 border-8 border-black shadow-neo-xl overflow-hidden bg-black group select-none">
                 <SafeImage
                   src="/img/profil.jpg"
                   alt="Farrel Diego Akbar"
-                  className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500 ease-out"
+                  className="w-full h-full object-cover grayscale contrast-125 transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute bottom-4 bg-neo-yellow text-black font-black px-4 py-1.5 border-2 border-black shadow-[3px_3px_0px_0px_#000000] uppercase text-xs tracking-wider transform -rotate-2 group-hover:rotate-2 transition-transform duration-300">
-                  {t("about-title")}
+                
+                {/* Left Panel */}
+                <div className="absolute top-0 left-0 w-1/2 h-full bg-black border-r-2 border-neo-yellow flex items-center justify-end pr-2 text-white font-black uppercase text-xl sm:text-2xl tracking-widest transition-transform duration-500 ease-out origin-left group-hover:-translate-x-full">
+                  <span>CLASS</span>
+                </div>
+                
+                {/* Right Panel */}
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-black border-l-2 border-neo-yellow flex items-center justify-start pl-2 text-white font-black uppercase text-xl sm:text-2xl tracking-widest transition-transform duration-500 ease-out origin-right group-hover:translate-x-full">
+                  <span>IFIED</span>
+                </div>
+                
+                {/* Censor Label Overlay */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-neo-pink text-white font-black border-2 border-white px-4 py-1.5 uppercase text-xs tracking-wider z-20 shadow-[3px_3px_0px_0px_#000000] rotate-1 group-hover:opacity-0 transition-opacity duration-300">
+                  [ {lang === "id" ? "KLASIFIKASI" : "CLASSIFIED"} ]
                 </div>
               </div>
             </div>
-
-            {/* Bento Card 2: Greeting & Role */}
-            <div className="bento-card bg-neo-yellow hover:bg-neo-blue hover:text-white text-black p-6 md:p-8 flex flex-col justify-center transition-colors duration-300 group md:col-start-2 md:col-end-4 md:row-start-1 md:row-end-2 min-h-[140px] md:min-h-0">
-              <div className="flex flex-col justify-center h-full">
-                <span className="text-xs md:text-sm font-black uppercase tracking-widest opacity-80 mb-1 group-hover:text-white/80 transition-colors">
-                  {lang === "id" ? "MEMPERKENALKAN" : "INTRODUCING"}
-                </span>
-                <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tight transition-transform duration-300 group-hover:translate-x-2">
-                  Farrel Diego Akbar
-                </h3>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-xs md:text-sm font-black bg-white text-black border-2 border-black px-2.5 py-0.5 inline-block uppercase tracking-wider transform -rotate-1 group-hover:rotate-1 transition-transform">
-                    {t("about-subtitle")}
-                  </span>
+            
+            {/* Right Side: Document Dossier Card */}
+            <div className="lg:col-span-7">
+              <div className="bg-white border-4 border-black shadow-neo-lg p-6 sm:p-8 relative overflow-hidden font-mono text-black">
+                {/* Dossier header stamp */}
+                <div className="flex justify-between items-start border-b-4 border-black pb-4 mb-6 select-none">
+                  <div>
+                    <div className="text-[10px] font-black text-neo-pink uppercase tracking-widest">RECORD DOSSIER</div>
+                    <div className="text-lg font-black uppercase tracking-tighter">FDA-9210-SECURE</div>
+                  </div>
+                  <div className="border-2 border-red-500 text-red-500 font-black uppercase text-[10px] tracking-wider px-2 py-1 rotate-12 transform">
+                    {lang === "id" ? "BERSIFAT RAHASIA" : "RESTRICTED"}
+                  </div>
+                </div>
+                
+                {/* Document Content */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black mb-1">
+                      {lang === "id" ? "SUBYEK: " : "SUBJECT: "}{" "}
+                      <CensoredText>FARREL DIEGO AKBAR</CensoredText>
+                    </h3>
+                    <div className="text-xs font-black text-gray-500 uppercase">
+                      {lang === "id" ? "PERAN AKTIF: " : "ACTIVE ROLE: "}{" "}
+                      <CensoredText>{t("about-subtitle")}</CensoredText>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t-2 border-dashed border-black pt-4">
+                    <p className="text-xs sm:text-sm font-bold leading-relaxed text-justify text-black/90">
+                      {lang === "id" ? "Deksripsi Subyek: " : "Subject Description: "}
+                      Saya <CensoredText>Farrel Diego Akbar</CensoredText>, lulusan dan spesialis <CensoredText>Web Development</CensoredText>. 
+                      Saya berspesialisasi dalam membangun pengalaman <CensoredText>digital yang luar biasa</CensoredText> dan memelihara aplikasi web yang kuat. 
+                      Sebagai Pengembang Web, saya menggabungkan <CensoredText>keahlian teknis pemrograman modern</CensoredText> dan desain web responsif untuk memberikan solusi komprehensif. 
+                      Saya menyukai pemecahan masalah kreatif dan terus mengikuti perkembangan teknologi terbaru.
+                    </p>
+                  </div>
+                  
+                  {/* Metadata Lists */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t-2 border-black border-dashed text-xs font-black uppercase">
+                    <div className="flex items-center gap-2 p-2 bg-neo-bg border-2 border-black cursor-pointer hover:bg-neo-pink hover:text-white transition-colors group">
+                      <span className="text-neo-pink group-hover:text-white">[LOC]</span>
+                      <span><CensoredText>JAKARTA, INDONESIA</CensoredText></span>
+                    </div>
+                    
+                    <div 
+                      className="flex items-center gap-2 p-2 bg-neo-bg border-2 border-black cursor-pointer hover:bg-neo-blue hover:text-white transition-colors group"
+                      onClick={() => {
+                        navigator.clipboard.writeText("farreldiegoakbar@gmail.com");
+                        showToast(lang === "id" ? "✓ Email berhasil disalin ke clipboard!" : "✓ Email copied to clipboard!");
+                      }}
+                      title="Copy Email"
+                    >
+                      <span className="text-neo-blue group-hover:text-white">[MAIL]</span>
+                      <span className="break-all"><CensoredText>farreldiegoakbar@gmail.com</CensoredText></span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end pt-4 border-t-2 border-black">
+                    <a
+                      href="#contact"
+                      className="neo-btn px-6 py-3 bg-black text-white hover:bg-neo-pink border-2 border-black text-xs font-black uppercase tracking-wider text-center"
+                    >
+                      <i className="fas fa-paper-plane mr-2"></i> {t("about-hire")}
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Bento Card 3: Description Box */}
-            <div className="bento-card bg-white hover:bg-neo-purple hover:text-white text-black p-6 md:p-8 flex flex-col justify-between transition-colors duration-300 group md:col-start-2 md:col-end-4 md:row-start-2 md:row-end-4 min-h-[220px] md:min-h-0 overflow-y-auto">
-              <div className="flex flex-col justify-between h-full gap-4">
-                <div className="relative">
-                  <i className="fas fa-quote-left text-4xl text-neo-pink group-hover:text-neo-yellow transition-colors absolute -top-3 -left-3 opacity-20"></i>
-                  <p className="text-sm md:text-base font-bold leading-relaxed relative z-10 text-justify">
-                    {t("about-desc")}
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                  <a
-                    href="#contact"
-                    className="neo-btn px-6 py-2.5 bg-neo-pink text-white hover:bg-white hover:text-black border-2 border-black text-xs font-black uppercase tracking-wider text-center"
-                  >
-                    <i className="fas fa-paper-plane mr-2"></i> {t("about-hire")}
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Bento Card 4: Location */}
-            <div className="bento-card bg-neo-green hover:bg-neo-pink hover:text-white text-black p-6 flex flex-col justify-center items-center text-center transition-colors duration-300 group md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4 min-h-[120px] md:min-h-0">
-              <div className="flex flex-col items-center justify-center">
-                <div className="w-14 h-14 bg-white border-2 border-black flex items-center justify-center text-black mb-3 transform group-hover:rotate-12 transition-transform duration-300 shadow-[3px_3px_0px_0px_#000000]">
-                  <i className="fas fa-map-marker-alt text-2xl text-neo-pink animate-pulse"></i>
-                </div>
-                <span className="text-xs font-black uppercase tracking-wider opacity-85 group-hover:text-white/80 transition-colors">
-                  {t("contact-location-title")}
-                </span>
-                <span className="text-sm font-black uppercase mt-1">
-                  Jakarta, Indonesia
-                </span>
-              </div>
-            </div>
-
-            {/* Bento Card 5: Degree Marquee Box */}
-            <div className="bento-card bg-neo-pink hover:bg-neo-green hover:text-black text-white p-0 flex items-center justify-center overflow-hidden transition-colors duration-300 select-none md:col-start-1 md:col-end-3 md:row-start-4 md:row-end-5 min-h-[80px] md:min-h-0">
-              <div className="bento-marquee-container py-4">
-                <div className="bento-marquee font-black uppercase text-lg tracking-wider">
-                  <span>D3 TEKNIK INFORMATIKA • WEB DEVELOPMENT • FULLSTACK SPECIALIST • FRONTEND ENGINEER • &nbsp;</span>
-                  <span>D3 TEKNIK INFORMATIKA • WEB DEVELOPMENT • FULLSTACK SPECIALIST • FRONTEND ENGINEER • &nbsp;</span>
-                  <span>D3 TEKNIK INFORMATIKA • WEB DEVELOPMENT • FULLSTACK SPECIALIST • FRONTEND ENGINEER • &nbsp;</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bento Card 6: Email / Copy */}
-            <div className="bento-card bg-neo-blue hover:bg-neo-orange hover:text-white text-white p-6 flex flex-col justify-center items-center text-center cursor-pointer transition-colors duration-300 group relative md:col-start-3 md:col-end-4 md:row-start-4 md:row-end-5 min-h-[120px] md:min-h-0">
-              <div
-                className="flex flex-col items-center justify-center w-full h-full"
-                onClick={() => {
-                  navigator.clipboard.writeText("farreldiegoakbar@gmail.com");
-                  showToast(lang === "id" ? "✓ Email berhasil disalin ke clipboard!" : "✓ Email copied to clipboard!");
-                }}
-                title="Copy email to clipboard"
-              >
-                <div className="w-12 h-12 bg-white border-2 border-black flex items-center justify-center text-black mb-2 transform group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300 shadow-[3px_3px_0px_0px_#000000]">
-                  <i className="fas fa-copy text-xl text-neo-blue"></i>
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-85 group-hover:text-white/80 transition-colors">
-                  {lang === "id" ? "SALIN EMAIL" : "COPY EMAIL"}
-                </span>
-                <span className="text-xs font-black break-all uppercase mt-1">
-                  farreldiegoakbar@gmail.com
-                </span>
-              </div>
-            </div>
+          </div>
+        </div>
+        
+        {/* Bottom Tape Ribbon */}
+        <div className="bg-neo-pink text-white py-3 border-y-4 border-black font-black uppercase text-xs sm:text-sm tracking-widest -rotate-1 scale-105 mt-20 select-none warning-marquee-container">
+          <div className="warning-marquee">
+            <span>✦ FRONTEND SPECIALIST • BACKEND DEVELOPMENT • PROBLEM SOLVER • USER INTERACTION • FULLSTACK ENGINEER ✦ &nbsp;</span>
+            <span>✦ FRONTEND SPECIALIST • BACKEND DEVELOPMENT • PROBLEM SOLVER • USER INTERACTION • FULLSTACK ENGINEER ✦ &nbsp;</span>
+            <span>✦ FRONTEND SPECIALIST • BACKEND DEVELOPMENT • PROBLEM SOLVER • USER INTERACTION • FULLSTACK ENGINEER ✦ &nbsp;</span>
           </div>
         </div>
       </section>
