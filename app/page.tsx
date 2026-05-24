@@ -187,6 +187,7 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [typedTitle, setTypedTitle] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
   const [profileAngle, setProfileAngle] = useState(-3);
   const [profileHoverOffset, setProfileHoverOffset] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -265,14 +266,16 @@ export default function Home() {
   // Job title typing effect trigger
   useEffect(() => {
     if (!mounted) return;
-    const textToType = "Web Developer";
+    const textToType = lang === "id" ? "Pengembang Web" : "Web Developer";
     let currentLength = 0;
     setTypedTitle("");
+    setIsTyping(true);
     const timer = setInterval(() => {
       currentLength++;
       setTypedTitle(textToType.slice(0, currentLength));
       if (currentLength >= textToType.length) {
         clearInterval(timer);
+        setIsTyping(false);
       }
     }, 75);
     return () => clearInterval(timer);
@@ -534,7 +537,7 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center">
             <a href="#" className="text-xl sm:text-2xl font-black text-black uppercase tracking-tighter flex items-center">
-              <span className="bg-neo-blue px-2 py-0.5 border-2 border-black mr-1">Farrel</span> Diego Akbar
+              <span className="bg-neo-yellow px-2 py-0.5 border-2 border-black mr-1">Farrel</span> Diego Akbar
             </a>
 
             {/* Navigation Desktop */}
@@ -641,8 +644,8 @@ export default function Home() {
           </h1>
 
           <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-8 text-black animate-slide-up bg-neo-pink text-white inline-block px-4 py-2 border-4 border-black shadow-neo transform rotate-1 hover:-rotate-1 transition-transform duration-300 cursor-default">
-            <span className="inline-block border-r-2 border-white pr-1 animate-pulse">
-              {typedTitle || "Web Developer"}
+            <span className={`inline-block pr-1 ${isTyping ? "border-r-2 border-white animate-pulse" : ""}`}>
+              {typedTitle || (lang === "id" ? "Pengembang Web" : "Web Developer")}
             </span>
           </h2>
 
@@ -1340,7 +1343,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="mb-2 md:mb-0">
               <a href="#" className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center">
-                <span className="bg-neo-yellow text-black px-2 py-0.5 border-2 border-white mr-1">R</span>eligo
+                <span className="bg-neo-yellow text-black px-2 py-0.5 border-2 border-white mr-1">Farrel</span> Diego Akbar
               </a>
             </div>
 
@@ -1349,7 +1352,7 @@ export default function Home() {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="neo-btn w-12 h-12 bg-neo-blue flex items-center justify-center text-white border-white"
+                className="neo-btn w-12 h-12 bg-neo-blue flex items-center justify-center text-white "
                 title="GitHub"
               >
                 <i className="fab fa-github text-xl"></i>
@@ -1358,7 +1361,7 @@ export default function Home() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="neo-btn w-12 h-12 bg-neo-purple flex items-center justify-center text-white border-white"
+                className="neo-btn w-12 h-12 bg-neo-purple flex items-center justify-center text-white"
                 title="LinkedIn"
               >
                 <i className="fab fa-linkedin-in text-xl"></i>
@@ -1367,7 +1370,7 @@ export default function Home() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="neo-btn w-12 h-12 bg-neo-pink flex items-center justify-center text-white border-white"
+                className="neo-btn w-12 h-12 bg-neo-pink flex items-center justify-center text-white "
                 title="Instagram"
               >
                 <i className="fab fa-instagram text-xl"></i>
@@ -1376,7 +1379,7 @@ export default function Home() {
                 href="https://wa.me/6281234567890"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="neo-btn w-12 h-12 bg-neo-green flex items-center justify-center text-black border-white"
+                className="neo-btn w-12 h-12 bg-neo-green flex items-center justify-center text-black "
                 title="WhatsApp"
               >
                 <i className="fab fa-whatsapp text-xl"></i>
@@ -1384,7 +1387,7 @@ export default function Home() {
             </div>
 
             <div className="text-white/80 font-black uppercase text-xs">
-              © {new Date().getFullYear()} Farrel Diego Akbar. {t("footer-rights")}
+              © {new Date().getFullYear()} Farrel Diego Akbar.
             </div>
           </div>
         </div>
