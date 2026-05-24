@@ -416,9 +416,9 @@ export default function Home() {
             <div className="sm:col-span-4 flex justify-center items-center">
               <div className="w-32 h-32 sm:w-36 sm:h-36 lg:w-40 lg:h-40 border-4 border-black bg-black overflow-hidden relative shadow-[4px_4px_0px_0px_#E95420]">
                 <SafeImage
-                  src="/img/profil.jpg"
+                  src="/img/muka_parel.jpeg"
                   alt="Farrel Diego Akbar"
-                  className="w-full h-full object-cover grayscale contrast-125"
+                  className="w-full h-full object-cover contrast-125"
                 />
               </div>
             </div>
@@ -626,7 +626,7 @@ export default function Home() {
                 title="Copy Email"
               >
                 <span className="text-neo-blue group-hover:text-white font-black text-[10px]">EMAIL:</span>
-                <span className="text-white font-bold underline break-all">farreldiegoakbar@gmail.com</span>
+                <span className="text-white font-bold underline break-all">farreldiego29@gmail.com</span>
               </div>
             </div>
 
@@ -1228,7 +1228,7 @@ export default function Home() {
               {t("hero-view-work")}
             </a>
             <a
-              href="https://wa.me/6281234567890?text=Halo%20Farrel%20Diego%20Akbar"
+              href="https://wa.me/6282155235200?text=Halo%20Ayo%20Mutualan"
               target="_blank"
               rel="noopener noreferrer"
               className="neo-btn px-8 py-4 text-sm sm:text-lg uppercase tracking-bold bg-neo-green text-black w-full sm:w-auto"
@@ -1238,7 +1238,7 @@ export default function Home() {
             </a>
             <div className="flex gap-4">
               <a
-                href="https://github.com"
+                href="https://github.com/farrel-codenoob29"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="neo-btn w-14 h-14 bg-neo-purple flex items-center justify-center text-white"
@@ -1247,7 +1247,7 @@ export default function Home() {
                 <i className="fab fa-github text-2xl"></i>
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/religoo_29/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="neo-btn w-14 h-14 bg-neo-pink flex items-center justify-center text-white"
@@ -1721,7 +1721,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="text-sm sm:text-base font-black mb-1 uppercase">{t("contact-email-title")}</h4>
-                    <p className="text-black font-black text-sm uppercase break-all">farreldiegoakbar@gmail.com</p>
+                    <p className="text-black font-black text-sm break-all">farreldiego29@gmail.com</p>
                   </div>
                 </div>
 
@@ -1731,7 +1731,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="text-sm sm:text-base font-black mb-1 uppercase">{t("contact-phone-title")}</h4>
-                    <p className="text-black font-black text-sm uppercase">+62 812 3456 7890</p>
+                    <p className="text-black font-black text-sm uppercase">+62 821 5523 5200</p>
                   </div>
                 </div>
               </div>
@@ -1831,7 +1831,7 @@ export default function Home() {
 
             <div className="flex space-x-6 mb-2 md:mb-0">
               <a
-                href="https://github.com"
+                href="https://github.com/farrel-codenoob29"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="neo-btn w-12 h-12 bg-neo-blue flex items-center justify-center text-white footer-social-btn"
@@ -1840,7 +1840,7 @@ export default function Home() {
                 <i className="fab fa-github text-xl"></i>
               </a>
               <a
-                href="https://linkedin.com"
+                href="http://linkedin.com/in/farrel-diego-512595345/?_l=en_US"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="neo-btn w-12 h-12 bg-neo-purple flex items-center justify-center text-white footer-social-btn"
@@ -1849,7 +1849,7 @@ export default function Home() {
                 <i className="fab fa-linkedin-in text-xl"></i>
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/religoo_29/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="neo-btn w-12 h-12 bg-neo-pink flex items-center justify-center text-white footer-social-btn"
@@ -1858,7 +1858,7 @@ export default function Home() {
                 <i className="fab fa-instagram text-xl"></i>
               </a>
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/6282155235200"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="neo-btn w-12 h-12 bg-neo-green flex items-center justify-center text-black footer-social-btn"
