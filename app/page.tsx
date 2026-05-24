@@ -309,7 +309,14 @@ const DraggableShape = ({
   );
 };
 
-
+const navItems = [
+  { id: "home", color: "#FFD600" },
+  { id: "about", color: "#FF006E" },
+  { id: "projects", color: "#3A86FF" },
+  { id: "skills", color: "#00FF66" },
+  { id: "certificates", color: "#8338EC" },
+  { id: "contact", color: "#FB5607" },
+];
 
 export default function Home() {
   const [lang, setLang] = useState<"id" | "en">("id");
@@ -322,7 +329,6 @@ export default function Home() {
   const [profileHoverOffset, setProfileHoverOffset] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
-  const [contributions, setContributions] = useState<number[]>([]);
   const [selectedCert, setSelectedCert] = useState<{
     title: string;
     org: string;
@@ -335,6 +341,17 @@ export default function Home() {
   // Form State
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
 
+  // Refs for sliding nav active indicator
+  const navRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({
+    left: 0,
+    width: 0,
+    height: 0,
+    top: 0,
+    opacity: 0,
+    backgroundColor: "transparent",
+  });
+
   const t = (key: keyof typeof translations["id"]) => {
     return translations[lang][key] || translations["en"][key] || key;
   };
@@ -342,10 +359,6 @@ export default function Home() {
   // Hydration fix & Init
   useEffect(() => {
     setMounted(true);
-
-    // Initial random contributions
-    const graphData = Array.from({ length: 364 }, () => Math.floor(Math.random() * 5));
-    setContributions(graphData);
 
     // Responsive carousel width sizing
     const handleResize = () => {
@@ -370,7 +383,7 @@ export default function Home() {
 
     // Scroll active link listener
     const handleScroll = () => {
-      const sections = ["home", "about", "projects", "skills", "certificates", "testimonial", "github", "contact"];
+      const sections = ["home", "about", "projects", "skills", "certificates", "contact"];
       let current = "home";
       for (const section of sections) {
         const el = document.getElementById(section);
@@ -392,6 +405,36 @@ export default function Home() {
       revealObserver.disconnect();
     };
   }, []);
+
+  // Update sliding indicator style on scroll or resize
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeElement = navRefs.current[activeSection];
+      if (activeElement) {
+        const item = navItems.find((n) => n.id === activeSection);
+        const bgColor = item ? item.color : "#FFD600";
+        setIndicatorStyle({
+          left: `${activeElement.offsetLeft}px`,
+          width: `${activeElement.offsetWidth}px`,
+          height: `${activeElement.offsetHeight}px`,
+          top: `${activeElement.offsetTop}px`,
+          opacity: 1,
+          backgroundColor: bgColor,
+        });
+      } else {
+        setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+      }
+    };
+
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+    const timeout = setTimeout(updateIndicator, 100);
+
+    return () => {
+      window.removeEventListener("resize", updateIndicator);
+      clearTimeout(timeout);
+    };
+  }, [activeSection]);
 
   // Job title typing effect trigger
   useEffect(() => {
@@ -671,20 +714,24 @@ export default function Home() {
             </a>
 
             {/* Navigation Desktop */}
-            <nav className="hidden lg:flex space-x-6 lg:space-x-8">
-              {["home", "about", "projects", "skills", "certificates", "testimonial", "github", "contact"].map(
-                (sec) => (
-                  <a
-                    key={sec}
-                    href={`#${sec}`}
-                    className={`nav-link py-2 text-sm lg:text-base font-black text-black uppercase hover:bg-neo-yellow px-2 transition-all ${
-                      activeSection === sec ? "bg-neo-yellow border-2 border-black" : ""
-                    }`}
-                  >
-                    {t(`nav-${sec}` as keyof typeof translations["id"])}
-                  </a>
-                )
-              )}
+            <nav className="relative hidden lg:flex items-center gap-1">
+              {/* Sliding dynamic background block */}
+              <div
+                className="absolute transition-all duration-300 ease-out z-0"
+                style={indicatorStyle}
+              />
+              {navItems.map((item) => (
+                <a
+                  key={item.id}
+                  ref={(el) => {
+                    navRefs.current[item.id] = el;
+                  }}
+                  href={`#${item.id}`}
+                  className="relative z-10 px-4 py-2 text-sm lg:text-base font-black text-black uppercase transition-colors duration-300 select-none"
+                >
+                  {t(`nav-${item.id}` as any)}
+                </a>
+              ))}
             </nav>
 
             {/* Language & Menu Actions */}
@@ -711,20 +758,28 @@ export default function Home() {
               mobileMenuOpen ? "block" : "hidden"
             }`}
           >
-            {["home", "about", "projects", "skills", "certificates", "testimonial", "github", "contact"].map(
-              (sec) => (
+            {navItems.map((item) => {
+              const isActive = activeSection === item.id;
+              let activeBg = "bg-neo-yellow";
+              if (item.id === "about") activeBg = "bg-neo-pink text-white";
+              else if (item.id === "projects") activeBg = "bg-neo-blue text-white";
+              else if (item.id === "skills") activeBg = "bg-neo-green text-black";
+              else if (item.id === "certificates") activeBg = "bg-neo-purple text-white";
+              else if (item.id === "contact") activeBg = "bg-neo-orange text-white";
+
+              return (
                 <a
-                  key={sec}
-                  href={`#${sec}`}
+                  key={item.id}
+                  href={`#${item.id}`}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-2 font-black uppercase text-black hover:bg-neo-yellow px-2 ${
-                    activeSection === sec ? "bg-neo-yellow border-l-4 border-black" : ""
+                  className={`block py-2 font-black uppercase px-2 transition-colors duration-200 ${
+                    isActive ? `${activeBg}` : "text-black hover:bg-gray-100"
                   }`}
                 >
-                  {t(`nav-${sec}` as keyof typeof translations["id"])}
+                  {t(`nav-${item.id}` as any)}
                 </a>
-              )
-            )}
+              );
+            })}
           </div>
         </div>
       </header>
@@ -1160,191 +1215,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* Testimonials Section */}
-      <section id="testimonial" className="py-20 sm:py-32 bg-neo-pink border-b-8 border-black scroll-mt-16">
-        <div className="container mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-16 text-center uppercase tracking-tighter reveal reveal-up">
-            <span className="bg-white text-black px-8 py-3 border-4 border-black shadow-neo-lg inline-block transform rotate-1 hover:-rotate-1 transition-transform duration-300 cursor-default">
-              {t("testimonial-title")}
-            </span>
-          </h2>
-
-          {/* Grid Quote Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <div className="testimonial-card p-6 sm:p-8 bg-white flex flex-col h-full reveal reveal-up delay-100">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="flex text-neo-yellow text-sm">
-                  {[...Array(5)].map((_, i) => (
-                    <i key={i} className="fas fa-star border-black mr-0.5" style={{ WebkitTextStroke: "1px #000" }}></i>
-                  ))}
-                </div>
-                <span className="ml-1 text-sm font-black">5.0</span>
-              </div>
-              <p className="text-black font-bold text-sm sm:text-base leading-relaxed flex-grow text-justify border-l-4 border-neo-yellow pl-4 mb-8 italic">
-                “{lang === "id" 
-                  ? "Saya sangat senang dengan website portofolio yang diselesaikan Farrel—desainnya bagus, bekerja lancar, dan sangat mudah dinavigasi di berbagai perangkat." 
-                  : "I'm pleased with the portfolio website Farrel delivered—it looks great, works smoothly, and is easy to navigate across devices."}”
-              </p>
-              <div className="flex items-center pt-4 border-t-2 border-black">
-                <div className="w-12 h-12 border-2 border-black mr-3 overflow-hidden bg-neo-yellow flex items-center justify-center font-black">
-                  N
-                </div>
-                <div>
-                  <h4 className="font-black text-black text-sm sm:text-base">Nik Nurlin Nadhira</h4>
-                  <p className="text-xs font-black text-gray-500 uppercase">College Student of UiTM Selangor</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="testimonial-card p-6 sm:p-8 bg-white flex flex-col h-full reveal reveal-up delay-200">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="flex text-neo-yellow text-sm">
-                  {[...Array(5)].map((_, i) => (
-                    <i key={i} className="fas fa-star border-black mr-0.5" style={{ WebkitTextStroke: "1px #000" }}></i>
-                  ))}
-                </div>
-                <span className="ml-1 text-sm font-black">5.0</span>
-              </div>
-              <p className="text-black font-bold text-sm sm:text-base leading-relaxed flex-grow text-justify border-l-4 border-neo-blue pl-4 mb-8 italic">
-                “{lang === "id" 
-                  ? "Chatbot AI yang dikembangkan Farrel untuk kami telah merevolusi layanan interaktif kami. Pemahamannya tentang arsitektur frontend dan backend modern sangat mengesankan." 
-                  : "The AI chatbot Farrel developed for us has revolutionized our customer service. His understanding of both frontend and backend technologies is impressive."}”
-              </p>
-              <div className="flex items-center pt-4 border-t-2 border-black">
-                <div className="w-12 h-12 border-2 border-black mr-3 overflow-hidden bg-neo-blue flex items-center justify-center font-black text-white">
-                  D
-                </div>
-                <div>
-                  <h4 className="font-black text-black text-sm sm:text-base">David Kim</h4>
-                  <p className="text-xs font-black text-gray-500 uppercase">Founder, AI Solutions</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="testimonial-card p-6 sm:p-8 bg-white flex flex-col h-full reveal reveal-up delay-300">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="flex text-neo-yellow text-sm">
-                  {[...Array(5)].map((_, i) => (
-                    <i key={i} className="fas fa-star border-black mr-0.5" style={{ WebkitTextStroke: "1px #000" }}></i>
-                  ))}
-                </div>
-                <span className="ml-1 text-sm font-black">5.0</span>
-              </div>
-              <p className="text-black font-bold text-sm sm:text-base leading-relaxed flex-grow text-justify border-l-4 border-neo-green pl-4 mb-8 italic">
-                “{lang === "id" 
-                  ? "Pekerjaan Farrel pada dasbor analitik kami sangat luar biasa. Visualisasi data dan sinkronisasi pembaruan data real-time bekerja tanpa kendala. Sangat direkomendasikan." 
-                  : "Farrel's work on our financial dashboard was outstanding. The data visualization and real-time updates work flawlessly. Professional and reliable developer."}”
-              </p>
-              <div className="flex items-center pt-4 border-t-2 border-black">
-                <div className="w-12 h-12 border-2 border-black mr-3 overflow-hidden bg-neo-green flex items-center justify-center font-black">
-                  L
-                </div>
-                <div>
-                  <h4 className="font-black text-black text-sm sm:text-base">Lisa Thompson</h4>
-                  <p className="text-xs font-black text-gray-500 uppercase">Director, FinTech Pro</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Testimonial Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 reveal reveal-up delay-100">
-            <div className="neo-card text-center p-6 bg-neo-yellow">
-              <div className="text-3xl sm:text-4xl font-black text-black mb-2 tracking-tighter">3</div>
-              <div className="text-xs font-black uppercase text-black">{t("stat-happy-clients")}</div>
-            </div>
-            <div className="neo-card text-center p-6 bg-neo-green">
-              <div className="text-3xl sm:text-4xl font-black text-black mb-2 tracking-tighter">100</div>
-              <div className="text-xs font-black uppercase text-black">{t("stat-success-rate")}</div>
-            </div>
-            <div className="neo-card text-center p-6 bg-neo-blue text-white">
-              <div className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter">13</div>
-              <div className="text-xs font-black uppercase">{t("stat-projects")}</div>
-            </div>
-            <div className="neo-card text-center p-6 bg-white">
-              <div className="text-3xl sm:text-4xl font-black text-black mb-2 tracking-tighter">5.0</div>
-              <div className="text-xs font-black uppercase text-black">{t("stat-rating")}</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* GitHub Calendar Grid Section */}
-      <section id="github" className="py-20 sm:py-32 bg-neo-bg scroll-mt-16">
-        <div className="container mx-auto px-4 sm:px-6">
-          <h4 className="text-2xl sm:text-3xl font-black mb-12 text-center uppercase tracking-tighter reveal reveal-up">
-            <span className="bg-neo-blue text-white px-6 py-2 border-4 border-black shadow-neo transform rotate-1 hover:-rotate-1 transition-transform duration-300 cursor-default">
-              {t("github_title")}
-            </span>
-          </h4>
-
-          {/* Graph visual representation */}
-          <div className="bg-white border-4 border-black shadow-neo-lg p-6 sm:p-8 overflow-x-auto reveal reveal-scale delay-100 mb-12">
-            <div className="github-contribution-graph mb-4">
-              {contributions.map((lvl, index) => (
-                <div
-                  key={index}
-                  className={`contribution-day level-${lvl}`}
-                  title={`${
-                    ["No contributions", "1-3 contributions", "4-6 contributions", "7-9 contributions", "10+ contributions"][lvl]
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="flex justify-between items-center mt-6 px-2 text-xs sm:text-sm">
-              <span className="text-black font-black uppercase">{t("github-less")}</span>
-              <div className="flex gap-1.5">
-                <span className="inline-block w-4 h-4 bg-[#ebedf0] border border-black"></span>
-                <span className="inline-block w-4 h-4 bg-[#9be9a8] border border-black"></span>
-                <span className="inline-block w-4 h-4 bg-[#40c463] border border-black"></span>
-                <span className="inline-block w-4 h-4 bg-[#30a14e] border border-black"></span>
-                <span className="inline-block w-4 h-4 bg-[#216e39] border border-black"></span>
-              </div>
-              <span className="text-black font-black uppercase">{t("github-more")}</span>
-            </div>
-          </div>
-
-          {/* GitHub Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 reveal reveal-up delay-200">
-            <div className="neo-card p-6 bg-white">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm sm:text-base font-black uppercase">{t("github_repos")}</h4>
-                <i className="fas fa-code-branch text-black text-2xl"></i>
-              </div>
-              <p className="text-4xl sm:text-5xl font-black text-neo-blue tracking-tighter">54</p>
-              <p className="text-[10px] font-black text-gray-500 uppercase mt-2">All Repositories</p>
-            </div>
-
-            <div className="neo-card p-6 bg-neo-yellow">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm sm:text-base font-black uppercase">{t("github_stars")}</h4>
-                <i className="fas fa-star text-black text-2xl"></i>
-              </div>
-              <p className="text-4xl sm:text-5xl font-black text-black tracking-tighter">18</p>
-              <p className="text-[10px] font-black text-black/70 mt-2 uppercase">{t("github_received")}</p>
-            </div>
-
-            <div className="neo-card p-6 bg-neo-green">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm sm:text-base font-black uppercase">{t("github_contrib")}</h4>
-                <i className="fas fa-code-commit text-black text-2xl"></i>
-              </div>
-              <p className="text-4xl sm:text-5xl font-black text-black tracking-tighter">1.840</p>
-              <p className="text-[10px] font-black text-black/70 mt-2 uppercase">{t("github_lastyear")}</p>
-            </div>
-
-            <div className="neo-card p-6 bg-neo-purple text-white">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm sm:text-base font-black uppercase">{t("github_followers")}</h4>
-                <i className="fas fa-users text-white text-2xl"></i>
-              </div>
-              <p className="text-4xl sm:text-5xl font-black tracking-tighter">24</p>
-              <p className="text-[10px] font-black mt-2 uppercase text-white/90">{t("github_followers_desc")}</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Contact Section */}
       <section id="contact" className="py-20 sm:py-32 bg-neo-green border-y-8 border-black scroll-mt-16">
