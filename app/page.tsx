@@ -500,22 +500,102 @@ export default function Home() {
       case "ls":
       case "ls skills/":
         result = (
-          <div className="p-3 bg-[#2C001E]/40 border-2 border-black rounded mt-2 space-y-2 max-w-md font-mono select-text text-left">
-            <div className="text-neo-green font-black border-b border-zinc-800 pb-1 uppercase">
-              {lang === "id" ? "[ KEAHLIAN / TEKNOLOGI ]" : "[ CORE SKILLS / TECH ]"}
+          <div className="p-4 bg-[#2C001E]/40 border-2 border-black rounded mt-2 space-y-3 max-w-xl font-mono select-text text-left">
+            <div className="text-neo-green font-black border-b border-zinc-800 pb-1.5 uppercase flex items-center justify-between">
+              <span>{lang === "id" ? "[ KEAHLIAN / TEKNOLOGI ]" : "[ CORE SKILLS / TECH ]"}</span>
+              <span className="text-[9px] text-zinc-500 font-normal">6 categories</span>
             </div>
-            <div className="flex flex-wrap gap-1.5 pt-1 text-[10px] text-white">
-              <span className="bg-[#E34F26] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">HTML5</span>
-              <span className="bg-[#1572B6] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">CSS3</span>
-              <span className="bg-[#F7DF1E] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">JavaScript</span>
-              <span className="bg-[#06B6D4] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">Tailwind</span>
-              <span className="bg-[#61DAFB] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">React</span>
-              <span className="bg-black text-white px-1.5 py-0.5 font-black border border-zinc-700 shadow-[1px_1px_0px_0px_#000]">Next.js</span>
-              <span className="bg-[#FF2D20] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">Laravel</span>
-              <span className="bg-[#4479A1] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">MySQL</span>
-              <span className="bg-[#8338EC] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000]">Supabase</span>
+            
+            <div className="space-y-3.5 pt-1 text-[10px] text-white">
+              {/* Category: Programming Languages */}
+              <div className="space-y-1">
+                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
+                  <span>💻</span>
+                  <span>{lang === "id" ? "Bahasa Pemrograman" : "Programming Languages"}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="bg-[#777BB4] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">PHP</span>
+                  <span className="bg-[#0175C2] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">DART</span>
+                  <span className="bg-[#3776AB] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">PYTHON</span>
+                  <span className="bg-[#68217A] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">C#</span>
+                  <span className="bg-[#F7DF1E] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">JavaScript</span>
+                  <span className="bg-[#3178C6] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">TypeScript</span>
+                  <span className="bg-[#00ADD8] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">GO</span>
+                </div>
+              </div>
+
+              {/* Category: Frameworks */}
+              <div className="space-y-1">
+                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
+                  <span>🧱</span>
+                  <span>Frameworks</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="bg-[#FF2D20] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Laravel</span>
+                  <span className="bg-[#02569B] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Flutter</span>
+                  <span className="bg-[#61DAFB] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">React</span>
+                  <span className="bg-black text-white px-1.5 py-0.5 font-black border border-zinc-700 shadow-[1px_1px_0px_0px_#000] uppercase">Next</span>
+                  <span className="bg-[#00ADD8] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Gin</span>
+                </div>
+              </div>
+
+              {/* Category: Databases */}
+              <div className="space-y-1">
+                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
+                  <span>🗄️</span>
+                  <span>Databases</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="bg-[#4479A1] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">MySQL</span>
+                  <span className="bg-[#CC292B] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Microsoft SQL Server</span>
+                  <span className="bg-[#FFCA28] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Firebase</span>
+                  <span className="bg-[#336791] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">PostgreSQL</span>
+                </div>
+              </div>
+
+              {/* Category: API */}
+              <div className="space-y-1">
+                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
+                  <span>🌐</span>
+                  <span>API</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="bg-[#007ACC] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">REST API</span>
+                  <span className="bg-[#E34F26] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">SOAP API</span>
+                  <span className="bg-[#E10098] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">GraphQL</span>
+                  <span className="bg-black text-white px-1.5 py-0.5 font-black border border-zinc-700 shadow-[1px_1px_0px_0px_#000] uppercase">WebSockets</span>
+                </div>
+              </div>
+
+              {/* Category: DevOps & CI/CD */}
+              <div className="space-y-1">
+                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
+                  <span>🚀</span>
+                  <span>DevOps & CI/CD</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="bg-[#1485B8] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Jenkins</span>
+                  <span className="bg-[#F47A20] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Grafana</span>
+                  <span className="bg-[#E6522C] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Prometheus</span>
+                  <span className="bg-[#E2703A] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Proxmox</span>
+                </div>
+              </div>
+
+              {/* Category: Tools & Design */}
+              <div className="space-y-1">
+                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
+                  <span>🛠️</span>
+                  <span>Tools & Design</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="bg-[#FF6C37] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Postman</span>
+                  <span className="bg-[#F24E1E] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Figma</span>
+                  <span className="bg-[#00C4CC] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Canva</span>
+                </div>
+              </div>
             </div>
-            <p className="text-[9px] text-zinc-500 italic mt-2">
+
+            <p className="text-[9px] text-zinc-500 italic mt-2.5 pt-1.5 border-t border-zinc-800/40">
               * {lang === "id" ? "Scroll ke bawah untuk melihat panel keahlian." : "Scroll down to see the skills panel."}
             </p>
           </div>
