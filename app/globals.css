@@ -344,4 +344,40 @@ body {
   transform: translate(0) scale(1) !important;
 }
 
+/* Bento Grid Card Styling */
+.bento-card {
+  border: 4px solid #000000;
+  box-shadow: 6px 6px 0px 0px #000000;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bento-card:hover {
+  transform: translate(-6px, -6px);
+  box-shadow: 12px 12px 0px 0px #000000;
+}
+
+/* Custom marquee for degree Bento block */
+.bento-marquee-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.bento-marquee {
+  display: flex;
+  gap: 2rem;
+  animation: bento-marquee 15s linear infinite;
+  width: fit-content;
+  white-space: nowrap;
+}
+
+@keyframes bento-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+
 

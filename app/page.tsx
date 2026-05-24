@@ -386,6 +386,11 @@ export default function Home() {
   // Hydration fix & Init
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Set up observers and event listeners once fully mounted in DOM
+  useEffect(() => {
+    if (!mounted) return;
 
     // Responsive carousel width sizing
     const handleResize = () => {
@@ -431,7 +436,7 @@ export default function Home() {
       window.removeEventListener("scroll", handleScroll);
       revealObserver.disconnect();
     };
-  }, []);
+  }, [mounted]);
 
   // Update sliding indicator style on scroll, resize, or hover
   useEffect(() => {
@@ -921,63 +926,112 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-20 sm:py-32 scroll-mt-16 bg-white">
+      {/* About Section (Bento Box Redesign) */}
+      <section id="about" className="py-20 sm:py-32 scroll-mt-16 bg-white overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-16 text-center uppercase tracking-tighter reveal reveal-up">
-            <span className="bg-neo-pink text-white px-6 py-3 border-4 border-black shadow-neo-lg inline-block transform rotate-2 hover:-rotate-2 transition-transform duration-300 cursor-default">
+            <span className="bg-neo-pink text-white px-8 py-3 border-4 border-black shadow-neo-lg inline-block transform rotate-2 hover:-rotate-2 transition-transform duration-300 cursor-default">
               {t("about-title")}
             </span>
           </h2>
 
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
-            <div className="lg:w-2/5 flex justify-center reveal reveal-left">
-              <div className="relative">
-                <div
-                  id="about-img-container"
-                  onClick={() => setProfileAngle((prev) => prev + 20)}
-                  onMouseEnter={() => setProfileHoverOffset(8)}
-                  onMouseLeave={() => setProfileHoverOffset(0)}
-                  style={{ transform: `rotate(${profileAngle + profileHoverOffset}deg)` }}
-                  className="w-64 h-64 sm:w-72 sm:h-72 overflow-hidden border-8 border-black shadow-neo-xl cursor-pointer transition-transform duration-300 ease-in-out bg-[#FFF]"
-                >
-                  <SafeImage src="/img/profil.jpg" alt="Farrel Diego Akbar" className="w-full h-full object-cover" />
+          <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-[180px_180px_180px_180px] gap-6 reveal reveal-up">
+            {/* Bento Card 1: Photo Box */}
+            <div className="bento-card bg-white cursor-pointer select-none overflow-hidden h-[300px] md:h-full group flex flex-col items-center justify-center relative p-0 md:col-start-1 md:col-end-2 md:row-start-1 md:row-end-3">
+              <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
+                <SafeImage
+                  src="/img/profil.jpg"
+                  alt="Farrel Diego Akbar"
+                  className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500 ease-out"
+                />
+                <div className="absolute bottom-4 bg-neo-yellow text-black font-black px-4 py-1.5 border-2 border-black shadow-[3px_3px_0px_0px_#000000] uppercase text-xs tracking-wider transform -rotate-2 group-hover:rotate-2 transition-transform duration-300">
+                  {t("about-title")}
                 </div>
-                <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-neo-yellow border-4 border-black shadow-neo -z-10 animate-spin-slow"></div>
               </div>
             </div>
 
-            <div className="lg:w-3/5 reveal reveal-right delay-200">
-              <h3 className="text-2xl sm:text-3xl font-black mb-6 uppercase tracking-tight text-black">
-                {lang === "id" ? "Halo, Saya " : "Hi, I am "}{" "}
-                <span className="text-neo-blue border-b-4 border-black pb-0.5">Farrel Diego Akbar</span>
-                <div className="mt-3 text-lg font-black bg-neo-green text-black inline-block px-3 py-1 border-2 border-black rotate-1">
-                  {t("about-subtitle")}
-                </div>
-              </h3>
-              <p className="text-black font-bold mb-6 leading-relaxed text-sm sm:text-base border-l-4 border-neo-pink pl-4 text-justify">
-                {t("about-desc")}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 reveal reveal-up delay-300">
-                <div className="flex items-center p-4 bg-neo-bg border-3 border-black shadow-neo">
-                  <div className="w-10 h-10 border-2 border-black bg-neo-pink flex items-center justify-center mr-3 text-white">
-                    <i className="fas fa-map-marker-alt"></i>
-                  </div>
-                  <span className="text-sm font-black uppercase">Jakarta, Indonesia</span>
-                </div>
-                <div className="flex items-center p-4 bg-neo-bg border-3 border-black shadow-neo">
-                  <div className="w-10 h-10 border-2 border-black bg-neo-blue flex items-center justify-center mr-3 text-white">
-                    <i className="fas fa-envelope"></i>
-                  </div>
-                  <span className="text-sm font-black uppercase break-all">farreldiegoakbar@gmail.com</span>
+            {/* Bento Card 2: Greeting & Role */}
+            <div className="bento-card bg-neo-yellow hover:bg-neo-blue hover:text-white text-black p-6 md:p-8 flex flex-col justify-center transition-colors duration-300 group md:col-start-2 md:col-end-4 md:row-start-1 md:row-end-2 min-h-[140px] md:min-h-0">
+              <div className="flex flex-col justify-center h-full">
+                <span className="text-xs md:text-sm font-black uppercase tracking-widest opacity-80 mb-1 group-hover:text-white/80 transition-colors">
+                  {lang === "id" ? "MEMPERKENALKAN" : "INTRODUCING"}
+                </span>
+                <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tight transition-transform duration-300 group-hover:translate-x-2">
+                  Farrel Diego Akbar
+                </h3>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-xs md:text-sm font-black bg-white text-black border-2 border-black px-2.5 py-0.5 inline-block uppercase tracking-wider transform -rotate-1 group-hover:rotate-1 transition-transform">
+                    {t("about-subtitle")}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <div className="flex flex-col sm:flex-row gap-6 mt-8">
-                <a href="#contact" className="neo-btn px-8 py-3 bg-white text-black uppercase text-sm w-full sm:w-auto">
-                  <i className="fas fa-paper-plane mr-2"></i> <span>{t("about-hire")}</span>
-                </a>
+            {/* Bento Card 3: Description Box */}
+            <div className="bento-card bg-white hover:bg-neo-purple hover:text-white text-black p-6 md:p-8 flex flex-col justify-between transition-colors duration-300 group md:col-start-2 md:col-end-4 md:row-start-2 md:row-end-4 min-h-[220px] md:min-h-0 overflow-y-auto">
+              <div className="flex flex-col justify-between h-full gap-4">
+                <div className="relative">
+                  <i className="fas fa-quote-left text-4xl text-neo-pink group-hover:text-neo-yellow transition-colors absolute -top-3 -left-3 opacity-20"></i>
+                  <p className="text-sm md:text-base font-bold leading-relaxed relative z-10 text-justify">
+                    {t("about-desc")}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+                  <a
+                    href="#contact"
+                    className="neo-btn px-6 py-2.5 bg-neo-pink text-white hover:bg-white hover:text-black border-2 border-black text-xs font-black uppercase tracking-wider text-center"
+                  >
+                    <i className="fas fa-paper-plane mr-2"></i> {t("about-hire")}
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Bento Card 4: Location */}
+            <div className="bento-card bg-neo-green hover:bg-neo-pink hover:text-white text-black p-6 flex flex-col justify-center items-center text-center transition-colors duration-300 group md:col-start-1 md:col-end-2 md:row-start-3 md:row-end-4 min-h-[120px] md:min-h-0">
+              <div className="flex flex-col items-center justify-center">
+                <div className="w-14 h-14 bg-white border-2 border-black flex items-center justify-center text-black mb-3 transform group-hover:rotate-12 transition-transform duration-300 shadow-[3px_3px_0px_0px_#000000]">
+                  <i className="fas fa-map-marker-alt text-2xl text-neo-pink animate-pulse"></i>
+                </div>
+                <span className="text-xs font-black uppercase tracking-wider opacity-85 group-hover:text-white/80 transition-colors">
+                  {t("contact-location-title")}
+                </span>
+                <span className="text-sm font-black uppercase mt-1">
+                  Jakarta, Indonesia
+                </span>
+              </div>
+            </div>
+
+            {/* Bento Card 5: Degree Marquee Box */}
+            <div className="bento-card bg-neo-pink hover:bg-neo-green hover:text-black text-white p-0 flex items-center justify-center overflow-hidden transition-colors duration-300 select-none md:col-start-1 md:col-end-3 md:row-start-4 md:row-end-5 min-h-[80px] md:min-h-0">
+              <div className="bento-marquee-container py-4">
+                <div className="bento-marquee font-black uppercase text-lg tracking-wider">
+                  <span>D3 TEKNIK INFORMATIKA • WEB DEVELOPMENT • FULLSTACK SPECIALIST • FRONTEND ENGINEER • &nbsp;</span>
+                  <span>D3 TEKNIK INFORMATIKA • WEB DEVELOPMENT • FULLSTACK SPECIALIST • FRONTEND ENGINEER • &nbsp;</span>
+                  <span>D3 TEKNIK INFORMATIKA • WEB DEVELOPMENT • FULLSTACK SPECIALIST • FRONTEND ENGINEER • &nbsp;</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bento Card 6: Email / Copy */}
+            <div className="bento-card bg-neo-blue hover:bg-neo-orange hover:text-white text-white p-6 flex flex-col justify-center items-center text-center cursor-pointer transition-colors duration-300 group relative md:col-start-3 md:col-end-4 md:row-start-4 md:row-end-5 min-h-[120px] md:min-h-0">
+              <div
+                className="flex flex-col items-center justify-center w-full h-full"
+                onClick={() => {
+                  navigator.clipboard.writeText("farreldiegoakbar@gmail.com");
+                  showToast(lang === "id" ? "✓ Email berhasil disalin ke clipboard!" : "✓ Email copied to clipboard!");
+                }}
+                title="Copy email to clipboard"
+              >
+                <div className="w-12 h-12 bg-white border-2 border-black flex items-center justify-center text-black mb-2 transform group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300 shadow-[3px_3px_0px_0px_#000000]">
+                  <i className="fas fa-copy text-xl text-neo-blue"></i>
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-85 group-hover:text-white/80 transition-colors">
+                  {lang === "id" ? "SALIN EMAIL" : "COPY EMAIL"}
+                </span>
+                <span className="text-xs font-black break-all uppercase mt-1">
+                  farreldiegoakbar@gmail.com
+                </span>
               </div>
             </div>
           </div>
