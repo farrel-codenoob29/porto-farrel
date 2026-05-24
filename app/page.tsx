@@ -1086,7 +1086,7 @@ export default function Home() {
             </div>
           </h1>
 
-          <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-8 text-black animate-slide-up bg-neo-pink text-white inline-block px-4 py-2 border-4 border-black shadow-neo transform rotate-1 hover:-rotate-1 transition-transform duration-300 cursor-default">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-black mt-6 sm:mt-8 mb-8 text-black animate-slide-up bg-neo-pink text-white inline-block px-4 py-2 border-4 border-black shadow-neo transform rotate-1 hover:-rotate-1 transition-transform duration-300 cursor-default">
             <span className={`inline-block pr-1 ${isTyping ? "border-r-2 border-white animate-pulse" : ""}`}>
               {typedTitle || (lang === "id" ? "Programmer & Pengembang" : "Programmer & Developer")}
             </span>
