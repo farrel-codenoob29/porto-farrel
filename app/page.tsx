@@ -323,6 +323,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [typedTitle, setTypedTitle] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [profileAngle, setProfileAngle] = useState(-3);
@@ -406,12 +407,13 @@ export default function Home() {
     };
   }, []);
 
-  // Update sliding indicator style on scroll or resize
+  // Update sliding indicator style on scroll, resize, or hover
   useEffect(() => {
     const updateIndicator = () => {
-      const activeElement = navRefs.current[activeSection];
+      const targetSection = hoveredSection || activeSection;
+      const activeElement = navRefs.current[targetSection];
       if (activeElement) {
-        const item = navItems.find((n) => n.id === activeSection);
+        const item = navItems.find((n) => n.id === targetSection);
         const bgColor = item ? item.color : "#FFD600";
         setIndicatorStyle({
           left: `${activeElement.offsetLeft}px`,
@@ -434,7 +436,7 @@ export default function Home() {
       window.removeEventListener("resize", updateIndicator);
       clearTimeout(timeout);
     };
-  }, [activeSection]);
+  }, [activeSection, hoveredSection]);
 
   // Job title typing effect trigger
   useEffect(() => {
@@ -714,7 +716,10 @@ export default function Home() {
             </a>
 
             {/* Navigation Desktop */}
-            <nav className="relative hidden lg:flex items-center gap-1">
+            <nav 
+              className="relative hidden lg:flex items-center gap-1"
+              onMouseLeave={() => setHoveredSection(null)}
+            >
               {/* Sliding dynamic background block */}
               <div
                 className="absolute transition-all duration-300 ease-out z-0"
@@ -727,6 +732,7 @@ export default function Home() {
                     navRefs.current[item.id] = el;
                   }}
                   href={`#${item.id}`}
+                  onMouseEnter={() => setHoveredSection(item.id)}
                   className="relative z-10 px-4 py-2 text-sm lg:text-base font-black text-black uppercase transition-colors duration-300 select-none"
                 >
                   {t(`nav-${item.id}` as any)}
