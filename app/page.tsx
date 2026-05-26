@@ -426,13 +426,13 @@ export default function Home() {
             <div className="sm:col-span-8 space-y-1.5 text-xs sm:text-[13px] text-zinc-300">
               <div className="text-neo-orange font-black text-sm sm:text-base">farrel@ubuntu-desktop</div>
               <div className="text-zinc-500 font-bold">---------------------</div>
-              <div><span className="text-neo-pink font-bold">OS:</span> Farrel-OS v29.0.108 (Developer Edition)</div>
+              <div><span className="text-neo-pink font-bold">OS:</span> Ubuntu 24.04 LTS</div>
               <div><span className="text-neo-pink font-bold">Host:</span> Farrel Diego Akbar</div>
               <div><span className="text-neo-pink font-bold">Role:</span> Junior Full Stack Developer</div>
-              <div><span className="text-neo-pink font-bold">Education:</span> SMK Rekayasa Perangkat Lunak</div>
+              <div><span className="text-neo-pink font-bold">Education:</span> Mahasiswa Informatika Institut Teknologi Kalimantan</div>
               <div><span className="text-neo-pink font-bold">Location:</span> Balikpapan, Indonesia</div>
               <div><span className="text-neo-pink font-bold">Shell:</span> bash 5.2.15</div>
-              <div><span className="text-neo-pink font-bold">WM:</span> Next.js (Neobrutalism)</div>
+              <div><span className="text-neo-pink font-bold">WM:</span> Next.js</div>
             </div>
             {/* Full biography description statement */}
             <div className="sm:col-span-12 border-t border-zinc-800 pt-3 text-zinc-300 leading-relaxed text-justify text-xs mt-2">
@@ -638,7 +638,7 @@ export default function Home() {
                 <i className="fas fa-paper-plane mr-1"></i> {t("about-hire")}
               </a>
               <a
-                href="https://wa.me/6281234567890?text=Halo%20Farrel%20Diego%20Akbar"
+                href="https://wa.me/6282155235200?text=Halo%20Bang"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="neo-btn flex-1 py-1.5 bg-neo-green text-black text-[9px] font-black uppercase text-center border-2 border-black"
@@ -1267,12 +1267,12 @@ export default function Home() {
       </section>
 
       {/* About Section (Ubuntu Terminal Theme) */}
-      <section id="about" className="py-20 sm:py-32 scroll-mt-16 hacker-grid-bg border-b-8 border-black overflow-hidden relative">
+      <section id="about" className="py-20 sm:py-32 scroll-mt-16 white-grid-bg border-b-8 border-black overflow-hidden relative">
         {/* Decorative Grid corner indicators */}
-        <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-neo-green opacity-40 hidden md:block" />
-        <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-neo-green opacity-40 hidden md:block" />
-        <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-neo-green opacity-40 hidden md:block" />
-        <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-neo-green opacity-40 hidden md:block" />
+        <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-black opacity-30 hidden md:block" />
+        <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-black opacity-30 hidden md:block" />
+        <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-black opacity-30 hidden md:block" />
+        <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-black opacity-30 hidden md:block" />
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-16 text-center uppercase tracking-tighter reveal reveal-up">
