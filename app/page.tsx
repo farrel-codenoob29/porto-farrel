@@ -354,6 +354,9 @@ export default function Home() {
   const [isTypingSimulated, setIsTypingSimulated] = useState(false);
   const terminalViewportRef = useRef<HTMLDivElement>(null);
 
+  // Calculate remaining count based on how many cards are currently on screen (dir is null)
+  const remainingCount = cardOffsets.filter((o) => o.dir === null).length;
+
   // Initialize terminal greeting based on current language
   useEffect(() => {
     if (mounted) {
@@ -858,7 +861,7 @@ export default function Home() {
           updated[i] = { y: 0, dir: null };
           return updated;
         });
-      }, (6 - i) * 100);
+      }, (7 - i) * 100);
     }
   };
 
@@ -972,16 +975,16 @@ export default function Home() {
   // 7 Retro game projects
   const projects = [
     {
-      titleId: "PETUALANGAN PIXEL (PIXEL QUEST)",
-      titleEn: "PIXEL QUEST ADVENTURE",
-      descId: "Game petualangan RPG 8-bit klasik di mana Anda menavigasi pahlawan pixel melewati kastil penuh rintangan untuk menyelamatkan kerajaan.",
-      descEn: "A classic 8-bit RPG adventure game where you guide a pixel hero through a hazardous castle to rescue the kingdom.",
+      titleId: "SignFlow",
+      titleEn: "SignFlow",
+      descId: "SignFlow adalah aplikasi penerjemah bahasa isyarat berbasis AI secara real-time. Program ini dirancang untuk mendobrak batasan komunikasi dan membantu teman-teman tunarungu serta tunawicara berinteraksi dengan lebih mudah dan inklusif.",
+      descEn: "SignFlow is a real-time AI sign language translator. This program is designed to break down communication barriers and empower seamless, inclusive interactions for the deaf and speech-impaired community.",
       image: "/img/retro_pixel_quest.png",
       tags: [
         { name: "JavaScript", icon: "fab fa-js", color: "bg-[#F7DF1E] text-black" },
         { name: "HTML5 Canvas", icon: "fab fa-html5", color: "bg-[#E34F26] text-white" },
       ],
-      repoUrl: "https://github.com/farrel-codenoob29/pixel-quest",
+      repoUrl: "https://github.com/farrel-codenoob29/HandGestureAI",
     },
     {
       titleId: "SERANGAN ANGKASA (SPACE NEO)",
@@ -1504,7 +1507,7 @@ export default function Home() {
               <div className="w-full flex justify-between items-center text-[10px] text-zinc-400 font-mono border-b-2 border-zinc-800 pb-2 mb-2 select-none">
                 <span className="text-neo-pink font-black tracking-widest animate-pulse">● INSERT COIN</span>
                 <span className="font-bold">FARREL CABINET V1.0</span>
-                <span className="text-neo-green font-black">P1 SCORE: {(7 - activeIndex).toString().padStart(2, "0")} / 07</span>
+                <span className="text-neo-green font-black">P1 SCORE: {remainingCount.toString().padStart(2, "0")} / 07</span>
               </div>
 
               {/* Split Body Container */}
@@ -1647,7 +1650,7 @@ export default function Home() {
                   <div className="bg-black/80 border border-zinc-700 px-3 py-2 md:py-4 flex flex-col justify-center items-center text-center w-28 md:w-full rounded-sm select-none">
                     <div className="text-[7px] md:text-[9px] text-zinc-500 font-mono font-black uppercase">REMAINING</div>
                     <div className="text-neo-yellow font-mono text-base md:text-xl font-black leading-none mt-1 animate-pulse">
-                      0{Math.max(0, 7 - activeIndex)} / 07
+                      {remainingCount.toString().padStart(2, "0")} / 07
                     </div>
                   </div>
 
