@@ -329,8 +329,13 @@ export default function Home() {
   const [isTyping, setIsTyping] = useState(true);
   const [profileAngle, setProfileAngle] = useState(-3);
   const [profileHoverOffset, setProfileHoverOffset] = useState(0);
-  const [carouselIndex, setCarouselIndex] = useState(0);
-  const [itemsPerView, setItemsPerView] = useState(3);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [cardOffsets, setCardOffsets] = useState<Array<{ y: number; dir: "left" | "right" | null }>>(
+    Array(7).fill({ y: 0, dir: null })
+  );
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isDraggingCard, setIsDraggingCard] = useState(false);
+  const dragStartPos = useRef({ x: 0, y: 0 });
   const [selectedCert, setSelectedCert] = useState<{
     title: string;
     org: string;
@@ -502,101 +507,84 @@ export default function Home() {
         result = (
           <div className="p-4 bg-[#2C001E]/40 border-2 border-black rounded mt-2 space-y-3 max-w-xl font-mono select-text text-left">
             <div className="text-neo-green font-black border-b border-zinc-800 pb-1.5 uppercase flex items-center justify-between">
-              <span>{lang === "id" ? "[ KEAHLIAN / TEKNOLOGI ]" : "[ CORE SKILLS / TECH ]"}</span>
-              <span className="text-[9px] text-zinc-500 font-normal">6 categories</span>
+              <span>{lang === "id" ? "[ TINGKAT KEAHLIAN / ROLES ]" : "[ SKILL LEVEL / ROLES ]"}</span>
+              <span className="text-[9px] text-zinc-500 font-normal">3 roles</span>
             </div>
             
-            <div className="space-y-3.5 pt-1 text-[10px] text-white">
-              {/* Category: Programming Languages */}
-              <div className="space-y-1">
-                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
-                  <span>💻</span>
-                  <span>{lang === "id" ? "Bahasa Pemrograman" : "Programming Languages"}</span>
+            <div className="space-y-4 pt-2">
+              {/* Front End Developer */}
+              <div className="p-3 bg-[#2C001E]/20 border-2 border-black shadow-[3px_3px_0px_0px_#000] flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded">
+                <div className="space-y-0.5">
+                  <div className="text-white font-black text-xs sm:text-sm uppercase flex items-center gap-1.5">
+                    <span className="text-neo-blue">●</span> Front End Developer
+                  </div>
+                  <div className="text-[9px] text-zinc-400 font-mono">
+                    React, Next.js, JavaScript, Tailwind CSS
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="bg-[#777BB4] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">PHP</span>
-                  <span className="bg-[#0175C2] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">DART</span>
-                  <span className="bg-[#3776AB] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">PYTHON</span>
-                  <span className="bg-[#68217A] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">C#</span>
-                  <span className="bg-[#F7DF1E] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">JavaScript</span>
-                  <span className="bg-[#3178C6] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">TypeScript</span>
-                  <span className="bg-[#00ADD8] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">GO</span>
-                </div>
-              </div>
-
-              {/* Category: Frameworks */}
-              <div className="space-y-1">
-                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
-                  <span>🧱</span>
-                  <span>Frameworks</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="bg-[#FF2D20] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Laravel</span>
-                  <span className="bg-[#02569B] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Flutter</span>
-                  <span className="bg-[#61DAFB] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">React</span>
-                  <span className="bg-black text-white px-1.5 py-0.5 font-black border border-zinc-700 shadow-[1px_1px_0px_0px_#000] uppercase">Next</span>
-                  <span className="bg-[#00ADD8] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Gin</span>
+                <div className="flex items-center gap-2 bg-black/30 px-2.5 py-1 border border-zinc-800 rounded flex-shrink-0 self-start sm:self-auto">
+                  <div className="flex gap-1 text-[10px]">
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="fas fa-star-half-alt text-neo-yellow"></i>
+                    <i className="far fa-star text-zinc-600"></i>
+                  </div>
+                  <span className="text-neo-yellow text-[10px] font-black">3.5/5</span>
                 </div>
               </div>
 
-              {/* Category: Databases */}
-              <div className="space-y-1">
-                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
-                  <span>🗄️</span>
-                  <span>Databases</span>
+              {/* Back End Developer (HIGHLIGHTED!) */}
+              <div className="p-4 bg-[#E95420] text-black border-4 border-black shadow-[4px_4px_0px_0px_#000] flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative overflow-hidden rounded-none">
+                {/* Ubuntu tag badge */}
+                <div className="absolute top-0 right-0 bg-black text-neo-green font-black text-[8px] px-2.5 py-0.5 uppercase tracking-widest border-b-2 border-l-2 border-black">
+                  {lang === "id" ? "FOKUS UTAMA" : "PRIMARY FOCUS"}
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="bg-[#4479A1] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">MySQL</span>
-                  <span className="bg-[#CC292B] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Microsoft SQL Server</span>
-                  <span className="bg-[#FFCA28] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Firebase</span>
-                  <span className="bg-[#336791] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">PostgreSQL</span>
+                <div className="space-y-0.5">
+                  <div className="text-black font-black text-sm sm:text-base uppercase flex items-center gap-1.5">
+                    <span className="animate-pulse text-black">●</span> Back End Developer
+                  </div>
+                  <div className="text-[9px] text-black/80 font-bold font-mono">
+                    PHP, Laravel, Python, TypeScript, Go, C#
+                  </div>
                 </div>
-              </div>
-
-              {/* Category: API */}
-              <div className="space-y-1">
-                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
-                  <span>🌐</span>
-                  <span>API</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="bg-[#007ACC] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">REST API</span>
-                  <span className="bg-[#E34F26] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">SOAP API</span>
-                  <span className="bg-[#E10098] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">GraphQL</span>
-                  <span className="bg-black text-white px-1.5 py-0.5 font-black border border-zinc-700 shadow-[1px_1px_0px_0px_#000] uppercase">WebSockets</span>
+                <div className="flex items-center gap-2 bg-black px-2.5 py-1 border-2 border-black rounded flex-shrink-0 self-start sm:self-auto shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
+                  <div className="flex gap-1 text-[10px]">
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="fas fa-star-half-alt text-neo-yellow"></i>
+                  </div>
+                  <span className="text-neo-green text-[10px] font-black">4.5/5</span>
                 </div>
               </div>
 
-              {/* Category: DevOps & CI/CD */}
-              <div className="space-y-1">
-                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
-                  <span>🚀</span>
-                  <span>DevOps & CI/CD</span>
+              {/* UI/UX Designer */}
+              <div className="p-3 bg-[#2C001E]/20 border-2 border-black shadow-[3px_3px_0px_0px_#000] flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded">
+                <div className="space-y-0.5">
+                  <div className="text-white font-black text-xs sm:text-sm uppercase flex items-center gap-1.5">
+                    <span className="text-neo-pink">●</span> UI/UX Designer
+                  </div>
+                  <div className="text-[9px] text-zinc-400 font-mono">
+                    Figma, Canva, Wireframing, Prototyping
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="bg-[#1485B8] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Jenkins</span>
-                  <span className="bg-[#F47A20] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Grafana</span>
-                  <span className="bg-[#E6522C] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Prometheus</span>
-                  <span className="bg-[#E2703A] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Proxmox</span>
-                </div>
-              </div>
-
-              {/* Category: Tools & Design */}
-              <div className="space-y-1">
-                <div className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider flex items-center gap-1">
-                  <span>🛠️</span>
-                  <span>Tools & Design</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="bg-[#FF6C37] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Postman</span>
-                  <span className="bg-[#F24E1E] px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Figma</span>
-                  <span className="bg-[#00C4CC] text-black px-1.5 py-0.5 font-black border border-black shadow-[1px_1px_0px_0px_#000] uppercase">Canva</span>
+                <div className="flex items-center gap-2 bg-black/30 px-2.5 py-1 border border-zinc-800 rounded flex-shrink-0 self-start sm:self-auto">
+                  <div className="flex gap-1 text-[10px]">
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="fas fa-star text-neo-yellow"></i>
+                    <i className="far fa-star text-zinc-600"></i>
+                    <i className="far fa-star text-zinc-600"></i>
+                    <i className="far fa-star text-zinc-600"></i>
+                  </div>
+                  <span className="text-neo-yellow text-[10px] font-black">2.0/5</span>
                 </div>
               </div>
             </div>
 
             <p className="text-[9px] text-zinc-500 italic mt-2.5 pt-1.5 border-t border-zinc-800/40">
-              * {lang === "id" ? "Scroll ke bawah untuk melihat panel keahlian." : "Scroll down to see the skills panel."}
+              * {lang === "id" ? "Scroll ke bawah untuk melihat panel keahlian lengkap." : "Scroll down to see the full skills panel."}
             </p>
           </div>
         );
@@ -732,13 +720,6 @@ export default function Home() {
   useEffect(() => {
     if (!mounted) return;
 
-    // Responsive carousel width sizing
-    const handleResize = () => {
-      setItemsPerView(window.innerWidth <= 768 ? 1 : 3);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
     // Scroll reveal observer
     const revealObserver = new IntersectionObserver(
       (entries) => {
@@ -772,7 +753,6 @@ export default function Home() {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
       revealObserver.disconnect();
     };
@@ -827,6 +807,139 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [lang, mounted]);
 
+  // Card stack handlers
+  const handleDragStart = (clientX: number, clientY: number) => {
+    if (activeIndex >= 7) return;
+    setIsDraggingCard(true);
+    dragStartPos.current = { x: clientX - dragOffset.x, y: clientY - dragOffset.y };
+  };
+
+  const handleDragMove = (clientX: number, clientY: number) => {
+    if (!isDraggingCard) return;
+    const newX = clientX - dragStartPos.current.x;
+    const newY = clientY - dragStartPos.current.y;
+    // Limit vertical drag for swiping stability
+    setDragOffset({ x: newX, y: newY * 0.4 });
+  };
+
+  const handleDragEnd = () => {
+    if (!isDraggingCard) return;
+    setIsDraggingCard(false);
+
+    const threshold = 120;
+    if (dragOffset.x > threshold) {
+      throwCard(activeIndex, "right");
+    } else if (dragOffset.x < -threshold) {
+      throwCard(activeIndex, "left");
+    } else {
+      setDragOffset({ x: 0, y: 0 });
+    }
+  };
+
+  const throwCard = (index: number, direction: "left" | "right") => {
+    setCardOffsets((prev) => {
+      const updated = [...prev];
+      updated[index] = { y: dragOffset.y, dir: direction };
+      return updated;
+    });
+    setDragOffset({ x: 0, y: 0 });
+    setActiveIndex(index + 1);
+  };
+
+  const resetStack = () => {
+    setCardOffsets(Array(7).fill({ y: 0, dir: null }));
+    setDragOffset({ x: 0, y: 0 });
+    setActiveIndex(0);
+  };
+
+  // Card deck event listener window-level registration
+  useEffect(() => {
+    if (!isDraggingCard) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handleDragMove(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      if (e.cancelable) e.preventDefault();
+      handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+
+    const handleMouseUp = () => {
+      handleDragEnd();
+    };
+
+    const handleTouchEnd = () => {
+      handleDragEnd();
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isDraggingCard, dragOffset, activeIndex]);
+
+  const getCardStyle = (index: number) => {
+    const relIndex = index - activeIndex;
+
+    // Discarded / Thrown cards
+    if (relIndex < 0) {
+      const offset = cardOffsets[index];
+      const dirMultiplier = offset?.dir === "left" ? -1 : 1;
+      return {
+        transform: `translate(${dirMultiplier * 600}px, ${offset?.y ?? 0}px) rotate(${dirMultiplier * 45}deg)`,
+        opacity: 0,
+        transition: "transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.6s",
+        zIndex: 50,
+        pointerEvents: "none" as const,
+      };
+    }
+
+    // Stack display limits (render top 3 cards visually, others hidden/none)
+    const maxVisible = 3;
+    if (relIndex >= maxVisible) {
+      return { display: "none" };
+    }
+
+    // Default stacked layout
+    let rotate = 0;
+    let translateY = 0;
+    let translateX = 0;
+
+    if (relIndex === 0) {
+      // Top card moves with user drag
+      rotate = (dragOffset.x / 15) * 1.5; // subtle tilt on drag
+      translateX = dragOffset.x;
+      translateY = dragOffset.y;
+    } else if (relIndex === 1) {
+      rotate = 4;
+      translateY = 8;
+      translateX = 4;
+    } else if (relIndex === 2) {
+      rotate = -3;
+      translateY = 16;
+      translateX = -4;
+    }
+
+    const isDragging = relIndex === 0 && isDraggingCard;
+
+    return {
+      transform: `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg)`,
+      transition: isDragging ? "none" : "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.3s",
+      zIndex: 30 - relIndex,
+      opacity: 1,
+      pointerEvents: relIndex === 0 ? ("auto" as const) : ("none" as const),
+    };
+  };
+
   if (!mounted) {
     return <div className="min-h-screen bg-neo-bg text-black flex items-center justify-center font-sans">Loading...</div>;
   }
@@ -839,168 +952,91 @@ export default function Home() {
     }, 3000);
   };
 
-  // Carousel actions
-  const moveCarousel = (direction: number) => {
-    const totalProjects = 13;
-    setCarouselIndex((prev) => {
-      let nextIndex = prev + direction;
-      const maxIndex = totalProjects - itemsPerView;
-      if (nextIndex > maxIndex) {
-        return 0;
-      } else if (nextIndex < 0) {
-        return maxIndex;
-      }
-      return nextIndex;
-    });
-  };
-
-  // Project List
+  // 7 Retro game projects
   const projects = [
     {
-      titleKey: "proj-gilmar-title",
-      descKey: "proj-gilmar-desc",
-      image: "/img/gilmaridea.png",
+      titleId: "PETUALANGAN PIXEL (PIXEL QUEST)",
+      titleEn: "PIXEL QUEST ADVENTURE",
+      descId: "Game petualangan RPG 8-bit klasik di mana Anda menavigasi pahlawan pixel melewati kastil penuh rintangan untuk menyelamatkan kerajaan.",
+      descEn: "A classic 8-bit RPG adventure game where you guide a pixel hero through a hazardous castle to rescue the kingdom.",
+      image: "/img/retro_pixel_quest.png",
       tags: [
-        { name: "Next.js", icon: "fas fa-bolt", color: "bg-black text-white" },
-        { name: "Supabase", icon: "fas fa-database", color: "bg-neo-green text-black" },
-      ],
-      liveUrl: "https://gilmaridea.stiepancasetia.ac.id/",
-      isPrivate: true,
-    },
-    {
-      titleKey: "proj-donghua-title",
-      descKey: "proj-donghua-desc",
-      image: "/image/donghuawatch.png",
-      tags: [
-        { name: "React.js", icon: "fab fa-react", color: "bg-[#61DAFB] text-black" },
-        { name: "Supabase", icon: "fas fa-bolt", color: "bg-neo-green text-black" },
-        { name: "CSS3", icon: "fab fa-css3-alt", color: "bg-[#1572B6] text-white" },
-      ],
-      liveUrl: "https://donghuawatch.vercel.app/",
-      isPrivate: true,
-    },
-    {
-      titleKey: "proj-siperu-title",
-      descKey: "proj-siperu-desc",
-      image: "/img/siperu.png",
-      tags: [
-        { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white" },
-        { name: "Tailwind CSS", icon: "fas fa-wind", color: "bg-[#06B6D4] text-white" },
-        { name: "MySQL", icon: "fas fa-database", color: "bg-[#4479A1] text-white" },
-      ],
-      liveUrl: "https://siperu.stiepancasetia.ac.id/",
-      isPrivate: true,
-    },
-    {
-      titleKey: "proj-komik-title",
-      descKey: "proj-komik-desc",
-      image: "/img/komik.png",
-      tags: [
-        { name: "React.js", icon: "fab fa-react", color: "bg-[#61DAFB] text-black" },
-        { name: "Supabase", icon: "fas fa-bolt", color: "bg-neo-green text-black" },
-      ],
-      liveUrl: "https://www.donghuawatch.cloud/komik",
-      isPrivate: true,
-    },
-    {
-      titleKey: "proj-api-title",
-      descKey: "proj-api-desc",
-      image: "/image/donghuawatchapi.png",
-      tags: [
-        { name: "Node.js", icon: "fab fa-node-js", color: "bg-[#339933] text-white" },
-        { name: "Express", icon: "fas fa-server", color: "bg-neo-blue text-white" },
-        { name: "Scraping", icon: "fas fa-spider", color: "bg-[#FF6600] text-white" },
-      ],
-      liveUrl: "https://donghuawatchapi.vercel.app/",
-      isPrivate: true,
-    },
-    {
-      titleKey: "proj-sip-title",
-      descKey: "proj-sip-desc",
-      image: "/img/sip.png",
-      tags: [
-        { name: "HTML5", icon: "fab fa-html5", color: "bg-[#E34F26] text-white" },
-        { name: "Tailwind CSS", icon: "fas fa-wind", color: "bg-[#06B6D4] text-white" },
-      ],
-      liveUrl: "https://sip.stiepancasetia.ac.id/",
-      isPrivate: true,
-    },
-    {
-      titleKey: "proj-lppm-title",
-      descKey: "proj-lppm-desc",
-      image: "/img/lppm.png",
-      tags: [{ name: "WordPress", icon: "fab fa-wordpress", color: "bg-[#21759B] text-white" }],
-      liveUrl: "https://lppm.stiepancasetia.ac.id/",
-      isPrivate: true,
-    },
-    {
-      titleKey: "proj-obe-title",
-      descKey: "proj-obe-desc",
-      image: "/image/project.png",
-      tags: [
-        { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white" },
-        { name: "Tailwind CSS", icon: "fas fa-wind", color: "bg-[#06B6D4] text-white" },
-        { name: "MySQL", icon: "fas fa-database", color: "bg-[#4479A1] text-white" },
-      ],
-      liveUrl: "https://obepoliban.vps-poliban.my.id/",
-      repoUrl: "https://github.com/MuhammadFikriiii/baru_kurikulum_OBE",
-    },
-    {
-      titleKey: "proj-bot-title",
-      descKey: "proj-bot-desc",
-      image: "/img/chatbot.png",
-      tags: [
-        { name: "Next.js", icon: "fas fa-bolt", color: "bg-black text-white" },
-        { name: "Gemini API", icon: "fas fa-brain", color: "bg-neo-purple text-white" },
-      ],
-      liveUrl: "https://fikri-bot.vercel.app/",
-      repoUrl: "https://github.com/MuhammadFikriiii/FikBot",
-    },
-    {
-      titleKey: "proj-sima-title",
-      descKey: "proj-sima-desc",
-      image: "/image/sima.jpg",
-      tags: [
-        { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white" },
-        { name: "Tailwind CSS", icon: "fas fa-wind", color: "bg-[#06B6D4] text-white" },
-        { name: "MySQL", icon: "fas fa-database", color: "bg-[#4479A1] text-white" },
-      ],
-      repoUrl: "https://github.com/MuhammadFikriiii/sistem-informasi-manajemen-arsip",
-      isPrivate: true,
-    },
-    {
-      titleKey: "proj-game-title",
-      descKey: "proj-game-desc",
-      image: "/image/ulartangga.png",
-      tags: [
-        { name: "HTML5", icon: "fab fa-html5", color: "bg-[#E34F26] text-white" },
         { name: "JavaScript", icon: "fab fa-js", color: "bg-[#F7DF1E] text-black" },
-        { name: "CSS3", icon: "fab fa-css3-alt", color: "bg-[#1572B6] text-white" },
+        { name: "HTML5 Canvas", icon: "fab fa-html5", color: "bg-[#E34F26] text-white" },
       ],
-      liveUrl: "https://muhammadfikriiii.github.io/Snakes-and-Ladders./",
-      repoUrl: "https://github.com/MuhammadFikriiii/Snakes-and-Ladders.",
+      repoUrl: "https://github.com/farrel-codenoob29/pixel-quest",
     },
     {
-      titleKey: "proj-upscale-title",
-      descKey: "proj-upscale-desc",
-      image: "/image/upscale.png",
+      titleId: "SERANGAN ANGKASA (SPACE NEO)",
+      titleEn: "SPACE INVADERS NEO",
+      descId: "Retro space shooter arcade terinspirasi oleh era keemasan game kabinet. Hancurkan armada alien pixel dengan meriam laser canggih.",
+      descEn: "Retro space shooter arcade inspired by the golden cabinet gaming era. Destroy pixel alien fleets using high-tech laser cannons.",
+      image: "/img/retro_space_neo.png",
       tags: [
         { name: "Next.js", icon: "fas fa-bolt", color: "bg-black text-white" },
-        { name: "AI/ML", icon: "fas fa-brain", color: "bg-neo-purple text-white" },
+        { name: "Web Audio API", icon: "fas fa-volume-up", color: "bg-neo-purple text-white" },
       ],
-      liveUrl: "https://muhammadfikriiii.github.io/UpscaleGambar/",
-      repoUrl: "https://github.com/MuhammadFikriiii/UpscaleGambar",
+      repoUrl: "https://github.com/farrel-codenoob29/space-neo",
     },
     {
-      titleKey: "proj-cisco-title",
-      descKey: "proj-cisco-desc",
-      image: "/image/project1.png",
+      titleId: "PENGHANCUR BATA (BRICK BREAKER)",
+      titleEn: "BRICK BREAKER RETRO",
+      descId: "Game penghancur bata dengan efek partikel menyala, papan pantul neobrutalis, dan tantangan fisika yang menantang refleks Anda.",
+      descEn: "A brick-breaking game featuring glowing particle effects, a neobrutalist paddle, and physics challenges that test your reflexes.",
+      image: "/img/retro_brick_breaker.png",
       tags: [
-        { name: "Cisco", icon: "fas fa-network-wired", color: "bg-[#1BA0D7] text-white" },
-        { name: "VLAN", icon: "fas fa-project-diagram", color: "bg-neo-blue text-white" },
+        { name: "React.js", icon: "fab fa-react", color: "bg-[#61DAFB] text-black" },
+        { name: "Tailwind CSS", icon: "fas fa-wind", color: "bg-[#06B6D4] text-white" },
       ],
-      liveUrl: "https://drive.google.com/drive/u/0/folders/12u0mo5TJ_B59r6mcU_ZM1LNpqIP7H-yz",
-      isPrivate: true,
+      repoUrl: "https://github.com/farrel-codenoob29/brick-breaker",
+    },
+    {
+      titleId: "LABIRIN PIXEL (PAC-RUNNER)",
+      titleEn: "PAC-RUNNER RETRO",
+      descId: "Pandu karakter kuning Anda melintasi labirin neon yang rumit, kumpulkan koin, dan hindari kejaran hantu pixel pintar.",
+      descEn: "Guide your yellow character through intricate neon mazes, collect coins, and avoid smart chasing pixel ghosts.",
+      image: "/img/retro_maze_runner.png",
+      tags: [
+        { name: "TypeScript", icon: "fas fa-code", color: "bg-neo-blue text-white" },
+        { name: "HTML5 Canvas", icon: "fab fa-html5", color: "bg-[#E34F26] text-white" },
+      ],
+      repoUrl: "https://github.com/farrel-codenoob29/maze-runner",
+    },
+    {
+      titleId: "DUNGEON 8-BIT (DUNGEON CRAWLER)",
+      titleEn: "8-BIT DUNGEON EXPLORER",
+      descId: "Eksplorasi labirin bawah tanah top-down klasik, kalahkan monster pixel, kumpulkan kunci rahasia, dan cari jalan keluar legendaris.",
+      descEn: "Classic top-down dungeon crawler exploration, defeat pixel monsters, collect secret keys, and find the legendary exit.",
+      image: "/img/retro_dungeon_8bit.png",
+      tags: [
+        { name: "JavaScript", icon: "fab fa-js", color: "bg-[#F7DF1E] text-black" },
+        { name: "CSS Grid", icon: "fab fa-css3-alt", color: "bg-[#1572B6] text-white" },
+      ],
+      repoUrl: "https://github.com/farrel-codenoob29/dungeon-8bit",
+    },
+    {
+      titleId: "BALAPAN RETRO (ARCADE DRIFT)",
+      titleEn: "ARCADE DRIFT RACER",
+      descId: "Sensasi balap mobil retro 2.5D bergaya Outrun dengan grafik pseudo-3D, musik synthwave energik, dan jalan raya tepi pantai yang indah.",
+      descEn: "Outrun-style 2.5D retro racing thrill featuring pseudo-3D graphics, energetic synthwave music, and a scenic coastal highway.",
+      image: "/img/retro_arcade_drift.png",
+      tags: [
+        { name: "Next.js", icon: "fas fa-bolt", color: "bg-black text-white" },
+        { name: "CSS 3D", icon: "fab fa-css3-alt", color: "bg-[#1572B6] text-white" },
+      ],
+      repoUrl: "https://github.com/farrel-codenoob29/arcade-drift",
+    },
+    {
+      titleId: "PAHLAWAN SYNTHWAVE (RHYTHM HERO)",
+      titleEn: "SYNTHWAVE RHYTHM HERO",
+      descId: "Rhythm game bertema synthwave dengan grid bersinar dan matahari digital. Tekan tombol sesuai ketukan musik retro synth untuk skor tinggi.",
+      descEn: "Synthwave-themed rhythm game featuring a glowing grid and digital sun. Press keys to the beat of retro synth music for high scores.",
+      image: "/img/retro_synthwave_rhythm.png",
+      tags: [
+        { name: "React.js", icon: "fab fa-react", color: "bg-[#61DAFB] text-black" },
+        { name: "Web Audio", icon: "fas fa-music", color: "bg-neo-green text-black" },
+      ],
+      repoUrl: "https://github.com/farrel-codenoob29/synthwave-rhythm",
     },
   ];
 
@@ -1425,112 +1461,199 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Projects Section with Carousel */}
-      <section id="projects" className="py-20 sm:py-32 border-y-8 border-black bg-neo-blue">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6 text-center md:text-left reveal reveal-up">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter">
+      {/* Projects Section with Card Stack */}
+      <section id="projects" className="py-20 sm:py-32 border-y-8 border-black bg-neo-blue relative overflow-hidden">
+        {/* Retro scanlines effect overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.1)_50%,rgba(0,0,0,0.2)_50%)] bg-[size:100%_4px]" />
+        
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="flex flex-col items-center mb-12 text-center reveal reveal-up">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4">
               <span className="bg-neo-yellow text-black px-8 py-3 border-4 border-black shadow-neo-lg inline-block transform -rotate-1 hover:rotate-1 transition-transform duration-300 cursor-default">
                 {t("projects-title")}
               </span>
             </h2>
-            <div className="flex gap-4">
-              <button
-                className="carousel-button-static prev"
-                id="prevBtn"
-                onClick={() => moveCarousel(-1)}
-                title="Previous Project"
-              >
-                <i className="fas fa-chevron-left"></i>
-              </button>
-              <button
-                className="carousel-button-static next"
-                id="nextBtn"
-                onClick={() => moveCarousel(1)}
-                title="Next Project"
-              >
-                <i className="fas fa-chevron-right"></i>
-              </button>
+            <div className="bg-black/30 border-2 border-black text-white font-mono text-[10px] sm:text-xs px-4 py-1.5 tracking-wider uppercase">
+              {lang === "id"
+                ? "🕹️ Geser kartu ke samping atau klik tombol untuk membuang kartu proyek!"
+                : "🕹️ Swipe cards sideways or use buttons below to discard project cards!"}
             </div>
           </div>
 
-          {/* Projects Carousel Container */}
-          <div className="carousel-container relative reveal reveal-scale delay-100">
-            <div
-              className="carousel-inner"
-              style={{
-                transform: `translateX(-${carouselIndex * (100 / itemsPerView)}%)`,
-                transition: "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1)",
-              }}
-            >
-              {projects.map((proj, idx) => (
-                <div key={idx} className="carousel-item">
-                  <div className="project-card rounded-none overflow-hidden bg-white border-4 border-black h-full flex flex-col">
-                    <div className="relative aspect-video overflow-hidden bg-black border-b-4 border-black flex-shrink-0">
-                      <SafeImage src={proj.image} alt={t(proj.titleKey as any)} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="p-5 flex flex-col flex-1">
-                      <h3 className="text-lg sm:text-xl font-black mb-3 text-black uppercase tracking-tight">
-                        {t(proj.titleKey as any)}
-                      </h3>
-                      <p className="text-black font-bold mb-6 text-xs sm:text-sm text-justify leading-relaxed flex-1">
-                        {t(proj.descKey as any)}
-                      </p>
+          {/* Retro Arcade Machine Screen Container */}
+          <div className="max-w-md mx-auto reveal reveal-scale">
+            <div className="bg-zinc-900 border-[6px] border-black shadow-neo-xl p-4 relative rounded-none flex flex-col items-center">
+              {/* Arcade top screen decals */}
+              <div className="w-full flex justify-between items-center text-[10px] text-zinc-400 font-mono border-b-2 border-zinc-800 pb-2 mb-4 select-none">
+                <span className="text-neo-pink font-black tracking-widest animate-pulse">● INSERT COIN</span>
+                <span className="font-bold">FARREL CABINET V1.0</span>
+                <span className="text-neo-green font-black">P1 SCORE: {(7 - activeIndex).toString().padStart(2, "0")} / 07</span>
+              </div>
 
-                      {/* Tech Badge Icons */}
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {proj.tags.map((tag, tIdx) => (
-                          <div
-                            key={tIdx}
-                            className={`flex items-center gap-1.5 px-2.5 py-1 border-2 border-black text-xs font-black uppercase ${tag.color}`}
-                          >
-                            <i className={tag.icon}></i>
-                            <span>{tag.name}</span>
-                          </div>
-                        ))}
-                      </div>
+              {/* Stack area */}
+              <div className="relative w-full aspect-[3/4] max-w-[320px] sm:max-w-[340px] h-[400px] flex items-center justify-center py-4">
+                {activeIndex < 7 ? (
+                  projects.map((proj, idx) => {
+                    const isThrown = idx < activeIndex;
+                    const isTop = idx === activeIndex;
 
-                      {/* Project Links */}
-                      <div className="flex gap-4 mt-auto">
-                        {proj.repoUrl ? (
+                    if (idx > activeIndex + 2 && !isThrown) {
+                      return null;
+                    }
+
+                    const style = getCardStyle(idx);
+
+                    return (
+                      <div
+                        key={idx}
+                        style={style}
+                        className={`absolute w-full h-[400px] bg-white border-4 border-black shadow-[4px_4px_0px_0px_#000] p-4 flex flex-col justify-between select-none ${
+                          isTop ? "cursor-grab active:cursor-grabbing" : ""
+                        }`}
+                        onMouseDown={(e) => {
+                          if (isTop) handleDragStart(e.clientX, e.clientY);
+                        }}
+                        onTouchStart={(e) => {
+                          if (isTop && e.touches.length > 0) {
+                            handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+                          }
+                        }}
+                      >
+                        {/* Top bar header */}
+                        <div className="flex justify-between items-center bg-black text-white px-2 py-1 text-[8px] font-mono tracking-wider mb-2 select-none border border-black uppercase">
+                          <span>DECK NO: {(idx + 1).toString().padStart(2, "0")} / 07</span>
+                          <span className="text-neo-yellow font-black">SIDE A</span>
+                        </div>
+
+                        {/* Visual Image container */}
+                        <div className="border-2 border-black overflow-hidden aspect-video bg-black relative flex-shrink-0 select-none">
+                          <SafeImage
+                            src={proj.image}
+                            alt={lang === "id" ? proj.titleId : proj.titleEn}
+                            className="w-full h-full object-cover pointer-events-none"
+                          />
+                        </div>
+
+                        {/* Title & Desc */}
+                        <div className="flex-1 py-3 flex flex-col text-left select-text">
+                          <h3 className="text-sm sm:text-base font-black text-black uppercase tracking-tight line-clamp-1 border-b-2 border-black pb-1.5 mb-1.5">
+                            {lang === "id" ? proj.titleId : proj.titleEn}
+                          </h3>
+                          <p className="text-[10px] text-black/90 font-bold leading-normal text-justify line-clamp-4 flex-1">
+                            {lang === "id" ? proj.descId : proj.descEn}
+                          </p>
+                        </div>
+
+                        {/* Tech tags */}
+                        <div className="flex flex-wrap gap-1 mb-3 select-none">
+                          {proj.tags.map((tag, tIdx) => (
+                            <div
+                              key={tIdx}
+                              className={`flex items-center gap-1 px-1.5 py-0.5 border border-black text-[8px] font-black uppercase ${tag.color}`}
+                            >
+                              <i className={tag.icon}></i>
+                              <span>{tag.name}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Source code button */}
+                        <div className="mt-auto select-none">
                           <a
                             href={proj.repoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="neo-btn flex-1 py-2 bg-neo-yellow text-center text-xs tracking-wider uppercase font-black"
+                            className="neo-btn w-full block py-2 bg-neo-yellow text-center text-[10px] font-black uppercase tracking-wider text-black border-2 border-black hover:bg-neo-pink hover:text-white transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
                           >
-                            {t("btn-source")}
+                            <i className="fab fa-github mr-1"></i> {t("btn-source")}
                           </a>
-                        ) : (
-                          <button
-                            onClick={() =>
-                              showToast(
-                                lang === "id"
-                                  ? "🔒 Repository proyek ini bersifat privat"
-                                  : "🔒 This project repository is private"
-                              )
-                            }
-                            className="neo-btn flex-1 py-2 bg-neo-yellow text-center text-xs tracking-wider uppercase font-black"
-                          >
-                            {t("btn-source")}
-                          </button>
-                        )}
-
-                        {proj.liveUrl && (
-                          <a
-                            href={proj.liveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="neo-btn flex-1 py-2 bg-neo-green text-center text-xs tracking-wider uppercase font-black"
-                          >
-                            {proj.isPrivate && proj.titleKey === "proj-cisco-title" ? t("btn-file") : t("btn-code2")}
-                          </a>
-                        )}
+                        </div>
                       </div>
+                    );
+                  })
+                ) : (
+                  /* Game Over Screen */
+                  <div className="w-full h-[400px] bg-black border-4 border-white flex flex-col items-center justify-center p-6 text-center animate-pulse-slow">
+                    <div className="text-red-500 font-mono font-black text-2xl tracking-widest uppercase mb-2">
+                      GAME OVER
                     </div>
+                    <div className="text-white font-mono text-xs uppercase tracking-wider mb-6">
+                      {lang === "id" ? "SELAIN PROYEK HABIS!" : "ALL CARDS DISCARDED!"}
+                    </div>
+                    
+                    <button
+                      onClick={resetStack}
+                      className="neo-btn px-6 py-4 bg-neo-green text-black border-4 border-white text-xs font-black uppercase tracking-widest shadow-[0px_0px_15px_rgba(0,255,102,0.6)] hover:bg-white transition-all active:translate-y-1"
+                    >
+                      🪙 {lang === "id" ? "MASUKKAN KOIN" : "INSERT COIN"}
+                    </button>
+                    
+                    <p className="text-zinc-600 font-mono text-[9px] mt-6 uppercase select-none">
+                      press start to reset deck
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Arcade Controller Console Desk */}
+              <div className="w-full bg-zinc-800 border-t-4 border-black p-3.5 flex justify-between items-center mt-4 rounded-none select-none">
+                {/* Visual D-Pad */}
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="text-[8px] text-zinc-500 font-mono font-black uppercase">D-PAD</div>
+                  <div className="grid grid-cols-3 gap-0.5 w-14 h-14 relative bg-black p-1 border border-zinc-700">
+                    <div className="bg-zinc-800 border border-zinc-900 col-start-2 rounded-t-sm" />
+                    <button 
+                      onClick={() => activeIndex < 7 && throwCard(activeIndex, "left")}
+                      className="bg-zinc-600 border-2 border-black hover:bg-zinc-400 active:bg-zinc-700 col-start-1 row-start-2 rounded-l-sm"
+                      title="Discard Left"
+                    />
+                    <div className="bg-zinc-700 col-start-2 row-start-2" />
+                    <button 
+                      onClick={() => activeIndex < 7 && throwCard(activeIndex, "right")}
+                      className="bg-zinc-600 border-2 border-black hover:bg-zinc-400 active:bg-zinc-700 col-start-3 row-start-2 rounded-r-sm"
+                      title="Discard Right"
+                    />
+                    <div className="bg-zinc-800 border border-zinc-900 col-start-2 row-start-3 rounded-b-sm" />
                   </div>
                 </div>
-              ))}
+
+                {/* Status Indicator Screen */}
+                <div className="bg-black/80 border border-zinc-700 px-3 py-2 flex flex-col justify-center items-center text-center w-28 rounded-sm select-none">
+                  <div className="text-[7px] text-zinc-500 font-mono font-black uppercase">REMAINING</div>
+                  <div className="text-neo-yellow font-mono text-base font-black leading-none mt-1 animate-pulse">
+                    0{Math.max(0, 7 - activeIndex)} / 07
+                  </div>
+                </div>
+
+                {/* Controller Action buttons */}
+                <div className="flex gap-2">
+                  <div className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={() => activeIndex < 7 && throwCard(activeIndex, "left")}
+                      disabled={activeIndex >= 7}
+                      className="w-10 h-10 rounded-full bg-red-600 border-2 border-black shadow-[2px_2px_0px_0px_#000] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] flex items-center justify-center text-white font-black text-xs hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Discard card"
+                    >
+                      A
+                    </button>
+                    <span className="text-[7px] text-zinc-500 font-mono font-black">THROW</span>
+                  </div>
+
+                  <div className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={resetStack}
+                      className="w-10 h-10 rounded-full bg-neo-yellow border-2 border-black shadow-[2px_2px_0px_0px_#000] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] flex items-center justify-center text-black font-black text-xs hover:bg-yellow-400"
+                      title="Reset cards"
+                    >
+                      B
+                    </button>
+                    <span className="text-[7px] text-zinc-500 font-mono font-black">RESET</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1544,6 +1667,132 @@ export default function Home() {
               {t("nav-skills")}
             </span>
           </h2>
+        </div>
+
+        {/* Ubuntu Terminal wrapper for Skills */}
+        <div className="max-w-4xl mx-auto mb-12 px-4 reveal reveal-up">
+          <div className="border-4 border-black shadow-neo-lg bg-[#300A24] rounded-none overflow-hidden">
+            {/* Terminal Header */}
+            <div className="bg-[#2c001e] border-b-4 border-black px-4 py-3 flex items-center justify-between select-none">
+              <div className="flex gap-2">
+                <div className="w-3.5 h-3.5 rounded-full bg-[#E95420] border-2 border-black" />
+                <div className="w-3.5 h-3.5 rounded-full bg-yellow-500 border-2 border-black" />
+                <div className="w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-black" />
+              </div>
+              <div className="text-zinc-400 font-mono text-xs uppercase tracking-wider font-bold">
+                farrel@ubuntu-desktop: ~/skills_overview
+              </div>
+              <div className="text-[10px] text-neo-orange font-mono border border-neo-orange px-1.5 py-0.5 rounded font-black tracking-widest animate-pulse">
+                SKILLS
+              </div>
+            </div>
+
+            {/* Terminal Body */}
+            <div className="p-6 bg-[#2C001E]/90 text-left font-mono space-y-6">
+              <div className="flex items-center text-neo-green font-bold text-xs select-none mb-4">
+                <span className="text-zinc-500 mr-2">farrel@ubuntu-desktop:~$</span>
+                <span className="text-white">cat skills_rating.json</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Front End Developer */}
+                <div className="p-4 bg-[#2C001E]/40 border-2 border-black shadow-[4px_4px_0px_0px_#000] flex flex-col justify-between gap-4 rounded-none text-white">
+                  <div className="space-y-2">
+                    <div className="text-neo-blue font-black text-sm uppercase flex items-center gap-1.5">
+                      <span>●</span> Front End Developer
+                    </div>
+                    <p className="text-[10px] text-zinc-400 leading-relaxed font-mono">
+                      {lang === "id" 
+                        ? "Membangun antarmuka web interaktif yang responsif dan cepat menggunakan framework modern." 
+                        : "Building interactive, fast, and responsive web interfaces using modern frameworks."}
+                    </p>
+                    <div className="text-[9px] text-zinc-300 font-bold border-t border-zinc-800/80 pt-2 font-mono">
+                      React, Next.js, HTML, CSS, JavaScript, Tailwind CSS
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 border border-zinc-800 rounded-none w-fit">
+                    <div className="flex gap-0.5 text-xs">
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="fas fa-star-half-alt text-neo-yellow"></i>
+                      <i className="far fa-star text-zinc-600"></i>
+                    </div>
+                    <span className="text-neo-yellow text-xs font-black">3.5/5</span>
+                  </div>
+                </div>
+
+                {/* Back End Developer - Highlighted */}
+                <div className="p-4 bg-[#E95420] text-black border-4 border-black shadow-[4px_4px_0px_0px_#000] flex flex-col justify-between gap-4 rounded-none relative overflow-hidden transform hover:scale-[1.02] transition-transform duration-200">
+                  <div className="absolute top-0 right-0 bg-black text-neo-green font-black text-[8px] px-2 py-0.5 uppercase tracking-widest border-b-2 border-l-2 border-black">
+                    {lang === "id" ? "FOKUS UTAMA" : "PRIMARY FOCUS"}
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-black font-black text-sm sm:text-base uppercase flex items-center gap-1.5 mt-2">
+                      <span className="animate-pulse text-black">●</span> Back End Developer
+                    </div>
+                    <p className="text-[10px] text-black/85 leading-relaxed font-bold font-mono">
+                      {lang === "id"
+                        ? "Merancang arsitektur server yang tangguh, optimasi database, API berkecepatan tinggi, dan logika WebSocket real-time."
+                        : "Designing robust server architectures, database optimizations, high-speed APIs, and real-time WebSocket logic."}
+                    </p>
+                    <div className="text-[9px] text-black/90 font-bold border-t border-black/20 pt-2 font-mono">
+                      PHP, Laravel, Python, C#, Go, MySQL, SQL Server, PostgreSQL, WebSockets
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-black px-3 py-1.5 border-2 border-black rounded-none w-fit shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
+                    <div className="flex gap-0.5 text-xs">
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="fas fa-star-half-alt text-neo-yellow"></i>
+                    </div>
+                    <span className="text-neo-green text-xs font-black">4.5/5</span>
+                  </div>
+                </div>
+
+                {/* UI/UX Designer */}
+                <div className="p-4 bg-[#2C001E]/40 border-2 border-black shadow-[4px_4px_0px_0px_#000] flex flex-col justify-between gap-4 rounded-none text-white">
+                  <div className="space-y-2">
+                    <div className="text-neo-pink font-black text-sm uppercase flex items-center gap-1.5">
+                      <span>●</span> UI/UX Designer
+                    </div>
+                    <p className="text-[10px] text-zinc-400 leading-relaxed font-mono">
+                      {lang === "id"
+                        ? "Merancang tata letak antarmuka, wireframing yang intuitif, dan alur prototype ramah pengguna."
+                        : "Designing interface layouts, intuitive wireframing, and user-friendly prototype flows."}
+                    </p>
+                    <div className="text-[9px] text-zinc-300 font-bold border-t border-zinc-800/80 pt-2 font-mono">
+                      Figma, Canva, Wireframing, Prototyping
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 border border-zinc-800 rounded-none w-fit">
+                    <div className="flex gap-0.5 text-xs">
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="fas fa-star text-neo-yellow"></i>
+                      <i className="far fa-star text-zinc-600"></i>
+                      <i className="far fa-star text-zinc-600"></i>
+                      <i className="far fa-star text-zinc-600"></i>
+                    </div>
+                    <span className="text-neo-yellow text-xs font-black">2.0/5</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subtitle / CLI prompt banner */}
+              <div className="pt-4 border-t border-zinc-800/60 flex flex-col sm:flex-row justify-between items-start sm:items-center text-zinc-500 text-[10px] gap-2 select-none">
+                <div>* {lang === "id" ? "Berdasarkan pengalaman proyek & jam terbang pengkodean pribadi." : "Based on personal project experience & coding flight hours."}</div>
+                <div className="text-neo-orange font-bold font-mono">ubuntu-desktop v24.04 lts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Stack Header Prompt */}
+        <div className="max-w-4xl mx-auto mb-4 px-4 flex items-center text-xs font-mono text-gray-500 reveal reveal-up select-none">
+          <span className="text-neo-green font-bold mr-2">farrel@ubuntu-desktop:~$</span>
+          <span>ls --all detailed_tools/</span>
         </div>
 
         {/* Marquee Banner */}
