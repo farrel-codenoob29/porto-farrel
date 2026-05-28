@@ -895,7 +895,7 @@ export default function Home() {
       const offset = cardOffsets[index];
       const dirMultiplier = offset?.dir === "left" ? -1 : 1;
       return {
-        transform: `translate(${dirMultiplier * 600}px, ${offset?.y ?? 0}px) rotate(${dirMultiplier * 45}deg)`,
+        transform: `translate(${dirMultiplier * 120}vw, ${offset?.y ?? 0}px) rotate(${dirMultiplier * 45}deg)`,
         opacity: 0,
         transition: "transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.6s",
         zIndex: 50,
@@ -1481,176 +1481,188 @@ export default function Home() {
           </div>
 
           {/* Retro Arcade Machine Screen Container */}
-          <div className="max-w-md mx-auto reveal reveal-scale">
-            <div className="bg-zinc-900 border-[6px] border-black shadow-neo-xl p-4 relative rounded-none flex flex-col items-center">
+          <div className="max-w-md md:max-w-4xl mx-auto w-full reveal reveal-scale">
+            <div className="bg-zinc-900 border-[6px] border-black shadow-neo-xl p-4 relative rounded-none flex flex-col">
               {/* Arcade top screen decals */}
-              <div className="w-full flex justify-between items-center text-[10px] text-zinc-400 font-mono border-b-2 border-zinc-800 pb-2 mb-4 select-none">
+              <div className="w-full flex justify-between items-center text-[10px] text-zinc-400 font-mono border-b-2 border-zinc-800 pb-2 mb-2 select-none">
                 <span className="text-neo-pink font-black tracking-widest animate-pulse">● INSERT COIN</span>
                 <span className="font-bold">FARREL CABINET V1.0</span>
                 <span className="text-neo-green font-black">P1 SCORE: {(7 - activeIndex).toString().padStart(2, "0")} / 07</span>
               </div>
 
-              {/* Stack area */}
-              <div className="relative w-full aspect-[3/4] max-w-[320px] sm:max-w-[340px] h-[400px] flex items-center justify-center py-4">
-                {activeIndex < 7 ? (
-                  projects.map((proj, idx) => {
-                    const isThrown = idx < activeIndex;
-                    const isTop = idx === activeIndex;
+              {/* Split Body Container */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-0 w-full items-stretch border-2 border-black rounded-sm overflow-hidden">
+                {/* Screen / Stack Area */}
+                <div className="col-span-12 md:col-span-8 p-4 flex items-center justify-center bg-black/10 min-h-[420px] md:min-h-[440px]">
+                  <div className="relative w-full aspect-[3/4] md:aspect-[16/10] max-w-[320px] sm:max-w-[340px] md:max-w-none md:w-full h-[400px] md:h-[420px] flex items-center justify-center">
+                    {activeIndex < 7 ? (
+                      projects.map((proj, idx) => {
+                        const isThrown = idx < activeIndex;
+                        const isTop = idx === activeIndex;
 
-                    if (idx > activeIndex + 2 && !isThrown) {
-                      return null;
-                    }
+                        if (idx > activeIndex + 2 && !isThrown) {
+                          return null;
+                        }
 
-                    const style = getCardStyle(idx);
+                        const style = getCardStyle(idx);
 
-                    return (
-                      <div
-                        key={idx}
-                        style={style}
-                        className={`absolute w-full h-[400px] bg-white border-4 border-black shadow-[4px_4px_0px_0px_#000] p-4 flex flex-col justify-between select-none ${
-                          isTop ? "cursor-grab active:cursor-grabbing" : ""
-                        }`}
-                        onMouseDown={(e) => {
-                          if (isTop) handleDragStart(e.clientX, e.clientY);
-                        }}
-                        onTouchStart={(e) => {
-                          if (isTop && e.touches.length > 0) {
-                            handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
-                          }
-                        }}
-                      >
-                        {/* Top bar header */}
-                        <div className="flex justify-between items-center bg-black text-white px-2 py-1 text-[8px] font-mono tracking-wider mb-2 select-none border border-black uppercase">
-                          <span>DECK NO: {(idx + 1).toString().padStart(2, "0")} / 07</span>
-                          <span className="text-neo-yellow font-black">SIDE A</span>
-                        </div>
-
-                        {/* Visual Image container */}
-                        <div className="border-2 border-black overflow-hidden aspect-video bg-black relative flex-shrink-0 select-none">
-                          <SafeImage
-                            src={proj.image}
-                            alt={lang === "id" ? proj.titleId : proj.titleEn}
-                            className="w-full h-full object-cover pointer-events-none"
-                          />
-                        </div>
-
-                        {/* Title & Desc */}
-                        <div className="flex-1 py-3 flex flex-col text-left select-text">
-                          <h3 className="text-sm sm:text-base font-black text-black uppercase tracking-tight line-clamp-1 border-b-2 border-black pb-1.5 mb-1.5">
-                            {lang === "id" ? proj.titleId : proj.titleEn}
-                          </h3>
-                          <p className="text-[10px] text-black/90 font-bold leading-normal text-justify line-clamp-4 flex-1">
-                            {lang === "id" ? proj.descId : proj.descEn}
-                          </p>
-                        </div>
-
-                        {/* Tech tags */}
-                        <div className="flex flex-wrap gap-1 mb-3 select-none">
-                          {proj.tags.map((tag, tIdx) => (
-                            <div
-                              key={tIdx}
-                              className={`flex items-center gap-1 px-1.5 py-0.5 border border-black text-[8px] font-black uppercase ${tag.color}`}
-                            >
-                              <i className={tag.icon}></i>
-                              <span>{tag.name}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Source code button */}
-                        <div className="mt-auto select-none">
-                          <a
-                            href={proj.repoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="neo-btn w-full block py-2 bg-neo-yellow text-center text-[10px] font-black uppercase tracking-wider text-black border-2 border-black hover:bg-neo-pink hover:text-white transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                        return (
+                          <div
+                            key={idx}
+                            style={style}
+                            className={`absolute w-full h-[400px] md:h-[420px] bg-white border-4 border-black shadow-[4px_4px_0px_0px_#000] p-4 flex flex-col justify-between select-none ${
+                              isTop ? "cursor-grab active:cursor-grabbing" : ""
+                            }`}
+                            onMouseDown={(e) => {
+                              if (isTop) handleDragStart(e.clientX, e.clientY);
+                            }}
+                            onTouchStart={(e) => {
+                              if (isTop && e.touches.length > 0) {
+                                handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+                              }
                             }}
                           >
-                            <i className="fab fa-github mr-1"></i> {t("btn-source")}
-                          </a>
+                            <div className="flex flex-col h-full w-full justify-between">
+                              {/* Top bar header */}
+                              <div className="flex justify-between items-center bg-black text-white px-2 py-1 text-[8px] font-mono tracking-wider mb-2 select-none border border-black uppercase w-full">
+                                <span>DECK NO: {(idx + 1).toString().padStart(2, "0")} / 07</span>
+                                <span className="text-neo-yellow font-black">SIDE A</span>
+                              </div>
+
+                              {/* Split / Column Content */}
+                              <div className="flex-1 flex flex-col md:flex-row gap-4 items-stretch overflow-hidden">
+                                {/* Visual Image container */}
+                                <div className="border-2 border-black overflow-hidden aspect-video md:aspect-auto md:w-[45%] bg-black relative flex-shrink-0 select-none h-32 md:h-full">
+                                  <SafeImage
+                                    src={proj.image}
+                                    alt={lang === "id" ? proj.titleId : proj.titleEn}
+                                    className="w-full h-full object-cover pointer-events-none"
+                                  />
+                                </div>
+
+                                {/* Title & Desc & Action */}
+                                <div className="flex-1 flex flex-col justify-between text-left select-text h-full">
+                                  <div className="flex flex-col">
+                                    <h3 className="text-xs sm:text-sm font-black text-black uppercase tracking-tight line-clamp-1 border-b-2 border-black pb-1.5 mb-1.5">
+                                      {lang === "id" ? proj.titleId : proj.titleEn}
+                                    </h3>
+                                    <p className="text-[9px] sm:text-[10px] text-black/90 font-bold leading-normal text-justify line-clamp-3 md:line-clamp-6">
+                                      {lang === "id" ? proj.descId : proj.descEn}
+                                    </p>
+                                  </div>
+
+                                  <div className="space-y-3 mt-auto select-none">
+                                    {/* Tech tags */}
+                                    <div className="flex flex-wrap gap-1">
+                                      {proj.tags.map((tag, tIdx) => (
+                                        <div
+                                          key={tIdx}
+                                          className={`flex items-center gap-1 px-1.5 py-0.5 border border-black text-[8px] font-black uppercase ${tag.color}`}
+                                        >
+                                          <i className={tag.icon}></i>
+                                          <span>{tag.name}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+
+                                    {/* Source code button */}
+                                    <a
+                                      href={proj.repoUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="neo-btn w-full block py-2 bg-neo-yellow text-center text-[10px] font-black uppercase tracking-wider text-black border-2 border-black hover:bg-neo-pink hover:text-white transition-colors"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                      }}
+                                    >
+                                      <i className="fab fa-github mr-1"></i> {t("btn-source")}
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      /* Game Over Screen */
+                      <div className="w-full h-[400px] md:h-[420px] bg-black border-4 border-white flex flex-col items-center justify-center p-6 text-center animate-pulse-slow">
+                        <div className="text-red-500 font-mono font-black text-2xl tracking-widest uppercase mb-2">
+                          GAME OVER
                         </div>
+                        <div className="text-white font-mono text-xs uppercase tracking-wider mb-6">
+                          {lang === "id" ? "SELAIN PROYEK HABIS!" : "ALL CARDS DISCARDED!"}
+                        </div>
+                        
+                        <button
+                          onClick={resetStack}
+                          className="neo-btn px-6 py-4 bg-neo-green text-black border-4 border-white text-xs font-black uppercase tracking-widest shadow-[0px_0px_15px_rgba(0,255,102,0.6)] hover:bg-white transition-all active:translate-y-1"
+                        >
+                          🪙 {lang === "id" ? "MASUKKAN KOIN" : "INSERT COIN"}
+                        </button>
+                        
+                        <p className="text-zinc-600 font-mono text-[9px] mt-6 uppercase select-none">
+                          press start to reset deck
+                        </p>
                       </div>
-                    );
-                  })
-                ) : (
-                  /* Game Over Screen */
-                  <div className="w-full h-[400px] bg-black border-4 border-white flex flex-col items-center justify-center p-6 text-center animate-pulse-slow">
-                    <div className="text-red-500 font-mono font-black text-2xl tracking-widest uppercase mb-2">
-                      GAME OVER
-                    </div>
-                    <div className="text-white font-mono text-xs uppercase tracking-wider mb-6">
-                      {lang === "id" ? "SELAIN PROYEK HABIS!" : "ALL CARDS DISCARDED!"}
-                    </div>
-                    
-                    <button
-                      onClick={resetStack}
-                      className="neo-btn px-6 py-4 bg-neo-green text-black border-4 border-white text-xs font-black uppercase tracking-widest shadow-[0px_0px_15px_rgba(0,255,102,0.6)] hover:bg-white transition-all active:translate-y-1"
-                    >
-                      🪙 {lang === "id" ? "MASUKKAN KOIN" : "INSERT COIN"}
-                    </button>
-                    
-                    <p className="text-zinc-600 font-mono text-[9px] mt-6 uppercase select-none">
-                      press start to reset deck
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Arcade Controller Console Desk */}
-              <div className="w-full bg-zinc-800 border-t-4 border-black p-3.5 flex justify-between items-center mt-4 rounded-none select-none">
-                {/* Visual D-Pad */}
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="text-[8px] text-zinc-500 font-mono font-black uppercase">D-PAD</div>
-                  <div className="grid grid-cols-3 gap-0.5 w-14 h-14 relative bg-black p-1 border border-zinc-700">
-                    <div className="bg-zinc-800 border border-zinc-900 col-start-2 rounded-t-sm" />
-                    <button 
-                      onClick={() => activeIndex < 7 && throwCard(activeIndex, "left")}
-                      className="bg-zinc-600 border-2 border-black hover:bg-zinc-400 active:bg-zinc-700 col-start-1 row-start-2 rounded-l-sm"
-                      title="Discard Left"
-                    />
-                    <div className="bg-zinc-700 col-start-2 row-start-2" />
-                    <button 
-                      onClick={() => activeIndex < 7 && throwCard(activeIndex, "right")}
-                      className="bg-zinc-600 border-2 border-black hover:bg-zinc-400 active:bg-zinc-700 col-start-3 row-start-2 rounded-r-sm"
-                      title="Discard Right"
-                    />
-                    <div className="bg-zinc-800 border border-zinc-900 col-start-2 row-start-3 rounded-b-sm" />
+                    )}
                   </div>
                 </div>
 
-                {/* Status Indicator Screen */}
-                <div className="bg-black/80 border border-zinc-700 px-3 py-2 flex flex-col justify-center items-center text-center w-28 rounded-sm select-none">
-                  <div className="text-[7px] text-zinc-500 font-mono font-black uppercase">REMAINING</div>
-                  <div className="text-neo-yellow font-mono text-base font-black leading-none mt-1 animate-pulse">
-                    0{Math.max(0, 7 - activeIndex)} / 07
+                {/* Arcade Controller Console Desk / Sidebar */}
+                <div className="col-span-12 md:col-span-4 bg-zinc-800 border-t-4 md:border-t-0 md:border-l-4 border-black p-3.5 md:p-6 flex md:flex-col justify-between md:justify-center items-center md:gap-8 rounded-none select-none">
+                  {/* Visual D-Pad */}
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="text-[8px] md:text-[10px] text-zinc-500 font-mono font-black uppercase">D-PAD</div>
+                    <div className="grid grid-cols-3 gap-0.5 w-14 h-14 md:w-16 md:h-16 relative bg-black p-1 border border-zinc-700">
+                      <div className="bg-zinc-800 border border-zinc-900 col-start-2 rounded-t-sm" />
+                      <button 
+                        onClick={() => activeIndex < 7 && throwCard(activeIndex, "left")}
+                        className="bg-zinc-600 border-2 border-black hover:bg-zinc-400 active:bg-zinc-700 col-start-1 row-start-2 rounded-l-sm"
+                        title="Discard Left"
+                      />
+                      <div className="bg-zinc-700 col-start-2 row-start-2" />
+                      <button 
+                        onClick={() => activeIndex < 7 && throwCard(activeIndex, "right")}
+                        className="bg-zinc-600 border-2 border-black hover:bg-zinc-400 active:bg-zinc-700 col-start-3 row-start-2 rounded-r-sm"
+                        title="Discard Right"
+                      />
+                      <div className="bg-zinc-800 border border-zinc-900 col-start-2 row-start-3 rounded-b-sm" />
+                    </div>
                   </div>
-                </div>
 
-                {/* Controller Action buttons */}
-                <div className="flex gap-2">
-                  <div className="flex flex-col items-center gap-1">
-                    <button
-                      onClick={() => activeIndex < 7 && throwCard(activeIndex, "left")}
-                      disabled={activeIndex >= 7}
-                      className="w-10 h-10 rounded-full bg-red-600 border-2 border-black shadow-[2px_2px_0px_0px_#000] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] flex items-center justify-center text-white font-black text-xs hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Discard card"
-                    >
-                      A
-                    </button>
-                    <span className="text-[7px] text-zinc-500 font-mono font-black">THROW</span>
+                  {/* Status Indicator Screen */}
+                  <div className="bg-black/80 border border-zinc-700 px-3 py-2 md:py-4 flex flex-col justify-center items-center text-center w-28 md:w-full rounded-sm select-none">
+                    <div className="text-[7px] md:text-[9px] text-zinc-500 font-mono font-black uppercase">REMAINING</div>
+                    <div className="text-neo-yellow font-mono text-base md:text-xl font-black leading-none mt-1 animate-pulse">
+                      0{Math.max(0, 7 - activeIndex)} / 07
+                    </div>
                   </div>
 
-                  <div className="flex flex-col items-center gap-1">
-                    <button
-                      onClick={resetStack}
-                      className="w-10 h-10 rounded-full bg-neo-yellow border-2 border-black shadow-[2px_2px_0px_0px_#000] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] flex items-center justify-center text-black font-black text-xs hover:bg-yellow-400"
-                      title="Reset cards"
-                    >
-                      B
-                    </button>
-                    <span className="text-[7px] text-zinc-500 font-mono font-black">RESET</span>
+                  {/* Controller Action buttons */}
+                  <div className="flex md:flex-row gap-2 md:gap-4">
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => activeIndex < 7 && throwCard(activeIndex, "left")}
+                        disabled={activeIndex >= 7}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600 border-2 border-black shadow-[2px_2px_0px_0px_#000] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] flex items-center justify-center text-white font-black text-xs hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Discard card"
+                      >
+                        A
+                      </button>
+                      <span className="text-[7px] md:text-[8px] text-zinc-500 font-mono font-black">THROW</span>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={resetStack}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-neo-yellow border-2 border-black shadow-[2px_2px_0px_0px_#000] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] flex items-center justify-center text-black font-black text-xs hover:bg-yellow-400"
+                        title="Reset cards"
+                      >
+                        B
+                      </button>
+                      <span className="text-[7px] md:text-[8px] text-zinc-500 font-mono font-black">RESET</span>
+                    </div>
                   </div>
                 </div>
               </div>
