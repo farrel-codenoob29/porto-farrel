@@ -847,9 +847,19 @@ export default function Home() {
   };
 
   const resetStack = () => {
-    setCardOffsets(Array(7).fill({ y: 0, dir: null }));
     setDragOffset({ x: 0, y: 0 });
     setActiveIndex(0);
+
+    // Staggered flyback reset
+    for (let i = 6; i >= 0; i--) {
+      setTimeout(() => {
+        setCardOffsets((prev) => {
+          const updated = [...prev];
+          updated[i] = { y: 0, dir: null };
+          return updated;
+        });
+      }, (6 - i) * 100);
+    }
   };
 
   // Card deck event listener window-level registration
@@ -888,11 +898,10 @@ export default function Home() {
   }, [isDraggingCard, dragOffset, activeIndex]);
 
   const getCardStyle = (index: number) => {
-    const relIndex = index - activeIndex;
+    const offset = cardOffsets[index];
 
     // Discarded / Thrown cards
-    if (relIndex < 0) {
-      const offset = cardOffsets[index];
+    if (offset?.dir !== null) {
       const dirMultiplier = offset?.dir === "left" ? -1 : 1;
       return {
         transform: `translate(${dirMultiplier * 120}vw, ${offset?.y ?? 0}px) rotate(${dirMultiplier * 45}deg)`,
@@ -903,9 +912,17 @@ export default function Home() {
       };
     }
 
-    // Stack display limits (render top 3 cards visually, others hidden/none)
+    // If card is NOT thrown, determine its position in the active stack.
+    let activeStackIndex = 0;
+    for (let i = 0; i < index; i++) {
+      if (cardOffsets[i]?.dir === null) {
+        activeStackIndex++;
+      }
+    }
+
+    // Stack display limits (render top 3 active cards visually, others hidden/none)
     const maxVisible = 3;
-    if (relIndex >= maxVisible) {
+    if (activeStackIndex >= maxVisible) {
       return { display: "none" };
     }
 
@@ -914,29 +931,29 @@ export default function Home() {
     let translateY = 0;
     let translateX = 0;
 
-    if (relIndex === 0) {
+    if (activeStackIndex === 0) {
       // Top card moves with user drag
       rotate = (dragOffset.x / 15) * 1.5; // subtle tilt on drag
       translateX = dragOffset.x;
       translateY = dragOffset.y;
-    } else if (relIndex === 1) {
+    } else if (activeStackIndex === 1) {
       rotate = 4;
       translateY = 8;
       translateX = 4;
-    } else if (relIndex === 2) {
+    } else if (activeStackIndex === 2) {
       rotate = -3;
       translateY = 16;
       translateX = -4;
     }
 
-    const isDragging = relIndex === 0 && isDraggingCard;
+    const isDragging = activeStackIndex === 0 && isDraggingCard;
 
     return {
       transform: `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg)`,
       transition: isDragging ? "none" : "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.3s",
-      zIndex: 30 - relIndex,
+      zIndex: 30 - activeStackIndex,
       opacity: 1,
-      pointerEvents: relIndex === 0 ? ("auto" as const) : ("none" as const),
+      pointerEvents: activeStackIndex === 0 ? ("auto" as const) : ("none" as const),
     };
   };
 
@@ -1495,98 +1512,93 @@ export default function Home() {
                 {/* Screen / Stack Area */}
                 <div className="col-span-12 md:col-span-8 p-4 flex items-center justify-center bg-black/10 min-h-[420px] md:min-h-[440px]">
                   <div className="relative w-full aspect-[3/4] md:aspect-[16/10] max-w-[320px] sm:max-w-[340px] md:max-w-none md:w-full h-[400px] md:h-[420px] flex items-center justify-center">
-                    {activeIndex < 7 ? (
-                      projects.map((proj, idx) => {
-                        const isThrown = idx < activeIndex;
-                        const isTop = idx === activeIndex;
+                    {projects.map((proj, idx) => {
+                      const isTop = idx === activeIndex;
 
-                        if (idx > activeIndex + 2 && !isThrown) {
-                          return null;
-                        }
+                      const style = getCardStyle(idx);
 
-                        const style = getCardStyle(idx);
+                      return (
+                        <div
+                          key={idx}
+                          style={style}
+                          className={`absolute w-full h-[400px] md:h-[420px] bg-white border-4 border-black shadow-[4px_4px_0px_0px_#000] p-4 flex flex-col justify-between select-none ${
+                            isTop ? "cursor-grab active:cursor-grabbing" : ""
+                          }`}
+                          onMouseDown={(e) => {
+                            if (isTop) handleDragStart(e.clientX, e.clientY);
+                          }}
+                          onTouchStart={(e) => {
+                            if (isTop && e.touches.length > 0) {
+                              handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+                            }
+                          }}
+                        >
+                          <div className="flex flex-col h-full w-full justify-between">
+                            {/* Top bar header */}
+                            <div className="flex justify-between items-center bg-black text-white px-2 py-1 text-[8px] font-mono tracking-wider mb-2 select-none border border-black uppercase w-full">
+                              <span>DECK NO: {(idx + 1).toString().padStart(2, "0")} / 07</span>
+                              <span className="text-neo-yellow font-black">SIDE A</span>
+                            </div>
 
-                        return (
-                          <div
-                            key={idx}
-                            style={style}
-                            className={`absolute w-full h-[400px] md:h-[420px] bg-white border-4 border-black shadow-[4px_4px_0px_0px_#000] p-4 flex flex-col justify-between select-none ${
-                              isTop ? "cursor-grab active:cursor-grabbing" : ""
-                            }`}
-                            onMouseDown={(e) => {
-                              if (isTop) handleDragStart(e.clientX, e.clientY);
-                            }}
-                            onTouchStart={(e) => {
-                              if (isTop && e.touches.length > 0) {
-                                handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
-                              }
-                            }}
-                          >
-                            <div className="flex flex-col h-full w-full justify-between">
-                              {/* Top bar header */}
-                              <div className="flex justify-between items-center bg-black text-white px-2 py-1 text-[8px] font-mono tracking-wider mb-2 select-none border border-black uppercase w-full">
-                                <span>DECK NO: {(idx + 1).toString().padStart(2, "0")} / 07</span>
-                                <span className="text-neo-yellow font-black">SIDE A</span>
+                            {/* Split / Column Content */}
+                            <div className="flex-1 flex flex-col md:flex-row gap-4 items-stretch overflow-hidden">
+                              {/* Visual Image container */}
+                              <div className="border-2 border-black overflow-hidden aspect-video md:aspect-auto md:w-[45%] bg-black relative flex-shrink-0 select-none h-32 md:h-full">
+                                <SafeImage
+                                  src={proj.image}
+                                  alt={lang === "id" ? proj.titleId : proj.titleEn}
+                                  className="w-full h-full object-cover pointer-events-none"
+                                />
                               </div>
 
-                              {/* Split / Column Content */}
-                              <div className="flex-1 flex flex-col md:flex-row gap-4 items-stretch overflow-hidden">
-                                {/* Visual Image container */}
-                                <div className="border-2 border-black overflow-hidden aspect-video md:aspect-auto md:w-[45%] bg-black relative flex-shrink-0 select-none h-32 md:h-full">
-                                  <SafeImage
-                                    src={proj.image}
-                                    alt={lang === "id" ? proj.titleId : proj.titleEn}
-                                    className="w-full h-full object-cover pointer-events-none"
-                                  />
+                              {/* Title & Desc & Action */}
+                              <div className="flex-1 flex flex-col justify-between text-left select-text h-full">
+                                <div className="flex flex-col">
+                                  <h3 className="text-xs sm:text-sm font-black text-black uppercase tracking-tight line-clamp-1 border-b-2 border-black pb-1.5 mb-1.5">
+                                    {lang === "id" ? proj.titleId : proj.titleEn}
+                                  </h3>
+                                  <p className="text-[9px] sm:text-[10px] text-black/90 font-bold leading-normal text-justify line-clamp-3 md:line-clamp-6">
+                                    {lang === "id" ? proj.descId : proj.descEn}
+                                  </p>
                                 </div>
 
-                                {/* Title & Desc & Action */}
-                                <div className="flex-1 flex flex-col justify-between text-left select-text h-full">
-                                  <div className="flex flex-col">
-                                    <h3 className="text-xs sm:text-sm font-black text-black uppercase tracking-tight line-clamp-1 border-b-2 border-black pb-1.5 mb-1.5">
-                                      {lang === "id" ? proj.titleId : proj.titleEn}
-                                    </h3>
-                                    <p className="text-[9px] sm:text-[10px] text-black/90 font-bold leading-normal text-justify line-clamp-3 md:line-clamp-6">
-                                      {lang === "id" ? proj.descId : proj.descEn}
-                                    </p>
+                                <div className="space-y-3 mt-auto select-none">
+                                  {/* Tech tags */}
+                                  <div className="flex flex-wrap gap-1">
+                                    {proj.tags.map((tag, tIdx) => (
+                                      <div
+                                        key={tIdx}
+                                        className={`flex items-center gap-1 px-1.5 py-0.5 border border-black text-[8px] font-black uppercase ${tag.color}`}
+                                      >
+                                        <i className={tag.icon}></i>
+                                        <span>{tag.name}</span>
+                                      </div>
+                                    ))}
                                   </div>
 
-                                  <div className="space-y-3 mt-auto select-none">
-                                    {/* Tech tags */}
-                                    <div className="flex flex-wrap gap-1">
-                                      {proj.tags.map((tag, tIdx) => (
-                                        <div
-                                          key={tIdx}
-                                          className={`flex items-center gap-1 px-1.5 py-0.5 border border-black text-[8px] font-black uppercase ${tag.color}`}
-                                        >
-                                          <i className={tag.icon}></i>
-                                          <span>{tag.name}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-
-                                    {/* Source code button */}
-                                    <a
-                                      href={proj.repoUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="neo-btn w-full block py-2 bg-neo-yellow text-center text-[10px] font-black uppercase tracking-wider text-black border-2 border-black hover:bg-neo-pink hover:text-white transition-colors"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                      }}
-                                    >
-                                      <i className="fab fa-github mr-1"></i> {t("btn-source")}
-                                    </a>
-                                  </div>
+                                  {/* Source code button */}
+                                  <a
+                                    href={proj.repoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="neo-btn w-full block py-2 bg-neo-yellow text-center text-[10px] font-black uppercase tracking-wider text-black border-2 border-black hover:bg-neo-pink hover:text-white transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    <i className="fab fa-github mr-1"></i> {t("btn-source")}
+                                  </a>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        );
-                      })
-                    ) : (
-                      /* Game Over Screen */
-                      <div className="w-full h-[400px] md:h-[420px] bg-black border-4 border-white flex flex-col items-center justify-center p-6 text-center animate-pulse-slow">
+                        </div>
+                      );
+                    })}
+
+                    {/* Game Over Screen overlay */}
+                    {activeIndex >= 7 && (
+                      <div className="absolute inset-0 bg-black border-4 border-white flex flex-col items-center justify-center p-6 text-center z-40 animate-scale-in">
                         <div className="text-red-500 font-mono font-black text-2xl tracking-widest uppercase mb-2">
                           GAME OVER
                         </div>
@@ -1596,7 +1608,7 @@ export default function Home() {
                         
                         <button
                           onClick={resetStack}
-                          className="neo-btn px-6 py-4 bg-neo-green text-black border-4 border-white text-xs font-black uppercase tracking-widest shadow-[0px_0px_15px_rgba(0,255,102,0.6)] hover:bg-white transition-all active:translate-y-1"
+                          className="neo-btn px-6 py-4 bg-neo-green text-black border-4 border-white text-xs font-black uppercase tracking-widest shadow-[0px_0px_15px_rgba(0,255,102,0.6)] hover:bg-white transition-all active:translate-y-1 animate-pulse"
                         >
                           🪙 {lang === "id" ? "MASUKKAN KOIN" : "INSERT COIN"}
                         </button>
