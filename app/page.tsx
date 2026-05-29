@@ -458,6 +458,27 @@ const navItems = [
   { id: "contact", color: "#FB5607" },
 ];
 
+interface PhysicsNode {
+  id: string;
+  label: string;
+  type: "center" | "branch" | "leaf";
+  color: string;
+  textColor: string;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  isDragging?: boolean;
+}
+
+interface PhysicsLink {
+  source: string;
+  target: string;
+  length: number;
+}
+
 export default function Home() {
   const [lang, setLang] = useState<"id" | "en">("id");
   const [mounted, setMounted] = useState(false);
@@ -495,6 +516,408 @@ export default function Home() {
   const [terminalInput, setTerminalInput] = useState("");
   const [isTypingSimulated, setIsTypingSimulated] = useState(false);
   const terminalViewportRef = useRef<HTMLDivElement>(null);
+
+  // Skills Gravity Graph States & Refs
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragNodeIdRef = useRef<string | null>(null);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const [dragNodeId, setDragNodeId] = useState<string | null>(null);
+  const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
+
+  const initialNodes = useRef<PhysicsNode[]>([
+    { id: "fullstack", label: "Full Stack", type: "center", color: "#FFD600", textColor: "#000000", width: 110, height: 110, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "frontend", label: "Frontend", type: "branch", color: "#3A86FF", textColor: "#ffffff", width: 90, height: 90, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "backend", label: "Backend", type: "branch", color: "#FF006E", textColor: "#ffffff", width: 90, height: 90, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "react", label: "React.js", type: "leaf", color: "#ffffff", textColor: "#000000", width: 110, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "next", label: "Next.js", type: "leaf", color: "#ffffff", textColor: "#000000", width: 110, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "tailwind", label: "Tailwind CSS", type: "leaf", color: "#ffffff", textColor: "#000000", width: 130, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "js", label: "JavaScript", type: "leaf", color: "#ffffff", textColor: "#000000", width: 120, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "go", label: "Go", type: "leaf", color: "#ffffff", textColor: "#000000", width: 80, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "python", label: "Python", type: "leaf", color: "#ffffff", textColor: "#000000", width: 100, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "csharp", label: "C#", type: "leaf", color: "#ffffff", textColor: "#000000", width: 80, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
+    { id: "laravel", label: "Laravel", type: "leaf", color: "#ffffff", textColor: "#000000", width: 110, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
+  ]);
+
+  const initialLinks = useRef<PhysicsLink[]>([
+    { source: "fullstack", target: "frontend", length: 160 },
+    { source: "fullstack", target: "backend", length: 160 },
+    { source: "frontend", target: "react", length: 120 },
+    { source: "frontend", target: "next", length: 120 },
+    { source: "frontend", target: "tailwind", length: 120 },
+    { source: "frontend", target: "js", length: 120 },
+    { source: "backend", target: "go", length: 120 },
+    { source: "backend", target: "python", length: 120 },
+    { source: "backend", target: "csharp", length: 120 },
+    { source: "backend", target: "laravel", length: 120 },
+  ]);
+
+  const nodesRef = useRef<PhysicsNode[]>(JSON.parse(JSON.stringify(initialNodes.current)));
+  const linksRef = useRef<PhysicsLink[]>(JSON.parse(JSON.stringify(initialLinks.current)));
+  const [nodesState, setNodesState] = useState<PhysicsNode[]>(JSON.parse(JSON.stringify(initialNodes.current)));
+
+  const initializeNodePositions = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    setContainerSize({ width, height });
+
+    const isMobile = width < 768;
+    const spreadDistance = isMobile ? 75 : 180;
+    const leafDistance = isMobile ? 80 : 140;
+
+    const nodes = nodesRef.current;
+
+    // Apply dimensions based on viewport
+    nodes.forEach((node) => {
+      if (node.type === "center") {
+        node.width = isMobile ? 85 : 110;
+        node.height = isMobile ? 85 : 110;
+      } else if (node.type === "branch") {
+        node.width = isMobile ? 75 : 90;
+        node.height = isMobile ? 75 : 90;
+      } else {
+        node.height = isMobile ? 38 : 46;
+        if (node.id === "react") node.width = isMobile ? 95 : 110;
+        else if (node.id === "next") node.width = isMobile ? 95 : 110;
+        else if (node.id === "tailwind") node.width = isMobile ? 115 : 130;
+        else if (node.id === "js") node.width = isMobile ? 105 : 120;
+        else if (node.id === "go") node.width = isMobile ? 70 : 80;
+        else if (node.id === "python") node.width = isMobile ? 85 : 100;
+        else if (node.id === "csharp") node.width = isMobile ? 70 : 80;
+        else if (node.id === "laravel") node.width = isMobile ? 95 : 110;
+      }
+    });
+
+    // Update link lengths dynamically
+    linksRef.current.forEach((link) => {
+      if (link.source === "fullstack" || link.target === "fullstack") {
+        link.length = isMobile ? 95 : 160;
+      } else {
+        link.length = isMobile ? 80 : 120;
+      }
+    });
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    // Center node position
+    const fullstack = nodes.find((n) => n.id === "fullstack");
+    if (fullstack) {
+      fullstack.x = centerX;
+      fullstack.y = centerY;
+      fullstack.vx = 0;
+      fullstack.vy = 0;
+    }
+
+    // Branch nodes positions
+    const frontend = nodes.find((n) => n.id === "frontend");
+    if (frontend) {
+      frontend.x = centerX - spreadDistance;
+      frontend.y = centerY - (isMobile ? 55 : 0);
+      frontend.vx = 0;
+      frontend.vy = 0;
+    }
+
+    const backend = nodes.find((n) => n.id === "backend");
+    if (backend) {
+      backend.x = centerX + spreadDistance;
+      backend.y = centerY + (isMobile ? 55 : 0);
+      backend.vx = 0;
+      backend.vy = 0;
+    }
+
+    // Frontend leaves
+    const feLeaves = ["react", "next", "tailwind", "js"];
+    feLeaves.forEach((id, idx) => {
+      const node = nodes.find((n) => n.id === id);
+      if (node) {
+        const angle = Math.PI - 0.7 + idx * 0.45; // angle spread
+        node.x = (centerX - spreadDistance) + Math.cos(angle) * leafDistance;
+        node.y = (centerY - (isMobile ? 55 : 0)) + Math.sin(angle) * leafDistance;
+        node.vx = 0;
+        node.vy = 0;
+      }
+    });
+
+    // Backend leaves
+    const beLeaves = ["go", "python", "csharp", "laravel"];
+    beLeaves.forEach((id, idx) => {
+      const node = nodes.find((n) => n.id === id);
+      if (node) {
+        const angle = -0.7 + idx * 0.45; // angle spread
+        node.x = (centerX + spreadDistance) + Math.cos(angle) * leafDistance;
+        node.y = (centerY + (isMobile ? 55 : 0)) + Math.sin(angle) * leafDistance;
+        node.vx = 0;
+        node.vy = 0;
+      }
+    });
+
+    setNodesState([...nodes]);
+  };
+
+  const updatePhysics = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    const nodes = nodesRef.current;
+    const links = linksRef.current;
+
+    // 1. Repulsion force between all nodes
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const nodeA = nodes[i];
+        const nodeB = nodes[j];
+        const dx = nodeA.x - nodeB.x;
+        const dy = nodeA.y - nodeB.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 0.1) dist = 0.1;
+
+        const minDistance = (nodeA.width + nodeB.width) / 2 + 50;
+        if (dist < minDistance) {
+          const force = (minDistance - dist) * 0.08;
+          const fx = (dx / dist) * force;
+          const fy = (dy / dist) * force;
+
+          if (!nodeA.isDragging) {
+            nodeA.vx += fx;
+            nodeA.vy += fy;
+          }
+          if (!nodeB.isDragging) {
+            nodeB.vx -= fx;
+            nodeB.vy -= fy;
+          }
+        }
+      }
+    }
+
+    // 2. Spring force along links (Hooke's Law)
+    for (let i = 0; i < links.length; i++) {
+      const link = links[i];
+      const sourceNode = nodes.find((n) => n.id === link.source);
+      const targetNode = nodes.find((n) => n.id === link.target);
+      if (!sourceNode || !targetNode) continue;
+
+      const dx = targetNode.x - sourceNode.x;
+      const dy = targetNode.y - sourceNode.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
+      const diff = dist - link.length;
+
+      const springStiffness = 0.045;
+      const fx = (dx / dist) * diff * springStiffness;
+      const fy = (dy / dist) * diff * springStiffness;
+
+      if (!sourceNode.isDragging) {
+        sourceNode.vx += fx;
+        sourceNode.vy += fy;
+      }
+      if (!targetNode.isDragging) {
+        targetNode.vx -= fx;
+        targetNode.vy -= fy;
+      }
+    }
+
+    // 3. Center gravity (keep nodes from drifting off)
+    const centerX = width / 2;
+    const centerY = height / 2;
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (node.isDragging) continue;
+
+      const dx = centerX - node.x;
+      const dy = centerY - node.y;
+      const gravity = 0.008;
+      node.vx += dx * gravity;
+      node.vy += dy * gravity;
+    }
+
+    // 4. Update positions & handle friction/boundary collisions
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (node.isDragging) continue;
+
+      node.vx *= 0.84; // friction
+      node.vy *= 0.84; // friction
+
+      // Cap max speed
+      const maxSpeed = 15;
+      const speed = Math.hypot(node.vx, node.vy);
+      if (speed > maxSpeed) {
+        node.vx = (node.vx / speed) * maxSpeed;
+        node.vy = (node.vy / speed) * maxSpeed;
+      }
+
+      node.x += node.vx;
+      node.y += node.vy;
+
+      const halfW = node.width / 2;
+      const halfH = node.height / 2;
+
+      if (width > node.width) {
+        if (node.x < halfW) {
+          node.x = halfW;
+          node.vx = -node.vx * 0.4;
+        } else if (node.x > width - halfW) {
+          node.x = width - halfW;
+          node.vx = -node.vx * 0.4;
+        }
+      }
+
+      if (height > node.height) {
+        if (node.y < halfH) {
+          node.y = halfH;
+          node.vy = -node.vy * 0.4;
+        } else if (node.y > height - halfH) {
+          node.y = height - halfH;
+          node.vy = -node.vy * 0.4;
+        }
+      }
+    }
+
+    setNodesState([...nodes]);
+  };
+
+  const handleStart = (nodeId: string, clientX: number, clientY: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const node = nodesRef.current.find((n) => n.id === nodeId);
+    if (!node) return;
+
+    dragNodeIdRef.current = nodeId;
+    setDragNodeId(nodeId);
+    node.isDragging = true;
+
+    dragOffsetRef.current = {
+      x: x - node.x,
+      y: y - node.y,
+    };
+  };
+
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!dragNodeIdRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    const node = nodesRef.current.find((n) => n.id === dragNodeIdRef.current);
+    if (!node) return;
+
+    const targetX = x - dragOffsetRef.current.x;
+    const targetY = y - dragOffsetRef.current.y;
+
+    // Instant velocity for throwing
+    node.vx = (targetX - node.x) * 0.4;
+    node.vy = (targetY - node.y) * 0.4;
+
+    node.x = targetX;
+    node.y = targetY;
+  };
+
+  const handleEnd = () => {
+    if (!dragNodeIdRef.current) return;
+    const node = nodesRef.current.find((n) => n.id === dragNodeIdRef.current);
+    if (node) {
+      node.isDragging = false;
+    }
+    dragNodeIdRef.current = null;
+    setDragNodeId(null);
+  };
+
+  useEffect(() => {
+    if (!dragNodeId) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX, e.clientY);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      if (e.cancelable) e.preventDefault();
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+
+    const onMouseUp = () => {
+      handleEnd();
+    };
+
+    const onTouchEnd = () => {
+      handleEnd();
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("touchend", onTouchEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [dragNodeId]);
+
+  useEffect(() => {
+    let animationFrameId: number;
+
+    const loop = () => {
+      updatePhysics();
+      animationFrameId = requestAnimationFrame(loop);
+    };
+
+    animationFrameId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    const timer = setTimeout(() => {
+      initializeNodePositions();
+    }, 150);
+
+    const handleResize = () => {
+      initializeNodePositions();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [mounted]);
+
+  const renderNodeIcon = (id: string) => {
+    switch (id) {
+      case "react":
+        return <img src="https://cdn.simpleicons.org/react/61DAFB" alt="React" className="w-5 h-5 object-contain flex-shrink-0" />;
+      case "next":
+        return <img src="https://cdn.simpleicons.org/nextdotjs/000000" alt="Next.js" className="w-5 h-5 dark:invert object-contain flex-shrink-0" />;
+      case "tailwind":
+        return <img src="https://cdn.simpleicons.org/tailwindcss/06B6D4" alt="Tailwind CSS" className="w-5 h-5 object-contain flex-shrink-0" />;
+      case "js":
+        return <img src="https://cdn.simpleicons.org/javascript/F7DF1E" alt="JavaScript" className="w-5 h-5 object-contain flex-shrink-0" />;
+      case "go":
+        return <img src="https://cdn.simpleicons.org/go/00ADD8" alt="Go" className="w-5 h-5 object-contain flex-shrink-0" />;
+      case "python":
+        return <img src="https://cdn.simpleicons.org/python/3776AB" alt="Python" className="w-5 h-5 object-contain flex-shrink-0" />;
+      case "csharp":
+        return <img src="https://cdn.simpleicons.org/csharp/239120" alt="C#" className="w-5 h-5 object-contain flex-shrink-0" />;
+      case "laravel":
+        return <img src="https://cdn.simpleicons.org/laravel/FF2D20" alt="Laravel" className="w-5 h-5 object-contain flex-shrink-0" />;
+      default:
+        return null;
+    }
+  };
 
   // Close active dropdown when clicking outside
   useEffect(() => {
@@ -2007,194 +2430,111 @@ export default function Home() {
           </h2>
         </div>
 
-        {/* Ubuntu Terminal wrapper for Skills */}
-        <div className="max-w-4xl mx-auto mb-12 px-4 reveal reveal-up">
-          <div className="border-4 border-black shadow-neo-lg bg-[#300A24] rounded-none overflow-hidden">
-            {/* Terminal Header */}
-            <div className="bg-[#2c001e] border-b-4 border-black px-4 py-3 flex items-center justify-between select-none">
-              <div className="flex gap-2">
-                <div className="w-3.5 h-3.5 rounded-full bg-[#E95420] border-2 border-black" />
-                <div className="w-3.5 h-3.5 rounded-full bg-yellow-500 border-2 border-black" />
-                <div className="w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-black" />
-              </div>
-              <div className="text-zinc-400 font-mono text-xs uppercase tracking-wider font-bold">
-                farrel@ubuntu-desktop: ~/skills_overview
-              </div>
-              <div className="text-[10px] text-neo-orange font-mono border border-neo-orange px-1.5 py-0.5 rounded font-black tracking-widest animate-pulse">
-                SKILLS
-              </div>
+        {/* Interactive Mindmap Container */}
+        <div className="max-w-5xl mx-auto px-4 reveal reveal-up select-none">
+          <div
+            ref={containerRef}
+            className="w-full h-[500px] sm:h-[600px] border-4 border-black bg-white relative overflow-hidden shadow-neo-lg select-none"
+          >
+            {/* Mindmap Hint Banner */}
+            <div className="absolute top-4 left-4 bg-neo-green text-black border-2 border-black font-mono font-black text-[9px] sm:text-xs uppercase tracking-widest px-3 py-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-30 select-none">
+              {lang === "id" ? "● DRAG & LEMPAR NODE UNTUK BERMAIN!" : "● DRAG & THROW NODES TO PLAY!"}
             </div>
 
-            {/* Terminal Body */}
-            <div className="p-6 bg-[#2C001E]/90 text-left font-mono space-y-6">
-              <div className="flex items-center text-neo-green font-bold text-xs select-none mb-4">
-                <span className="text-zinc-500 mr-2">farrel@ubuntu-desktop:~$</span>
-                <span className="text-white">cat skills_rating.json</span>
-              </div>
+            {/* Reset Button */}
+            <button
+              onClick={initializeNodePositions}
+              className="absolute bottom-4 right-4 bg-neo-pink text-white font-mono font-black text-[10px] sm:text-xs uppercase tracking-widest px-3 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-neo-pink/90 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all z-30 cursor-pointer"
+            >
+              Reset Graph
+            </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Front End Developer */}
-                <div className="p-4 bg-[#2C001E]/40 border-2 border-black shadow-[4px_4px_0px_0px_#000] flex flex-col justify-between gap-4 rounded-none text-white">
-                  <div className="space-y-2">
-                    <div className="text-neo-blue font-black text-sm uppercase flex items-center gap-1.5">
-                      <span>●</span> Front End Developer
-                    </div>
-                    <p className="text-[10px] text-zinc-400 leading-relaxed font-mono">
-                      {lang === "id" 
-                        ? "Membangun antarmuka web interaktif yang responsif dan cepat menggunakan framework modern." 
-                        : "Building interactive, fast, and responsive web interfaces using modern frameworks."}
-                    </p>
-                    <div className="text-[9px] text-zinc-300 font-bold border-t border-zinc-800/80 pt-2 font-mono">
-                      React, Next.js, HTML, CSS, JavaScript, Tailwind CSS
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 border border-zinc-800 rounded-none w-fit">
-                    <div className="flex gap-0.5 text-xs">
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="fas fa-star-half-alt text-neo-yellow"></i>
-                      <i className="far fa-star text-zinc-600"></i>
-                    </div>
-                    <span className="text-neo-yellow text-xs font-black">3.5/5</span>
-                  </div>
-                </div>
+            {/* SVG Connections Line Layer */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+              {linksRef.current.map((link, idx) => {
+                const sourceNode = nodesState.find((n) => n.id === link.source);
+                const targetNode = nodesState.find((n) => n.id === link.target);
+                if (!sourceNode || !targetNode) return null;
 
-                {/* Back End Developer - Highlighted */}
-                <div className="p-4 bg-[#E95420] text-black border-4 border-black shadow-[4px_4px_0px_0px_#000] flex flex-col justify-between gap-4 rounded-none relative overflow-hidden transform hover:scale-[1.02] transition-transform duration-200">
-                  <div className="absolute top-0 right-0 bg-black text-neo-green font-black text-[8px] px-2 py-0.5 uppercase tracking-widest border-b-2 border-l-2 border-black">
-                    {lang === "id" ? "FOKUS UTAMA" : "PRIMARY FOCUS"}
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-black font-black text-sm sm:text-base uppercase flex items-center gap-1.5 mt-2">
-                      <span className="animate-pulse text-black">●</span> Back End Developer
-                    </div>
-                    <p className="text-[10px] text-black/85 leading-relaxed font-bold font-mono">
-                      {lang === "id"
-                        ? "Merancang arsitektur server yang tangguh, optimasi database, API berkecepatan tinggi, dan logika WebSocket real-time."
-                        : "Designing robust server architectures, database optimizations, high-speed APIs, and real-time WebSocket logic."}
-                    </p>
-                    <div className="text-[9px] text-black/90 font-bold border-t border-black/20 pt-2 font-mono">
-                      PHP, Laravel, Python, C#, Go, MySQL, SQL Server, PostgreSQL, WebSockets
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 bg-black px-3 py-1.5 border-2 border-black rounded-none w-fit shadow-[2px_2px_0px_0px_rgba(0,0,0,0.15)]">
-                    <div className="flex gap-0.5 text-xs">
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="fas fa-star-half-alt text-neo-yellow"></i>
-                    </div>
-                    <span className="text-neo-green text-xs font-black">4.5/5</span>
-                  </div>
-                </div>
+                return (
+                  <line
+                    key={idx}
+                    x1={sourceNode.x}
+                    y1={sourceNode.y}
+                    x2={targetNode.x}
+                    y2={targetNode.y}
+                    stroke="black"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                );
+              })}
+            </svg>
 
-                {/* UI/UX Designer */}
-                <div className="p-4 bg-[#2C001E]/40 border-2 border-black shadow-[4px_4px_0px_0px_#000] flex flex-col justify-between gap-4 rounded-none text-white">
-                  <div className="space-y-2">
-                    <div className="text-neo-pink font-black text-sm uppercase flex items-center gap-1.5">
-                      <span>●</span> UI/UX Designer
-                    </div>
-                    <p className="text-[10px] text-zinc-400 leading-relaxed font-mono">
-                      {lang === "id"
-                        ? "Merancang tata letak antarmuka, wireframing yang intuitif, dan alur prototype ramah pengguna."
-                        : "Designing interface layouts, intuitive wireframing, and user-friendly prototype flows."}
-                    </p>
-                    <div className="text-[9px] text-zinc-300 font-bold border-t border-zinc-800/80 pt-2 font-mono">
-                      Figma, Canva, Wireframing, Prototyping
-                    </div>
+            {/* Nodes Render Layer */}
+            {nodesState.map((node) => {
+              const isCircle = node.type === "center" || node.type === "branch";
+              const isCenter = node.type === "center";
+
+              if (isCircle) {
+                return (
+                  <div
+                    key={node.id}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleStart(node.id, e.clientX, e.clientY);
+                    }}
+                    onTouchStart={(e) => {
+                      handleStart(node.id, e.touches[0].clientX, e.touches[0].clientY);
+                    }}
+                    className={`absolute rounded-full border-4 border-black flex flex-col items-center justify-center font-mono font-black select-none cursor-grab active:cursor-grabbing text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-transform duration-75`}
+                    style={{
+                      left: `${node.x - node.width / 2}px`,
+                      top: `${node.y - node.height / 2}px`,
+                      width: `${node.width}px`,
+                      height: `${node.height}px`,
+                      backgroundColor: node.color,
+                      color: node.textColor,
+                      zIndex: dragNodeId === node.id ? 40 : 20,
+                    }}
+                  >
+                    {isCenter ? (
+                      <>
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider opacity-85 leading-none mb-1 font-bold">Skill Hub</span>
+                        <span className="text-xs sm:text-sm uppercase tracking-tighter leading-none">{node.label}</span>
+                      </>
+                    ) : (
+                      <span className="text-xs sm:text-sm uppercase tracking-tighter leading-none">{node.label}</span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 border border-zinc-800 rounded-none w-fit">
-                    <div className="flex gap-0.5 text-xs">
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="fas fa-star text-neo-yellow"></i>
-                      <i className="far fa-star text-zinc-600"></i>
-                      <i className="far fa-star text-zinc-600"></i>
-                      <i className="far fa-star text-zinc-600"></i>
-                    </div>
-                    <span className="text-neo-yellow text-xs font-black">2.0/5</span>
-                  </div>
-                </div>
-              </div>
+                );
+              }
 
-              {/* Subtitle / CLI prompt banner */}
-              <div className="pt-4 border-t border-zinc-800/60 flex flex-col sm:flex-row justify-between items-start sm:items-center text-zinc-500 text-[10px] gap-2 select-none">
-                <div>* {lang === "id" ? "Berdasarkan pengalaman proyek & jam terbang pengkodean pribadi." : "Based on personal project experience & coding flight hours."}</div>
-                <div className="text-neo-orange font-bold font-mono">ubuntu-desktop v24.04 lts</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Detailed Stack Header Prompt */}
-        <div className="max-w-4xl mx-auto mb-4 px-4 flex items-center text-xs font-mono text-gray-500 reveal reveal-up select-none">
-          <span className="text-neo-green font-bold mr-2">farrel@ubuntu-desktop:~$</span>
-          <span>ls --all detailed_tools/</span>
-        </div>
-
-        {/* Marquee Banner */}
-        <div className="skills-marquee-container border-y-4 border-black bg-neo-yellow mt-4 select-none">
-          <div className="skills-marquee">
-            {[
-              { name: "HTML5", icon: "fab fa-html5", color: "hover:bg-[#E34F26]" },
-              { name: "CSS3", icon: "fab fa-css3-alt", color: "hover:bg-[#1572B6]" },
-              { name: "JavaScript", icon: "fab fa-js", color: "hover:bg-[#F7DF1E]" },
-              { name: "Tailwind CSS", icon: "fas fa-wind", color: "hover:bg-[#06B6D4]" },
-              { name: "React.js", icon: "fab fa-react", color: "hover:bg-[#61DAFB]" },
-              { name: "Next.js", icon: "fas fa-bolt", color: "hover:bg-black" },
-              { name: "PHP", icon: "fab fa-php", color: "hover:bg-[#777BB4]" },
-              { name: "Laravel", icon: "fab fa-laravel", color: "hover:bg-[#FF2D20]" },
-              { name: "MySQL", icon: "fas fa-database", color: "hover:bg-[#4479A1]" },
-              { name: "WordPress", icon: "fab fa-wordpress", color: "hover:bg-[#21759B]" },
-              { name: "Cisco Networking", icon: "fas fa-network-wired", color: "hover:bg-[#1BA0D7]" },
-              { name: "Figma UI/UX", icon: "fab fa-figma", color: "hover:bg-[#F24E1E]" },
-              { name: "GitHub Workspace", icon: "fab fa-github", color: "hover:bg-[#6e5494]" },
-              { name: "Vercel Deployments", icon: "fas fa-rocket", color: "hover:bg-gray-600" },
-              { name: "Postman Testing", icon: "fas fa-envelope", color: "hover:bg-[#FF6C37]" },
-            ].map((skill, sIdx) => (
-              <div
-                key={sIdx}
-                className={`skills-marquee-item group transition-all duration-300 cursor-default ${skill.color}`}
-              >
-                <div className="text-4xl mb-3 text-black group-hover:text-white transition-colors duration-300">
-                  <i className={skill.icon}></i>
+              // Tech Leaf Cards (Rectangles)
+              return (
+                <div
+                  key={node.id}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleStart(node.id, e.clientX, e.clientY);
+                  }}
+                  onTouchStart={(e) => {
+                    handleStart(node.id, e.touches[0].clientX, e.touches[0].clientY);
+                  }}
+                  className="absolute border-4 border-black bg-white text-black flex items-center justify-center gap-1.5 sm:gap-2 font-mono font-black select-none cursor-grab active:cursor-grabbing text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-transform duration-75"
+                  style={{
+                    left: `${node.x - node.width / 2}px`,
+                    top: `${node.y - node.height / 2}px`,
+                    width: `${node.width}px`,
+                    height: `${node.height}px`,
+                    zIndex: dragNodeId === node.id ? 40 : 20,
+                  }}
+                >
+                  {renderNodeIcon(node.id)}
+                  <span className="text-[10px] sm:text-xs uppercase tracking-tight whitespace-nowrap">{node.label}</span>
                 </div>
-                <div className="font-black text-xs sm:text-sm uppercase tracking-wider group-hover:text-white transition-colors">
-                  {skill.name}
-                </div>
-              </div>
-            ))}
-            {/* Loop clone */}
-            {[
-              { name: "HTML5", icon: "fab fa-html5", color: "hover:bg-[#E34F26]" },
-              { name: "CSS3", icon: "fab fa-css3-alt", color: "hover:bg-[#1572B6]" },
-              { name: "JavaScript", icon: "fab fa-js", color: "hover:bg-[#F7DF1E]" },
-              { name: "Tailwind CSS", icon: "fas fa-wind", color: "hover:bg-[#06B6D4]" },
-              { name: "React.js", icon: "fab fa-react", color: "hover:bg-[#61DAFB]" },
-              { name: "Next.js", icon: "fas fa-bolt", color: "hover:bg-black" },
-              { name: "PHP", icon: "fab fa-php", color: "hover:bg-[#777BB4]" },
-              { name: "Laravel", icon: "fab fa-laravel", color: "hover:bg-[#FF2D20]" },
-              { name: "MySQL", icon: "fas fa-database", color: "hover:bg-[#4479A1]" },
-              { name: "WordPress", icon: "fab fa-wordpress", color: "hover:bg-[#21759B]" },
-              { name: "Cisco Networking", icon: "fas fa-network-wired", color: "hover:bg-[#1BA0D7]" },
-              { name: "Figma UI/UX", icon: "fab fa-figma", color: "hover:bg-[#F24E1E]" },
-              { name: "GitHub Workspace", icon: "fab fa-github", color: "hover:bg-[#6e5494]" },
-              { name: "Vercel Deployments", icon: "fas fa-rocket", color: "hover:bg-gray-600" },
-              { name: "Postman Testing", icon: "fas fa-envelope", color: "hover:bg-[#FF6C37]" },
-            ].map((skill, sIdx) => (
-              <div
-                key={`clone-${sIdx}`}
-                className={`skills-marquee-item group transition-all duration-300 cursor-default ${skill.color}`}
-              >
-                <div className="text-4xl mb-3 text-black group-hover:text-white transition-colors duration-300">
-                  <i className={skill.icon}></i>
-                </div>
-                <div className="font-black text-xs sm:text-sm uppercase tracking-wider group-hover:text-white transition-colors">
-                  {skill.name}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
