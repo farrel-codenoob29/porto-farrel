@@ -458,25 +458,22 @@ const navItems = [
   { id: "contact", color: "#FB5607" },
 ];
 
-interface PhysicsNode {
+interface VendingItem {
   id: string;
   label: string;
-  type: "center" | "branch" | "leaf";
-  color: string;
-  textColor: string;
-  width: number;
-  height: number;
+  category: "frontend" | "backend" | "devops";
+  bg: string;
+  textWhite?: boolean;
   x: number;
   y: number;
   vx: number;
   vy: number;
+  width: number;
+  height: number;
+  angle: number;
+  vAngle: number;
   isDragging?: boolean;
-}
-
-interface PhysicsLink {
-  source: string;
-  target: string;
-  length: number;
+  isPopping?: boolean;
 }
 
 export default function Home() {
@@ -517,144 +514,86 @@ export default function Home() {
   const [isTypingSimulated, setIsTypingSimulated] = useState(false);
   const terminalViewportRef = useRef<HTMLDivElement>(null);
 
-  // Skills Gravity Graph States & Refs
+  // Vending Machine States & Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const dragNodeIdRef = useRef<string | null>(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const [dragNodeId, setDragNodeId] = useState<string | null>(null);
-  const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
+  const [activeButton, setActiveButton] = useState<"frontend" | "backend" | "devops" | null>(null);
 
-  const initialNodes = useRef<PhysicsNode[]>([
-    { id: "fullstack", label: "Full Stack", type: "center", color: "#FFD600", textColor: "#000000", width: 110, height: 110, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "frontend", label: "Frontend", type: "branch", color: "#3A86FF", textColor: "#ffffff", width: 90, height: 90, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "backend", label: "Backend", type: "branch", color: "#FF006E", textColor: "#ffffff", width: 90, height: 90, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "react", label: "React.js", type: "leaf", color: "#ffffff", textColor: "#000000", width: 110, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "next", label: "Next.js", type: "leaf", color: "#ffffff", textColor: "#000000", width: 110, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "tailwind", label: "Tailwind CSS", type: "leaf", color: "#ffffff", textColor: "#000000", width: 130, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "js", label: "JavaScript", type: "leaf", color: "#ffffff", textColor: "#000000", width: 120, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "go", label: "Go", type: "leaf", color: "#ffffff", textColor: "#000000", width: 80, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "python", label: "Python", type: "leaf", color: "#ffffff", textColor: "#000000", width: 100, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "csharp", label: "C#", type: "leaf", color: "#ffffff", textColor: "#000000", width: 80, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
-    { id: "laravel", label: "Laravel", type: "leaf", color: "#ffffff", textColor: "#000000", width: 110, height: 46, x: 0, y: 0, vx: 0, vy: 0 },
-  ]);
+  const vendingItemsRef = useRef<VendingItem[]>([]);
+  const [vendingItemsState, setVendingItemsState] = useState<VendingItem[]>([]);
 
-  const initialLinks = useRef<PhysicsLink[]>([
-    { source: "fullstack", target: "frontend", length: 160 },
-    { source: "fullstack", target: "backend", length: 160 },
-    { source: "frontend", target: "react", length: 120 },
-    { source: "frontend", target: "next", length: 120 },
-    { source: "frontend", target: "tailwind", length: 120 },
-    { source: "frontend", target: "js", length: 120 },
-    { source: "backend", target: "go", length: 120 },
-    { source: "backend", target: "python", length: 120 },
-    { source: "backend", target: "csharp", length: 120 },
-    { source: "backend", target: "laravel", length: 120 },
-  ]);
-
-  const nodesRef = useRef<PhysicsNode[]>(JSON.parse(JSON.stringify(initialNodes.current)));
-  const linksRef = useRef<PhysicsLink[]>(JSON.parse(JSON.stringify(initialLinks.current)));
-  const [nodesState, setNodesState] = useState<PhysicsNode[]>(JSON.parse(JSON.stringify(initialNodes.current)));
-
-  const initializeNodePositions = () => {
+  const spawnItems = (category: "frontend" | "backend" | "devops") => {
     const container = containerRef.current;
     if (!container) return;
     const width = container.clientWidth;
-    const height = container.clientHeight;
 
-    setContainerSize({ width, height });
+    const techData: { [key: string]: { label: string; icon: string; bg: string; textWhite?: boolean }[] } = {
+      frontend: [
+        { label: "JavaScript", icon: "javascript", bg: "#F7DF1E" },
+        { label: "TypeScript", icon: "typescript", bg: "#3178C6", textWhite: true },
+        { label: "Dart", icon: "dart", bg: "#0175C2", textWhite: true },
+        { label: "React", icon: "react", bg: "#61DAFB" },
+        { label: "Next JS", icon: "nextdotjs", bg: "#000000", textWhite: true },
+        { label: "Flutter", icon: "flutter", bg: "#02569B", textWhite: true },
+        { label: "Figma", icon: "figma", bg: "#F24E1E", textWhite: true },
+        { label: "Canva", icon: "canva", bg: "#FFFFFF", textWhite: false },
+      ],
+      backend: [
+        { label: "PHP", icon: "php", bg: "#777BB4", textWhite: true },
+        { label: "Python", icon: "python", bg: "#3776AB", textWhite: true },
+        { label: "C#", icon: "csharp", bg: "#512BD4", textWhite: true },
+        { label: "Go", icon: "go", bg: "#00ADD8", textWhite: true },
+        { label: "Laravel", icon: "laravel", bg: "#FF2D20", textWhite: true },
+        { label: "Gin", icon: "gin", bg: "#FFFFFF", textWhite: false },
+        { label: "MySQL", icon: "mysql", bg: "#4479A1", textWhite: true },
+        { label: "SQL Server", icon: "microsoftsqlserver", bg: "#FFFFFF", textWhite: false },
+        { label: "Firebase", icon: "firebase", bg: "#FFCA28" },
+        { label: "PostgreSQL", icon: "postgresql", bg: "#4169E1", textWhite: true },
+      ],
+      devops: [
+        { label: "REST API", icon: "rest", bg: "#009688", textWhite: true },
+        { label: "SOAP API", icon: "soap", bg: "#FF5722", textWhite: true },
+        { label: "GraphQL", icon: "graphql", bg: "#E10098", textWhite: true },
+        { label: "WebSockets", icon: "websockets", bg: "#010101", textWhite: true },
+        { label: "Jenkins", icon: "jenkins", bg: "#D24939", textWhite: true },
+        { label: "Grafana", icon: "grafana", bg: "#FADE2A" },
+        { label: "Prometheus", icon: "prometheus", bg: "#E6522C", textWhite: true },
+        { label: "Proxmox", icon: "proxmox", bg: "#E57000", textWhite: true },
+        { label: "Postman", icon: "postman", bg: "#FF6C37", textWhite: true },
+      ],
+    };
 
+    const itemsToSpawn = techData[category];
     const isMobile = width < 768;
-    const spreadDistance = isMobile ? 75 : 180;
-    const leafDistance = isMobile ? 80 : 140;
+    const size = isMobile ? 44 : 54;
 
-    const nodes = nodesRef.current;
-
-    // Apply dimensions based on viewport
-    nodes.forEach((node) => {
-      if (node.type === "center") {
-        node.width = isMobile ? 85 : 110;
-        node.height = isMobile ? 85 : 110;
-      } else if (node.type === "branch") {
-        node.width = isMobile ? 75 : 90;
-        node.height = isMobile ? 75 : 90;
-      } else {
-        node.height = isMobile ? 38 : 46;
-        if (node.id === "react") node.width = isMobile ? 95 : 110;
-        else if (node.id === "next") node.width = isMobile ? 95 : 110;
-        else if (node.id === "tailwind") node.width = isMobile ? 115 : 130;
-        else if (node.id === "js") node.width = isMobile ? 105 : 120;
-        else if (node.id === "go") node.width = isMobile ? 70 : 80;
-        else if (node.id === "python") node.width = isMobile ? 85 : 100;
-        else if (node.id === "csharp") node.width = isMobile ? 70 : 80;
-        else if (node.id === "laravel") node.width = isMobile ? 95 : 110;
-      }
+    const spawned: VendingItem[] = itemsToSpawn.map((item, idx) => {
+      return {
+        id: `${item.icon}-${Date.now()}-${idx}-${Math.random()}`,
+        label: item.label,
+        category,
+        bg: item.bg,
+        textWhite: item.textWhite,
+        x: width / 2 - 80 + idx * 40 + (Math.random() - 0.5) * 15,
+        y: -60 - idx * 40,
+        vx: (Math.random() - 0.5) * 5,
+        vy: 3 + Math.random() * 3,
+        width: size,
+        height: size,
+        angle: (Math.random() - 0.5) * 45,
+        vAngle: (Math.random() - 0.5) * 6,
+      };
     });
 
-    // Update link lengths dynamically
-    linksRef.current.forEach((link) => {
-      if (link.source === "fullstack" || link.target === "fullstack") {
-        link.length = isMobile ? 95 : 160;
-      } else {
-        link.length = isMobile ? 80 : 120;
-      }
-    });
-
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    // Center node position
-    const fullstack = nodes.find((n) => n.id === "fullstack");
-    if (fullstack) {
-      fullstack.x = centerX;
-      fullstack.y = centerY;
-      fullstack.vx = 0;
-      fullstack.vy = 0;
+    const currentItems = [...vendingItemsRef.current, ...spawned];
+    if (currentItems.length > 30) {
+      currentItems.splice(0, currentItems.length - 30);
     }
 
-    // Branch nodes positions
-    const frontend = nodes.find((n) => n.id === "frontend");
-    if (frontend) {
-      frontend.x = centerX - spreadDistance;
-      frontend.y = centerY - (isMobile ? 55 : 0);
-      frontend.vx = 0;
-      frontend.vy = 0;
-    }
-
-    const backend = nodes.find((n) => n.id === "backend");
-    if (backend) {
-      backend.x = centerX + spreadDistance;
-      backend.y = centerY + (isMobile ? 55 : 0);
-      backend.vx = 0;
-      backend.vy = 0;
-    }
-
-    // Frontend leaves
-    const feLeaves = ["react", "next", "tailwind", "js"];
-    feLeaves.forEach((id, idx) => {
-      const node = nodes.find((n) => n.id === id);
-      if (node) {
-        const angle = Math.PI - 0.7 + idx * 0.45; // angle spread
-        node.x = (centerX - spreadDistance) + Math.cos(angle) * leafDistance;
-        node.y = (centerY - (isMobile ? 55 : 0)) + Math.sin(angle) * leafDistance;
-        node.vx = 0;
-        node.vy = 0;
-      }
-    });
-
-    // Backend leaves
-    const beLeaves = ["go", "python", "csharp", "laravel"];
-    beLeaves.forEach((id, idx) => {
-      const node = nodes.find((n) => n.id === id);
-      if (node) {
-        const angle = -0.7 + idx * 0.45; // angle spread
-        node.x = (centerX + spreadDistance) + Math.cos(angle) * leafDistance;
-        node.y = (centerY + (isMobile ? 55 : 0)) + Math.sin(angle) * leafDistance;
-        node.vx = 0;
-        node.vy = 0;
-      }
-    });
-
-    setNodesState([...nodes]);
+    vendingItemsRef.current = currentItems;
+    setVendingItemsState(currentItems);
   };
 
   const updatePhysics = () => {
@@ -663,140 +602,131 @@ export default function Home() {
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    const nodes = nodesRef.current;
-    const links = linksRef.current;
+    const items = vendingItemsRef.current;
+    const gravity = 0.45;
+    const damping = 0.99;
+    const restitution = 0.55;
+    const collisionRepulsion = 0.4;
 
-    // 1. Repulsion force between all nodes
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const nodeA = nodes[i];
-        const nodeB = nodes[j];
-        const dx = nodeA.x - nodeB.x;
-        const dy = nodeA.y - nodeB.y;
-        let dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 0.1) dist = 0.1;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.isDragging) continue;
 
-        const minDistance = (nodeA.width + nodeB.width) / 2 + 50;
+      if (item.isPopping) {
+        item.vy = -1.5;
+        item.vx = 0;
+        item.x += item.vx;
+        item.y += item.vy;
+        item.angle = 0;
+        item.vAngle = 0;
+        continue;
+      }
+
+      item.vy += gravity;
+      item.vx *= damping;
+      item.vy *= damping;
+
+      item.x += item.vx;
+      item.y += item.vy;
+
+      item.angle += item.vAngle;
+      item.vAngle *= 0.96;
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.isDragging || item.isPopping) continue;
+
+      const halfW = item.width / 2;
+      const halfH = item.height / 2;
+
+      if (item.y > height - halfH) {
+        item.y = height - halfH;
+        item.vy = -item.vy * restitution;
+        item.vx *= 0.75;
+        item.vAngle = -item.vx * 0.1;
+        if (Math.abs(item.vy) < 1.0) item.vy = 0;
+      }
+
+      if (item.x < halfW) {
+        item.x = halfW;
+        item.vx = -item.vx * restitution;
+        item.vAngle = item.vy * 0.1;
+      }
+
+      if (item.x > width - halfW) {
+        item.x = width - halfW;
+        item.vx = -item.vx * restitution;
+        item.vAngle = -item.vy * 0.1;
+      }
+
+      if (item.y < -150) {
+        item.y = -150;
+        item.vy = 0;
+      }
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const itemA = items[i];
+      if (itemA.isDragging || itemA.isPopping) continue;
+
+      for (let j = i + 1; j < items.length; j++) {
+        const itemB = items[j];
+        if (itemB.isDragging || itemB.isPopping) continue;
+
+        const dx = itemB.x - itemA.x;
+        const dy = itemB.y - itemA.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
+
+        const radiusA = Math.max(itemA.width, itemA.height) / 2;
+        const radiusB = Math.max(itemB.width, itemB.height) / 2;
+        const minDistance = radiusA + radiusB;
+
         if (dist < minDistance) {
-          const force = (minDistance - dist) * 0.08;
-          const fx = (dx / dist) * force;
-          const fy = (dy / dist) * force;
+          const overlap = minDistance - dist;
+          const pushX = (dx / dist) * overlap * 0.5;
+          const pushY = (dy / dist) * overlap * 0.5;
 
-          if (!nodeA.isDragging) {
-            nodeA.vx += fx;
-            nodeA.vy += fy;
+          if (!itemA.isDragging) {
+            itemA.x -= pushX;
+            itemA.y -= pushY;
+            itemA.vx -= pushX * collisionRepulsion;
+            itemA.vy -= pushY * collisionRepulsion;
+            itemA.vAngle += (Math.random() - 0.5) * 1.5;
           }
-          if (!nodeB.isDragging) {
-            nodeB.vx -= fx;
-            nodeB.vy -= fy;
+          if (!itemB.isDragging) {
+            itemB.x += pushX;
+            itemB.y += pushY;
+            itemB.vx += pushX * collisionRepulsion;
+            itemB.vy += pushY * collisionRepulsion;
+            itemB.vAngle += (Math.random() - 0.5) * 1.5;
           }
         }
       }
     }
 
-    // 2. Spring force along links (Hooke's Law)
-    for (let i = 0; i < links.length; i++) {
-      const link = links[i];
-      const sourceNode = nodes.find((n) => n.id === link.source);
-      const targetNode = nodes.find((n) => n.id === link.target);
-      if (!sourceNode || !targetNode) continue;
-
-      const dx = targetNode.x - sourceNode.x;
-      const dy = targetNode.y - sourceNode.y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
-      const diff = dist - link.length;
-
-      const springStiffness = 0.045;
-      const fx = (dx / dist) * diff * springStiffness;
-      const fy = (dy / dist) * diff * springStiffness;
-
-      if (!sourceNode.isDragging) {
-        sourceNode.vx += fx;
-        sourceNode.vy += fy;
-      }
-      if (!targetNode.isDragging) {
-        targetNode.vx -= fx;
-        targetNode.vy -= fy;
-      }
-    }
-
-    // 3. Center gravity (keep nodes from drifting off)
-    const centerX = width / 2;
-    const centerY = height / 2;
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      if (node.isDragging) continue;
-
-      const dx = centerX - node.x;
-      const dy = centerY - node.y;
-      const gravity = 0.008;
-      node.vx += dx * gravity;
-      node.vy += dy * gravity;
-    }
-
-    // 4. Update positions & handle friction/boundary collisions
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      if (node.isDragging) continue;
-
-      node.vx *= 0.84; // friction
-      node.vy *= 0.84; // friction
-
-      // Cap max speed
-      const maxSpeed = 15;
-      const speed = Math.hypot(node.vx, node.vy);
-      if (speed > maxSpeed) {
-        node.vx = (node.vx / speed) * maxSpeed;
-        node.vy = (node.vy / speed) * maxSpeed;
-      }
-
-      node.x += node.vx;
-      node.y += node.vy;
-
-      const halfW = node.width / 2;
-      const halfH = node.height / 2;
-
-      if (width > node.width) {
-        if (node.x < halfW) {
-          node.x = halfW;
-          node.vx = -node.vx * 0.4;
-        } else if (node.x > width - halfW) {
-          node.x = width - halfW;
-          node.vx = -node.vx * 0.4;
-        }
-      }
-
-      if (height > node.height) {
-        if (node.y < halfH) {
-          node.y = halfH;
-          node.vy = -node.vy * 0.4;
-        } else if (node.y > height - halfH) {
-          node.y = height - halfH;
-          node.vy = -node.vy * 0.4;
-        }
-      }
-    }
-
-    setNodesState([...nodes]);
+    setVendingItemsState([...items]);
   };
 
-  const handleStart = (nodeId: string, clientX: number, clientY: number) => {
+  const handleStart = (itemId: string, clientX: number, clientY: number) => {
     const container = containerRef.current;
     if (!container) return;
     const rect = container.getBoundingClientRect();
     const x = clientX - rect.left;
     const y = clientY - rect.top;
 
-    const node = nodesRef.current.find((n) => n.id === nodeId);
-    if (!node) return;
+    const item = vendingItemsRef.current.find((it) => it.id === itemId);
+    if (!item) return;
 
-    dragNodeIdRef.current = nodeId;
-    setDragNodeId(nodeId);
-    node.isDragging = true;
+    dragNodeIdRef.current = itemId;
+    setDragNodeId(itemId);
+    item.isDragging = true;
+    item.angle = 0;
+    item.vAngle = 0;
 
     dragOffsetRef.current = {
-      x: x - node.x,
-      y: y - node.y,
+      x: x - item.x,
+      y: y - item.y,
     };
   };
 
@@ -808,25 +738,28 @@ export default function Home() {
     const x = clientX - rect.left;
     const y = clientY - rect.top;
 
-    const node = nodesRef.current.find((n) => n.id === dragNodeIdRef.current);
-    if (!node) return;
+    const item = vendingItemsRef.current.find((it) => it.id === dragNodeIdRef.current);
+    if (!item) return;
 
     const targetX = x - dragOffsetRef.current.x;
     const targetY = y - dragOffsetRef.current.y;
 
-    // Instant velocity for throwing
-    node.vx = (targetX - node.x) * 0.4;
-    node.vy = (targetY - node.y) * 0.4;
+    item.vx = (targetX - item.x) * 0.4;
+    item.vy = (targetY - item.y) * 0.4;
 
-    node.x = targetX;
-    node.y = targetY;
+    item.x = targetX;
+    item.y = targetY;
+    item.angle = 0;
+    item.vAngle = 0;
   };
 
   const handleEnd = () => {
     if (!dragNodeIdRef.current) return;
-    const node = nodesRef.current.find((n) => n.id === dragNodeIdRef.current);
-    if (node) {
-      node.isDragging = false;
+    const item = vendingItemsRef.current.find((it) => it.id === dragNodeIdRef.current);
+    if (item) {
+      item.isDragging = false;
+      item.angle = 0;
+      item.vAngle = 0;
     }
     dragNodeIdRef.current = null;
     setDragNodeId(null);
@@ -878,42 +811,85 @@ export default function Home() {
     return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
 
-    const timer = setTimeout(() => {
-      initializeNodePositions();
-    }, 150);
 
-    const handleResize = () => {
-      initializeNodePositions();
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [mounted]);
-
-  const renderNodeIcon = (id: string) => {
+  const renderNodeIcon = (id: string, textWhite?: boolean) => {
     switch (id) {
-      case "react":
-        return <img src="https://cdn.simpleicons.org/react/61DAFB" alt="React" className="w-5 h-5 object-contain flex-shrink-0" />;
-      case "next":
-        return <img src="https://cdn.simpleicons.org/nextdotjs/000000" alt="Next.js" className="w-5 h-5 dark:invert object-contain flex-shrink-0" />;
-      case "tailwind":
-        return <img src="https://cdn.simpleicons.org/tailwindcss/06B6D4" alt="Tailwind CSS" className="w-5 h-5 object-contain flex-shrink-0" />;
-      case "js":
-        return <img src="https://cdn.simpleicons.org/javascript/F7DF1E" alt="JavaScript" className="w-5 h-5 object-contain flex-shrink-0" />;
-      case "go":
-        return <img src="https://cdn.simpleicons.org/go/00ADD8" alt="Go" className="w-5 h-5 object-contain flex-shrink-0" />;
+      case "php":
+        return <img src="https://cdn.simpleicons.org/php/ffffff" alt="PHP" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "dart":
+        return <img src="https://cdn.simpleicons.org/dart/ffffff" alt="Dart" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
       case "python":
-        return <img src="https://cdn.simpleicons.org/python/3776AB" alt="Python" className="w-5 h-5 object-contain flex-shrink-0" />;
+        return <img src="https://cdn.simpleicons.org/python/ffffff" alt="Python" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
       case "csharp":
-        return <img src="https://cdn.simpleicons.org/csharp/239120" alt="C#" className="w-5 h-5 object-contain flex-shrink-0" />;
+        return <img src="/img/csharp.png" alt="C#" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "javascript":
+        return <img src="https://cdn.simpleicons.org/javascript/000000" alt="JavaScript" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "typescript":
+        return <img src="https://cdn.simpleicons.org/typescript/ffffff" alt="TypeScript" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "go":
+        return <img src="https://cdn.simpleicons.org/go/ffffff" alt="Go" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
       case "laravel":
-        return <img src="https://cdn.simpleicons.org/laravel/FF2D20" alt="Laravel" className="w-5 h-5 object-contain flex-shrink-0" />;
+        return <img src="https://cdn.simpleicons.org/laravel/ffffff" alt="Laravel" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "flutter":
+        return <img src="https://cdn.simpleicons.org/flutter/ffffff" alt="Flutter" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "react":
+        return <img src="https://cdn.simpleicons.org/react/000000" alt="React" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "nextdotjs":
+        return <img src="/img/nextjs.png" alt="Next.js" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "gin":
+        return <img src="/img/gin.png" alt="Gin" className="w-8 h-8 sm:w-10 sm:h-10 object-contain flex-shrink-0" />;
+      case "mysql":
+        return <img src="https://cdn.simpleicons.org/mysql/ffffff" alt="MySQL" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "microsoftsqlserver":
+        return <img src="/img/sqlserver.png" alt="SQL Server" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "firebase":
+        return <img src="https://cdn.simpleicons.org/firebase/000000" alt="Firebase" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "postgresql":
+        return <img src="https://cdn.simpleicons.org/postgresql/ffffff" alt="PostgreSQL" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "rest":
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0 text-white">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+          </svg>
+        );
+      case "soap":
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0 text-white">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <path d="M8 13h8M8 17h8" />
+          </svg>
+        );
+      case "graphql":
+        return <img src="https://cdn.simpleicons.org/graphql/ffffff" alt="GraphQL" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "websockets":
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0 text-white">
+            <polyline points="17 1 21 5 17 9" />
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+            <polyline points="7 23 3 19 7 15" />
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+          </svg>
+        );
+      case "jenkins":
+        return <img src="https://cdn.simpleicons.org/jenkins/ffffff" alt="Jenkins" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "grafana":
+        return <img src="https://cdn.simpleicons.org/grafana/000000" alt="Grafana" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "prometheus":
+        return <img src="https://cdn.simpleicons.org/prometheus/ffffff" alt="Prometheus" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "proxmox":
+        return <img src="https://cdn.simpleicons.org/proxmox/ffffff" alt="Proxmox" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "postman":
+        return <img src="https://cdn.simpleicons.org/postman/ffffff" alt="Postman" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "figma":
+        return <img src="https://cdn.simpleicons.org/figma/ffffff" alt="Figma" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
+      case "canva":
+        return <img src="/img/canva.png" alt="Canva" className="w-5 h-5 sm:w-6 sm:h-6 object-contain flex-shrink-0" />;
       default:
         return null;
     }
@@ -2430,111 +2406,178 @@ export default function Home() {
           </h2>
         </div>
 
-        {/* Interactive Mindmap Container */}
-        <div className="max-w-5xl mx-auto px-4 reveal reveal-up select-none">
-          <div
-            ref={containerRef}
-            className="w-full h-[500px] sm:h-[600px] border-4 border-black bg-white relative overflow-hidden shadow-neo-lg select-none"
-          >
-            {/* Mindmap Hint Banner */}
-            <div className="absolute top-4 left-4 bg-neo-green text-black border-2 border-black font-mono font-black text-[9px] sm:text-xs uppercase tracking-widest px-3 py-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-30 select-none">
-              {lang === "id" ? "● DRAG & LEMPAR NODE UNTUK BERMAIN!" : "● DRAG & THROW NODES TO PLAY!"}
+        {/* Interactive Vending Machine Illustration */}
+        <div className="max-w-4xl mx-auto px-4 reveal reveal-up select-none">
+          <div className="bg-[#8338EC] border-[6px] border-black shadow-neo-xl p-4 sm:p-6 relative rounded-none flex flex-col items-stretch select-none">
+            {/* Machine Header Banner */}
+            <div className="bg-black text-white font-mono border-b-4 border-black p-3 mb-4 select-none text-center">
+              <div className="text-lg sm:text-2xl font-black tracking-widest animate-pulse">👾 Farrel's Tech Stack 👾</div>
+              <div className="text-[9px] sm:text-xs text-neo-green font-bold tracking-wider mt-1 uppercase">
+                {lang === "id" ? "MASUKKAN KOIN & TEKAN TOMBOL UNTUK MENGAMBIL SKILL!" : "INSERT COIN & PRESS BUTTON TO COLLECT SKILLS"}
+              </div>
             </div>
 
-            {/* Reset Button */}
-            <button
-              onClick={initializeNodePositions}
-              className="absolute bottom-4 right-4 bg-neo-pink text-white font-mono font-black text-[10px] sm:text-xs uppercase tracking-widest px-3 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-neo-pink/90 active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all z-30 cursor-pointer"
+            {/* Display Screen Box (Glass Window) */}
+            <div
+              ref={containerRef}
+              className="w-full h-[360px] sm:h-[450px] border-4 border-black bg-zinc-900 relative overflow-hidden shadow-inner select-none mb-6"
+              style={{
+                backgroundImage: "radial-gradient(rgba(0, 0, 0, 0.35) 1.5px, transparent 1.5px)",
+                backgroundSize: "20px 20px"
+              }}
             >
-              Reset Graph
-            </button>
+              {/* Inner screen glass glare reflection overlays */}
+              <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/10 via-transparent to-black/20 z-30" />
+              <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.15)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] z-30" />
 
-            {/* SVG Connections Line Layer */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-              {linksRef.current.map((link, idx) => {
-                const sourceNode = nodesState.find((n) => n.id === link.source);
-                const targetNode = nodesState.find((n) => n.id === link.target);
-                if (!sourceNode || !targetNode) return null;
-
-                return (
-                  <line
-                    key={idx}
-                    x1={sourceNode.x}
-                    y1={sourceNode.y}
-                    x2={targetNode.x}
-                    y2={targetNode.y}
-                    stroke="black"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                  />
-                );
-              })}
-            </svg>
-
-            {/* Nodes Render Layer */}
-            {nodesState.map((node) => {
-              const isCircle = node.type === "center" || node.type === "branch";
-              const isCenter = node.type === "center";
-
-              if (isCircle) {
-                return (
-                  <div
-                    key={node.id}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleStart(node.id, e.clientX, e.clientY);
-                    }}
-                    onTouchStart={(e) => {
-                      handleStart(node.id, e.touches[0].clientX, e.touches[0].clientY);
-                    }}
-                    className={`absolute rounded-full border-4 border-black flex flex-col items-center justify-center font-mono font-black select-none cursor-grab active:cursor-grabbing text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-transform duration-75`}
-                    style={{
-                      left: `${node.x - node.width / 2}px`,
-                      top: `${node.y - node.height / 2}px`,
-                      width: `${node.width}px`,
-                      height: `${node.height}px`,
-                      backgroundColor: node.color,
-                      color: node.textColor,
-                      zIndex: dragNodeId === node.id ? 40 : 20,
-                    }}
-                  >
-                    {isCenter ? (
-                      <>
-                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider opacity-85 leading-none mb-1 font-bold">Skill Hub</span>
-                        <span className="text-xs sm:text-sm uppercase tracking-tighter leading-none">{node.label}</span>
-                      </>
-                    ) : (
-                      <span className="text-xs sm:text-sm uppercase tracking-tighter leading-none">{node.label}</span>
-                    )}
+              {/* Empty display screen text instructions helper */}
+              {vendingItemsState.length === 0 && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-zinc-500 font-mono select-none">
+                  <i className="fas fa-coins text-4xl sm:text-5xl text-neo-yellow/30 mb-3 animate-bounce"></i>
+                  <div className="text-sm font-black uppercase tracking-wider text-zinc-400">
+                    {lang === "id" ? "Mesin Kosong" : "Machine is Empty"}
                   </div>
-                );
-              }
+                  <div className="text-[10px] text-zinc-500 mt-1 uppercase leading-relaxed max-w-[280px]">
+                    {lang === "id" ? "Tekan tombol di bawah untuk menjatuhkan kapsul keahlian!" : "Press any button below to drop skill capsules!"}
+                  </div>
+                </div>
+              )}
 
-              // Tech Leaf Cards (Rectangles)
-              return (
+              {/* Falling Capsule Cards Layer */}
+              {vendingItemsState.map((item) => (
                 <div
-                  key={node.id}
+                  key={item.id}
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    handleStart(node.id, e.clientX, e.clientY);
+                    handleStart(item.id, e.clientX, e.clientY);
                   }}
                   onTouchStart={(e) => {
-                    handleStart(node.id, e.touches[0].clientX, e.touches[0].clientY);
+                    handleStart(item.id, e.touches[0].clientX, e.touches[0].clientY);
                   }}
-                  className="absolute border-4 border-black bg-white text-black flex items-center justify-center gap-1.5 sm:gap-2 font-mono font-black select-none cursor-grab active:cursor-grabbing text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:scale-105 active:scale-95 transition-transform duration-75"
                   style={{
-                    left: `${node.x - node.width / 2}px`,
-                    top: `${node.y - node.height / 2}px`,
-                    width: `${node.width}px`,
-                    height: `${node.height}px`,
-                    zIndex: dragNodeId === node.id ? 40 : 20,
+                    left: `${item.x - item.width / 2}px`,
+                    top: `${item.y - item.height / 2}px`,
+                    width: `${item.width}px`,
+                    height: `${item.height}px`,
+                    transform: `rotate(${dragNodeId === item.id ? 0 : item.angle}deg)`,
+                    backgroundColor: item.bg,
+                    zIndex: dragNodeId === item.id ? 40 : 20,
                   }}
+                  className={`absolute rounded-full border-4 border-black flex items-center justify-center font-mono font-black select-none cursor-grab active:cursor-grabbing text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-transform duration-75 group ${
+                    item.isPopping ? "animate-pop-out pointer-events-none" : ""
+                  }`}
                 >
-                  {renderNodeIcon(node.id)}
-                  <span className="text-[10px] sm:text-xs uppercase tracking-tight whitespace-nowrap">{node.label}</span>
+                  {renderNodeIcon(item.id.split("-")[0], item.textWhite)}
+
+                  {/* HTML Hover Tooltip */}
+                  <div className={`absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-200 z-50 flex flex-col items-center ${
+                    dragNodeId === item.id 
+                      ? "opacity-100 translate-y-0 scale-105" 
+                      : "opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-1"
+                  }`}>
+                    <div className="bg-black text-white text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1.5 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] whitespace-nowrap">
+                      {item.label}
+                    </div>
+                    <div className="w-2.5 h-2.5 bg-black border-r-2 border-b-2 border-black transform rotate-45 -mt-1.5 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"></div>
+                  </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+
+            {/* Control Panel Deck Console */}
+            <div className="bg-zinc-800 border-4 border-black p-4 mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="text-zinc-400 font-mono text-[9px] sm:text-[10px] uppercase tracking-widest text-center mb-3 font-bold select-none">
+                🎮 CONTROL PANEL - DROP CATEGORIES 🎮
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                {/* Frontend & Design */}
+                <button
+                  onClick={() => {
+                    setActiveButton("frontend");
+                    spawnItems("frontend");
+                    setTimeout(() => setActiveButton(null), 150);
+                  }}
+                  className={`neo-btn py-3 bg-neo-yellow text-black border-2 border-black font-mono font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer ${
+                    activeButton === "frontend" ? "translate-x-[1px] translate-y-[1px] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : ""
+                  }`}
+                >
+                  Frontend & Design
+                </button>
+
+                {/* Backend & Database */}
+                <button
+                  onClick={() => {
+                    setActiveButton("backend");
+                    spawnItems("backend");
+                    setTimeout(() => setActiveButton(null), 150);
+                  }}
+                  className={`neo-btn py-3 bg-neo-blue text-white border-2 border-black font-mono font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer ${
+                    activeButton === "backend" ? "translate-x-[1px] translate-y-[1px] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : ""
+                  }`}
+                >
+                  Backend & Database
+                </button>
+
+                {/* DevOps & API */}
+                <button
+                  onClick={() => {
+                    setActiveButton("devops");
+                    spawnItems("devops");
+                    setTimeout(() => setActiveButton(null), 150);
+                  }}
+                  className={`neo-btn py-3 bg-neo-green text-black border-2 border-black font-mono font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer ${
+                    activeButton === "devops" ? "translate-x-[1px] translate-y-[1px] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : ""
+                  }`}
+                >
+                  DevOps & API
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom Retriever slots Decals */}
+            <div className="flex justify-between items-stretch gap-6 h-20">
+              {/* Prize Slot tray dispenser */}
+              <div className="flex-1 bg-zinc-950 border-4 border-black shadow-inner relative flex items-center justify-center">
+                <div className="w-4/5 h-[80%] bg-zinc-900 border-2 border-zinc-800 rounded-sm flex items-center justify-center text-[9px] font-mono text-zinc-600 font-bold select-none uppercase">
+                  Prize Slot
+                </div>
+                {/* Grab / Clear button when items exist */}
+                {vendingItemsState.length > 0 && (
+                  <button
+                    onClick={() => {
+                      // Don't trigger again if already popping
+                      if (vendingItemsRef.current.some(it => it.isPopping)) return;
+                      
+                      vendingItemsRef.current = vendingItemsRef.current.map((item) => ({
+                        ...item,
+                        isPopping: true,
+                      }));
+                      setVendingItemsState([...vendingItemsRef.current]);
+
+                      // Clear items after pop-out animation (350ms)
+                      setTimeout(() => {
+                        vendingItemsRef.current = [];
+                        setVendingItemsState([]);
+                      }, 350);
+                    }}
+                    className="absolute inset-0 bg-neo-green text-black border-2 border-black font-mono font-black text-[9px] sm:text-xs uppercase tracking-widest flex items-center justify-center hover:bg-emerald-400 active:scale-95 transition-all cursor-pointer"
+                  >
+                    ♻️ {lang === "id" ? "AMBIL / BERSIHKAN" : "GRAB / CLEAR ALL"}
+                  </button>
+                )}
+              </div>
+
+              {/* Coin Slot entry interface */}
+              <div className="w-24 bg-zinc-900 border-4 border-black flex flex-col justify-around items-center p-1.5 shadow-md">
+                <div className="w-10 h-2 bg-black border border-zinc-700 rounded-sm animate-pulse" />
+                <span className="text-[7px] text-zinc-500 font-mono font-bold tracking-widest select-none uppercase">COIN ENTRY</span>
+                <div className="w-6 h-6 bg-zinc-950 border-2 border-black rounded-full flex items-center justify-center text-[8px] font-mono text-neo-orange font-black select-none">
+                  $
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
