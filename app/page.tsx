@@ -178,6 +178,145 @@ const SafeImage = ({ src, alt, className }: { src: string; alt: string; classNam
     />
   );
 };
+
+const renderTagIcon = (tag: { name: string; icon: string }) => {
+  const nameLower = tag.name.toLowerCase();
+  
+  if (nameLower === "typescript") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/typescript/ffffff"
+        alt="TypeScript"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "tailwindcss") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/tailwindcss/000000"
+        alt="TailwindCSS"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "mysql") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/mysql/ffffff"
+        alt="MySQL"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "go" || nameLower === "golang") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/go/000000"
+        alt="Go"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "postgresql" || nameLower === "postgres") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/postgresql/ffffff"
+        alt="PostgreSQL"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "shadcn/ui" || nameLower === "shadcn" || nameLower === "shadcnui") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-5 h-5 md:w-7 md:h-7 object-contain">
+        <line x1="16.5" y1="4.5" x2="10.5" y2="19.5" />
+        <line x1="12" y1="4.5" x2="6" y2="19.5" />
+      </svg>
+    );
+  }
+  if (nameLower === "tensorflow") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/tensorflow/ffffff"
+        alt="TensorFlow"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "numpy") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/numpy/ffffff"
+        alt="NumPy"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "opencv") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/opencv/ffffff"
+        alt="OpenCV"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "keras") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/keras/ffffff"
+        alt="Keras"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "scikit-learn" || nameLower === "scikitlearn") {
+    return (
+      <img
+        src="https://cdn.simpleicons.org/scikitlearn/ffffff"
+        alt="Scikit-Learn"
+        className="w-full h-full object-contain"
+      />
+    );
+  }
+  if (nameLower === "mediapipe") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-5 h-5 md:w-7 md:h-7 object-contain">
+        <circle cx="12" cy="5" r="2" />
+        <circle cx="5" cy="12" r="2" />
+        <circle cx="19" cy="12" r="2" />
+        <circle cx="12" cy="19" r="2" />
+        <line x1="12" y1="7" x2="5.5" y2="10.5" />
+        <line x1="12" y1="7" x2="18.5" y2="10.5" />
+        <line x1="5.5" y1="13.5" x2="12" y2="17" />
+        <line x1="18.5" y1="13.5" x2="12" y2="17" />
+      </svg>
+    );
+  }
+  if (nameLower === "pygame") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 md:w-7 md:h-7 object-contain">
+        <rect x="2" y="6" width="20" height="12" rx="3" />
+        <line x1="6" y1="12" x2="10" y2="12" />
+        <line x1="8" y1="10" x2="8" y2="14" />
+        <circle cx="15.5" cy="12" r="1.5" fill="currentColor" />
+        <circle cx="18.5" cy="12" r="1.5" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (nameLower === "pyttsx3") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-5 h-5 md:w-7 md:h-7 object-contain">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" />
+        <path d="M15.5 8.5a4 4 0 0 1 0 7" />
+        <path d="M18.5 5.5a8 8 0 0 1 0 13" />
+      </svg>
+    );
+  }
+  return <i className={`${tag.icon} text-sm md:text-xl`}></i>;
+};
+
 // Draggable Neobrutalist Shape Component for Hero section
 const DraggableShape = ({
   initialClass,
@@ -344,6 +483,9 @@ export default function Home() {
     desc: string;
   } | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [activeImageLightbox, setActiveImageLightbox] = useState<string | null>(null);
+  const hasDraggedCard = useRef(false);
+  const [activeDropdownIndex, setActiveDropdownIndex] = useState<number | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
@@ -353,6 +495,17 @@ export default function Home() {
   const [terminalInput, setTerminalInput] = useState("");
   const [isTypingSimulated, setIsTypingSimulated] = useState(false);
   const terminalViewportRef = useRef<HTMLDivElement>(null);
+
+  // Close active dropdown when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      setActiveDropdownIndex(null);
+    };
+    window.addEventListener("click", handleOutsideClick);
+    return () => {
+      window.removeEventListener("click", handleOutsideClick);
+    };
+  }, []);
 
   // Calculate remaining count based on how many cards are currently on screen (dir is null)
   const remainingCount = cardOffsets.filter((o) => o.dir === null).length;
@@ -814,6 +967,7 @@ export default function Home() {
   const handleDragStart = (clientX: number, clientY: number) => {
     if (activeIndex >= 7) return;
     setIsDraggingCard(true);
+    hasDraggedCard.current = false;
     dragStartPos.current = { x: clientX - dragOffset.x, y: clientY - dragOffset.y };
   };
 
@@ -821,6 +975,9 @@ export default function Home() {
     if (!isDraggingCard) return;
     const newX = clientX - dragStartPos.current.x;
     const newY = clientY - dragStartPos.current.y;
+    if (Math.abs(newX) > 5 || Math.abs(newY) > 5) {
+      hasDraggedCard.current = true;
+    }
     // Limit vertical drag for swiping stability
     setDragOffset({ x: newX, y: newY * 0.4 });
   };
@@ -979,84 +1136,115 @@ export default function Home() {
       titleEn: "SignFlow",
       descId: "SignFlow adalah aplikasi penerjemah bahasa isyarat berbasis AI secara real-time. Program ini dirancang untuk mendobrak batasan komunikasi dan membantu teman-teman tunarungu serta tunawicara berinteraksi dengan lebih mudah dan inklusif.",
       descEn: "SignFlow is a real-time AI sign language translator. This program is designed to break down communication barriers and empower seamless, inclusive interactions for the deaf and speech-impaired community.",
-      image: "/img/retro_pixel_quest.png",
+      image: "/img/projects-preview/signflow.png",
       tags: [
-        { name: "JavaScript", icon: "fab fa-js", color: "bg-[#F7DF1E] text-black" },
-        { name: "HTML5 Canvas", icon: "fab fa-html5", color: "bg-[#E34F26] text-white" },
+        {
+          name: "Python",
+          icon: "fab fa-python",
+          color: "bg-[#3776AB] text-white",
+          url: "https://www.python.org/",
+          libraries: [
+            { name: "TensorFlow", icon: "svg", color: "bg-[#FF6F00] text-white", url: "https://www.tensorflow.org/" },
+            { name: "OpenCV", icon: "svg", color: "bg-[#5C3EE8] text-white", url: "https://opencv.org/" },
+            { name: "NumPy", icon: "svg", color: "bg-[#013243] text-white", url: "https://numpy.org/" },
+            { name: "MediaPipe", icon: "svg", color: "bg-[#007FFF] text-white", url: "https://google.github.io/mediapipe/" },
+            { name: "Pyttsx3", icon: "svg", color: "bg-[#34495E] text-white", url: "https://pypi.org/project/pyttsx3/" },
+            { name: "Scikit-Learn", icon: "svg", color: "bg-[#F89939] text-white", url: "https://scikit-learn.org/" },
+            { name: "Keras", icon: "svg", color: "bg-[#D00000] text-white", url: "https://keras.io/" },
+          ]
+        },
       ],
       repoUrl: "https://github.com/farrel-codenoob29/HandGestureAI",
     },
     {
-      titleId: "SERANGAN ANGKASA (SPACE NEO)",
-      titleEn: "SPACE INVADERS NEO",
-      descId: "Retro space shooter arcade terinspirasi oleh era keemasan game kabinet. Hancurkan armada alien pixel dengan meriam laser canggih.",
-      descEn: "Retro space shooter arcade inspired by the golden cabinet gaming era. Destroy pixel alien fleets using high-tech laser cannons.",
-      image: "/img/retro_space_neo.png",
+      titleId: "Amerta AI",
+      titleEn: "Amerta AI",
+      descId: "Amerta AI adalah asisten bisnis pintar berbasis kecerdasan buatan (AI) yang dirancang untuk para pengusaha. Baik untuk bisnis yang baru merintis maupun yang sudah berkembang, Amerta menyederhanakan operasional Anda melalui pencatatan keuangan terintegrasi, manajemen stok barang, dan analisis data cerdas (AI insights) untuk mendukung keputusan bisnis yang lebih baik.",
+      descEn: "Amerta AI is an intelligent, AI-powered business assistant tailored for entrepreneurs and business owners. Whether you are launching a startup or scaling an established enterprise, Amerta streamlines your operations with seamless financial tracking, inventory management, and actionable AI insights to drive smarter business decisions.",
+      image: "/img/projects-preview/amerta.png",
       tags: [
-        { name: "Next.js", icon: "fas fa-bolt", color: "bg-black text-white" },
-        { name: "Web Audio API", icon: "fas fa-volume-up", color: "bg-neo-purple text-white" },
+        { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white", url: "https://laravel.com/" },
+        { name: "JavaScript", icon: "fab fa-js", color: "bg-[#F7DF1E] text-black", url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript" },
+        { name: "TailwindCSS", icon: "svg", color: "bg-[#38BDF8] text-black", url: "https://tailwindcss.com/" },
+        { name: "MySQL", icon: "svg", color: "bg-[#00758F] text-white", url: "https://www.mysql.com/" },
       ],
-      repoUrl: "https://github.com/farrel-codenoob29/space-neo",
+      repoUrl: "https://github.com/farrel-codenoob29/amerta-ai",
     },
     {
-      titleId: "PENGHANCUR BATA (BRICK BREAKER)",
-      titleEn: "BRICK BREAKER RETRO",
-      descId: "Game penghancur bata dengan efek partikel menyala, papan pantul neobrutalis, dan tantangan fisika yang menantang refleks Anda.",
-      descEn: "A brick-breaking game featuring glowing particle effects, a neobrutalist paddle, and physics challenges that test your reflexes.",
-      image: "/img/retro_brick_breaker.png",
+      titleId: "Sistem Monitor Otomatis LibreNMS",
+      titleEn: "Automatic Monitoring System LibreNMS",
+      descId: "LibreNMS Report Automator adalah platform manajemen jaringan yang mengotomatisasi pemantauan data dari LibreNMS. Sistem ini dirancang khusus untuk menyederhanakan pengelolaan infrastruktur perangkat keras berskala besar—seperti router dan server—dengan melacak status perangkat secara real-time dan menghasilkan laporan harian otomatis berformat PDF secara efisien.",
+      descEn: "LibreNMS Report Automator is a network management platform that automates device monitoring from LibreNMS. Tailored to streamline the administration of large-scale hardware infrastructures—such as routers and servers—this system tracks real-time device status and efficiently generates automated daily PDF reports for effortless network oversight.",
+      image: "/img/projects-preview/libre.png",
       tags: [
-        { name: "React.js", icon: "fab fa-react", color: "bg-[#61DAFB] text-black" },
-        { name: "Tailwind CSS", icon: "fas fa-wind", color: "bg-[#06B6D4] text-white" },
+        { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white", url: "https://laravel.com/" },
+        { name: "JavaScript", icon: "fab fa-js", color: "bg-[#F7DF1E] text-black", url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript" },
+        { name: "TailwindCSS", icon: "svg", color: "bg-[#38BDF8] text-black", url: "https://tailwindcss.com/" },
+        { name: "MySQL", icon: "svg", color: "bg-[#00758F] text-white", url: "https://www.mysql.com/" },
       ],
-      repoUrl: "https://github.com/farrel-codenoob29/brick-breaker",
+      repoUrl: "https://github.com/farrel-codenoob29/librenms_automation_system",
     },
     {
-      titleId: "LABIRIN PIXEL (PAC-RUNNER)",
-      titleEn: "PAC-RUNNER RETRO",
-      descId: "Pandu karakter kuning Anda melintasi labirin neon yang rumit, kumpulkan koin, dan hindari kejaran hantu pixel pintar.",
-      descEn: "Guide your yellow character through intricate neon mazes, collect coins, and avoid smart chasing pixel ghosts.",
-      image: "/img/retro_maze_runner.png",
+      titleId: "Website Pengaduan Aspirasi Sekolah",
+      titleEn: "School Aspirations Complaint Website",
+      descId: "Layanan Pengaduan Siswa adalah platform interaktif yang memudahkan siswa untuk menyampaikan laporan, keluhan, maupun aspirasi secara aman. Sistem ini terintegrasi dengan dasbor admin untuk meninjau dan menindaklanjuti setiap masukan, bertujuan untuk menciptakan lingkungan sekolah yang lebih transparan, responsif, dan nyaman bagi semua pihak.",
+      descEn: "Student Grievance & Aspiration Portal is an interactive platform designed to help students safely submit reports, complaints, and ideas. Equipped with a dedicated admin dashboard for reviewing and processing submissions, this system aims to foster a more transparent, responsive, and supportive school environment for everyone.",
+      image: "/img/projects-preview/pengaduan.png",
       tags: [
-        { name: "TypeScript", icon: "fas fa-code", color: "bg-neo-blue text-white" },
-        { name: "HTML5 Canvas", icon: "fab fa-html5", color: "bg-[#E34F26] text-white" },
+        { name: "React", icon: "fab fa-react", color: "bg-[#61DAFB] text-black", url: "https://react.dev/" },
+        { name: "TailwindCSS", icon: "svg", color: "bg-[#38BDF8] text-black", url: "https://tailwindcss.com/" },
+        { name: "Golang", icon: "svg", color: "bg-[#00ADD8] text-black", url: "https://go.dev/" },
+        { name: "PostgreSQL", icon: "svg", color: "bg-[#336791] text-white", url: "https://www.postgresql.org/" },
       ],
-      repoUrl: "https://github.com/farrel-codenoob29/maze-runner",
+      repoUrls: [
+        { labelId: "Frontend", labelEn: "Frontend", url: "https://github.com/farrel-codenoob29/Frontend-pengaduan-UKK" },
+        { labelId: "Backend", labelEn: "Backend", url: "https://github.com/farrel-codenoob29/Backend-Pengaduan-UKK" },
+      ],
     },
     {
-      titleId: "DUNGEON 8-BIT (DUNGEON CRAWLER)",
-      titleEn: "8-BIT DUNGEON EXPLORER",
-      descId: "Eksplorasi labirin bawah tanah top-down klasik, kalahkan monster pixel, kumpulkan kunci rahasia, dan cari jalan keluar legendaris.",
-      descEn: "Classic top-down dungeon crawler exploration, defeat pixel monsters, collect secret keys, and find the legendary exit.",
-      image: "/img/retro_dungeon_8bit.png",
+      titleId: "Komponen UI Website",
+      titleEn: "Website UI Components",
+      descId: "Komponen UI Website adalah pustaka komponen UI yang terinspirasi dari gaya desain shadcn/ui, dikembangkan secara khusus menggunakan Laravel dan Tailwind CSS. Projek ini menyediakan koleksi komponen modular yang siap pakai dan mudah disesuaikan—mulai dari navbar, sidebar, hingga dropdown—untuk membantu developer membangun antarmuka web yang modern dan responsif dengan jauh lebih cepat.",
+      descEn: "Website UI Components is a UI component library inspired by the design philosophy of shadcn/ui, built specifically with Laravel and Tailwind CSS. It offers a collection of highly customizable, ready-to-use modular components—including navbars, sidebars, and dropdowns—designed to help developers rapidly build modern and responsive web interfaces.",
+      image: "/img/projects-preview/uicom.png",
       tags: [
-        { name: "JavaScript", icon: "fab fa-js", color: "bg-[#F7DF1E] text-black" },
-        { name: "CSS Grid", icon: "fab fa-css3-alt", color: "bg-[#1572B6] text-white" },
+        { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white", url: "https://laravel.com/" },
+        { name: "TailwindCSS", icon: "svg", color: "bg-[#38BDF8] text-black", url: "https://tailwindcss.com/" },
+        { name: "shadcn/ui", icon: "svg", color: "bg-[#000000] text-white", url: "https://ui.shadcn.com/" },
       ],
-      repoUrl: "https://github.com/farrel-codenoob29/dungeon-8bit",
+      repoUrl: "https://github.com/farrel-codenoob29/ui-component",
     },
     {
-      titleId: "BALAPAN RETRO (ARCADE DRIFT)",
-      titleEn: "ARCADE DRIFT RACER",
-      descId: "Sensasi balap mobil retro 2.5D bergaya Outrun dengan grafik pseudo-3D, musik synthwave energik, dan jalan raya tepi pantai yang indah.",
-      descEn: "Outrun-style 2.5D retro racing thrill featuring pseudo-3D graphics, energetic synthwave music, and a scenic coastal highway.",
-      image: "/img/retro_arcade_drift.png",
+      titleId: "Website Pengelolaan Tiket Pesawat",
+      titleEn: "Airline Ticket Management Website",
+      descId: "TiketPesawat adalah platform pemesanan penerbangan komprehensif yang terinspirasi dari aplikasi travel terkemuka. Dirancang dengan arsitektur kode yang rapi dan terstruktur (Separation of Concerns), website ini tidak hanya memudahkan pengguna mengeksplorasi destinasi wisata impian, tetapi juga mengelola informasi kompleks terkait jadwal pesawat, maskapai, dan operasional bandara secara efisien.",
+      descEn: "TiketPesawat is a comprehensive flight booking platform inspired by leading travel applications. Developed with a clean and structured architecture (Separation of Concerns), this website provides an intuitive interface for users to explore dream destinations while efficiently managing complex data across flight schedules, airlines, and airports.",
+      image: "/img/projects-preview/pesawat.png",
       tags: [
-        { name: "Next.js", icon: "fas fa-bolt", color: "bg-black text-white" },
-        { name: "CSS 3D", icon: "fab fa-css3-alt", color: "bg-[#1572B6] text-white" },
+        { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white", url: "https://laravel.com/" },
+        { name: "TailwindCSS", icon: "svg", color: "bg-[#38BDF8] text-black", url: "https://tailwindcss.com/" },
+        { name: "MySQL", icon: "svg", color: "bg-[#00758F] text-white", url: "https://www.mysql.com/" },
       ],
-      repoUrl: "https://github.com/farrel-codenoob29/arcade-drift",
+      repoUrl: "https://github.com/farrel-codenoob29/airline-ticket-management",
     },
     {
-      titleId: "PAHLAWAN SYNTHWAVE (RHYTHM HERO)",
-      titleEn: "SYNTHWAVE RHYTHM HERO",
-      descId: "Rhythm game bertema synthwave dengan grid bersinar dan matahari digital. Tekan tombol sesuai ketukan musik retro synth untuk skor tinggi.",
-      descEn: "Synthwave-themed rhythm game featuring a glowing grid and digital sun. Press keys to the beat of retro synth music for high scores.",
-      image: "/img/retro_synthwave_rhythm.png",
+      titleId: "Ninja Game",
+      titleEn: "Ninja Game",
+      descId: "Game Ninja adalah permainan platformer 2D yang dikembangkan sepenuhnya menggunakan bahasa pemrograman Python. Pemain mengendalikan seorang ninja dengan mekanik pergerakan dinamis—berjalan, melompat, dan menunduk—untuk bertahan hidup dan melawan sekumpulan ninja jahat. Menawarkan sistem progressive scaling, tingkat kesulitan musuh dan rintangan akan terus meningkat seiring berjalannya permainan, memberikan tantangan yang tiada henti.",
+      descEn: "Ninja Game is an action-packed 2D platformer game built entirely with Python. Players control a ninja equipped with dynamic movement mechanics—including running, jumping, and crouching—to survive and battle rogue, evil ninjas. Featuring a progressive scaling system, the difficulty of enemies and obstacles increases the longer you play, delivering an endlessly challenging gameplay experience.",
+      image: "/img/projects-preview/ninja.png",
       tags: [
-        { name: "React.js", icon: "fab fa-react", color: "bg-[#61DAFB] text-black" },
-        { name: "Web Audio", icon: "fas fa-music", color: "bg-neo-green text-black" },
+        {
+          name: "Python",
+          icon: "fab fa-python",
+          color: "bg-[#3776AB] text-white",
+          url: "https://www.python.org/",
+          libraries: [
+            { name: "Pygame", icon: "svg", color: "bg-[#B91C1C] text-white", url: "https://www.pygame.org/" },
+          ]
+        },
       ],
-      repoUrl: "https://github.com/farrel-codenoob29/synthwave-rhythm",
+      repoUrl: "https://github.com/farrel-codenoob29/ninja_game",
     },
   ];
 
@@ -1506,7 +1694,7 @@ export default function Home() {
               {/* Arcade top screen decals */}
               <div className="w-full flex justify-between items-center text-[10px] text-zinc-400 font-mono border-b-2 border-zinc-800 pb-2 mb-2 select-none">
                 <span className="text-neo-pink font-black tracking-widest animate-pulse">● INSERT COIN</span>
-                <span className="font-bold">FARREL CABINET V1.0</span>
+                <span className="font-bold">FARREL'S PROJECTS</span>
                 <span className="text-neo-green font-black">P1 SCORE: {remainingCount.toString().padStart(2, "0")} / 07</span>
               </div>
 
@@ -1543,54 +1731,177 @@ export default function Home() {
                               <span className="text-neo-yellow font-black">SIDE A</span>
                             </div>
 
-                            {/* Split / Column Content */}
-                            <div className="flex-1 flex flex-col md:flex-row gap-4 items-stretch overflow-hidden">
-                              {/* Visual Image container */}
-                              <div className="border-2 border-black overflow-hidden aspect-video md:aspect-auto md:w-[45%] bg-black relative flex-shrink-0 select-none h-32 md:h-full">
+                            {/* Vertical Stack Content (Landscape Image & Details) */}
+                            <div className="flex-1 flex flex-col gap-2.5">
+                              {/* Visual Image container (Always Landscape) */}
+                              <div
+                                className="border-2 border-black overflow-hidden bg-black relative flex-shrink-0 select-none h-28 sm:h-32 md:h-36 w-full cursor-zoom-in group/img"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (hasDraggedCard.current) return;
+                                  setActiveImageLightbox(proj.image);
+                                }}
+                              >
                                 <SafeImage
                                   src={proj.image}
                                   alt={lang === "id" ? proj.titleId : proj.titleEn}
-                                  className="w-full h-full object-cover pointer-events-none"
+                                  className="w-full h-full object-cover pointer-events-none group-hover/img:scale-[1.03] transition-transform duration-300"
                                 />
+                                {/* Zoom Icon Overlay Indicator */}
+                                <div className="absolute top-2 right-2 bg-black/60 text-white p-1.5 border border-black hover:bg-black transition-colors rounded-none opacity-0 group-hover/img:opacity-100 pointer-events-none flex items-center justify-center">
+                                  <i className="fas fa-expand-arrows-alt text-xs"></i>
+                                </div>
                               </div>
 
                               {/* Title & Desc & Action */}
                               <div className="flex-1 flex flex-col justify-between text-left select-text h-full">
                                 <div className="flex flex-col">
-                                  <h3 className="text-xs sm:text-sm font-black text-black uppercase tracking-tight line-clamp-1 border-b-2 border-black pb-1.5 mb-1.5">
+                                  <h3 className="text-xs sm:text-sm font-black text-black uppercase tracking-tight line-clamp-1 border-b-2 border-black pb-1 mb-1">
                                     {lang === "id" ? proj.titleId : proj.titleEn}
                                   </h3>
-                                  <p className="text-[9px] sm:text-[10px] text-black/90 font-bold leading-normal text-justify line-clamp-3 md:line-clamp-6">
+                                  <p className="text-[9px] sm:text-[10px] text-black/90 font-bold leading-normal text-justify line-clamp-2 md:line-clamp-3">
                                     {lang === "id" ? proj.descId : proj.descEn}
                                   </p>
                                 </div>
 
-                                <div className="space-y-3 mt-auto select-none">
+                                <div className="space-y-2 mt-auto select-none">
                                   {/* Tech tags */}
-                                  <div className="flex flex-wrap gap-1">
-                                    {proj.tags.map((tag, tIdx) => (
-                                      <div
-                                        key={tIdx}
-                                        className={`flex items-center gap-1 px-1.5 py-0.5 border border-black text-[8px] font-black uppercase ${tag.color}`}
-                                      >
-                                        <i className={tag.icon}></i>
-                                        <span>{tag.name}</span>
-                                      </div>
-                                    ))}
+                                  <div className="flex flex-wrap gap-2 mb-1">
+                                    {proj.tags.map((tag, tIdx) => {
+                                      const hasLibraries = !!(tag as any).libraries;
+                                      return (
+                                        <div key={tIdx} className={hasLibraries ? "relative flex items-center group/python-tag" : "relative"}>
+                                          <a
+                                            href={tag.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`relative group w-8 h-8 md:w-11 md:h-11 flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_0px_#000] hover:shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0px_0px_#000] transition-all duration-150 cursor-pointer rounded-none ${tag.color}`}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                            }}
+                                            onMouseDown={(e) => {
+                                              e.stopPropagation();
+                                            }}
+                                            onTouchStart={(e) => {
+                                              e.stopPropagation();
+                                            }}
+                                          >
+                                            <div className="w-5 h-5 md:w-7 md:h-7 flex items-center justify-center select-none transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-200">
+                                              {renderTagIcon(tag)}
+                                            </div>
+                                            {/* Tooltip */}
+                                            <div className="absolute bottom-full mb-2 left-0 opacity-0 scale-90 pointer-events-none group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 flex flex-col items-start z-[60]">
+                                              <div className="bg-neo-yellow text-black text-[9px] font-mono py-1 px-2 border-2 border-black whitespace-nowrap shadow-[2px_2px_0px_0px_#000] font-black uppercase">
+                                                {tag.name} ↗
+                                              </div>
+                                              <div className="w-1.5 h-1.5 bg-neo-yellow transform rotate-45 -mt-1 ml-3 md:ml-4 border-r-2 border-b-2 border-black"></div>
+                                            </div>
+                                          </a>
+
+                                          {/* Sub-libraries expanded list */}
+                                          {hasLibraries && (tag as any).libraries && (
+                                            <div className="flex items-center gap-2 transition-all duration-500 ease-out max-w-0 overflow-hidden group-hover/python-tag:max-w-[500px] group-hover/python-tag:ml-2">
+                                              {(tag as any).libraries.map((lib: any, lIdx: number) => (
+                                                <a
+                                                  key={lIdx}
+                                                  href={lib.url}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className={`relative group/lib-item w-8 h-8 md:w-11 md:h-11 flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_0px_#000] hover:shadow-[4px_4px_0px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-[1px_1px_0px_0px_#000] transition-all duration-300 ease-out opacity-0 scale-50 -translate-x-4 group-hover/python-tag:opacity-100 group-hover/python-tag:scale-100 group-hover/python-tag:translate-x-0 pointer-events-none group-hover/python-tag:pointer-events-auto rounded-none ${lib.color}`}
+                                                  style={{ transitionDelay: `${lIdx * 50}ms` }}
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                  }}
+                                                  onMouseDown={(e) => {
+                                                    e.stopPropagation();
+                                                  }}
+                                                  onTouchStart={(e) => {
+                                                    e.stopPropagation();
+                                                  }}
+                                                >
+                                                  <div className="w-5 h-5 md:w-7 md:h-7 flex items-center justify-center select-none transform group-hover/lib-item:scale-110 group-hover/lib-item:rotate-6 transition-transform duration-200">
+                                                    {renderTagIcon(lib)}
+                                                  </div>
+
+                                                  {/* Tooltip */}
+                                                  <div className="absolute bottom-full mb-2 left-0 opacity-0 scale-90 pointer-events-none group-hover/lib-item:opacity-100 group-hover/lib-item:scale-100 transition-all duration-200 flex flex-col items-start z-[60]">
+                                                    <div className="bg-black text-white text-[9px] font-mono py-1 px-2 border border-white/60 whitespace-nowrap shadow-[2px_2px_0px_0px_rgba(255,255,255,0.25)] font-bold uppercase">
+                                                      <span className="text-neo-green font-black">[LIB]</span> {lib.name} ↗
+                                                    </div>
+                                                    <div className="w-1.5 h-1.5 bg-black transform rotate-45 -mt-1 ml-3 md:ml-4 border-r border-b border-white/20"></div>
+                                                  </div>
+                                                </a>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
                                   </div>
 
                                   {/* Source code button */}
-                                  <a
-                                    href={proj.repoUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="neo-btn w-full block py-2 bg-neo-yellow text-center text-[10px] font-black uppercase tracking-wider text-black border-2 border-black hover:bg-neo-pink hover:text-white transition-colors"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                    }}
-                                  >
-                                    <i className="fab fa-github mr-1"></i> {t("btn-source")}
-                                  </a>
+                                  {proj.repoUrls ? (
+                                    <div className="relative w-full">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActiveDropdownIndex(activeDropdownIndex === idx ? null : idx);
+                                        }}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        className="neo-btn w-full py-2 bg-neo-yellow text-center text-[10px] font-black uppercase tracking-wider text-black border-2 border-black hover:bg-neo-pink hover:text-white transition-colors flex items-center justify-center gap-1.5"
+                                      >
+                                        <i className="fab fa-github"></i> {t("btn-source")}
+                                        <i className={`fas fa-chevron-${activeDropdownIndex === idx ? "up" : "down"} text-[8px]`}></i>
+                                      </button>
+                                      
+                                      {activeDropdownIndex === idx && (
+                                        <div
+                                          className="absolute bottom-full mb-2 left-0 right-0 bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] z-[60] flex flex-col divide-y-2 divide-black text-left"
+                                          onClick={(e) => e.stopPropagation()}
+                                          onMouseDown={(e) => e.stopPropagation()}
+                                          onTouchStart={(e) => e.stopPropagation()}
+                                        >
+                                          {proj.repoUrls.map((repo, rIdx) => (
+                                            <a
+                                              key={rIdx}
+                                              href={repo.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setActiveDropdownIndex(null);
+                                              }}
+                                              onMouseDown={(e) => e.stopPropagation()}
+                                              onTouchStart={(e) => e.stopPropagation()}
+                                              className="px-3 py-2 bg-white text-black hover:bg-neo-pink hover:text-white transition-colors flex justify-between items-center font-mono font-black text-[9px] uppercase tracking-wider"
+                                            >
+                                              <span>{lang === "id" ? repo.labelId : repo.labelEn}</span>
+                                              <i className="fas fa-external-link-alt text-[8px]"></i>
+                                            </a>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <a
+                                      href={proj.repoUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="neo-btn w-full block py-2 bg-neo-yellow text-center text-[10px] font-black uppercase tracking-wider text-black border-2 border-black hover:bg-neo-pink hover:text-white transition-colors"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                      }}
+                                      onMouseDown={(e) => {
+                                        e.stopPropagation();
+                                      }}
+                                      onTouchStart={(e) => {
+                                        e.stopPropagation();
+                                      }}
+                                    >
+                                      <i className="fab fa-github mr-1"></i> {t("btn-source")}
+                                    </a>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -2150,6 +2461,38 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Dynamic Image Lightbox Overlay Modal */}
+      {activeImageLightbox && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/90 flex flex-col items-center justify-center p-4 md:p-8 select-none"
+          onClick={() => setActiveImageLightbox(null)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setActiveImageLightbox(null)}
+            className="absolute top-4 right-4 w-12 h-12 bg-neo-pink text-white border-4 border-black shadow-[4px_4px_0px_0px_#000] active:translate-y-1 active:shadow-[1px_1px_0px_0px_#000] flex items-center justify-center font-black text-2xl hover:bg-white hover:text-black transition-all cursor-pointer z-[210]"
+          >
+            ×
+          </button>
+          
+          {/* Lightbox Image Container */}
+          <div 
+            className="relative max-w-5xl max-h-[85vh] border-[6px] border-black bg-zinc-900 shadow-neo-xl"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image box itself
+          >
+            <img
+              src={activeImageLightbox}
+              alt="Fullscreen Preview"
+              className="max-w-full max-h-[80vh] object-contain block pointer-events-auto"
+            />
+            {/* Image caption/helper */}
+            <div className="bg-black text-white text-[10px] font-mono p-2 text-center border-t-4 border-black uppercase select-none">
+              {lang === "id" ? "Tekan tombol '×' atau klik di luar untuk menutup" : "Press '×' button or click outside to close"}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
