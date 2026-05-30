@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import emailjs from "@emailjs/browser";
+
 
 // Translations Dictionary
 const translations = {
@@ -515,6 +517,7 @@ export default function Home() {
 
   // Form State
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Terminal Simulator State
   const [terminalHistory, setTerminalHistory] = useState<Array<{ command: string; result: React.ReactNode }>>([]);
@@ -1759,32 +1762,59 @@ export default function Home() {
   ];
 
   // Form submission handler
-  const handleFormSubmit = (e?: React.FormEvent) => {
+  const handleFormSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (isSendingEmail) return false;
+
     // Validate inputs
     if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
       showToast(lang === "id" ? "⚠ Mohon lengkapi semua bidang isian form!" : "⚠ Please fill out all form fields!");
       return false;
     }
-    // Simulate successful delivery
-    showToast(lang === "id" ? "✓ Pesan berhasil terkirim (Simulasi)!" : "✓ Message sent successfully (Simulated)!");
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    return true;
+
+    setIsSendingEmail(true);
+
+    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_2n4ltaa";
+    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_7kny2k3";
+    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "-Lt7n87Y-ycodAbt-";
+
+    try {
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+
+      showToast(lang === "id" ? "✓ Pesan berhasil dikirim ke email!" : "✓ Message successfully sent to email!");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setIsSendingEmail(false);
+      return true;
+    } catch (error) {
+      console.error("Failed to send email via EmailJS:", error);
+      showToast(lang === "id" ? "❌ Gagal mengirim pesan. Silakan coba lagi nanti." : "❌ Failed to send message. Please try again later.");
+      setIsSendingEmail(false);
+      return false;
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (isSendingEmail) return;
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Slider Drag Handlers
   const handleSliderStart = (clientX: number) => {
+    if (isSendingEmail) return;
     setIsDraggingSlider(true);
     sliderStartPos.current = clientX - sliderX;
   };
 
   const handleSliderMove = (clientX: number) => {
-    if (!isDraggingSlider || !sliderRef.current) return;
+    if (!isDraggingSlider || !sliderRef.current || isSendingEmail) return;
     const containerWidth = sliderRef.current.clientWidth;
     const isMobileSize = windowWidth < 640;
     const handleWidth = isMobileSize ? 80 : 112;
@@ -1802,7 +1832,7 @@ export default function Home() {
   };
 
   const handleSliderEnd = () => {
-    if (!isDraggingSlider) return;
+    if (!isDraggingSlider || isSendingEmail) return;
     setIsDraggingSlider(false);
     setSliderX(0);
   };
@@ -2911,13 +2941,16 @@ export default function Home() {
                     onBlur={() => setFocusedInput(null)}
                     placeholder={lang === "id" ? "Masukkan nama Anda..." : "Enter your name..."}
                     className={`form-input w-full px-4 py-4 border-4 border-black font-black focus:outline-none transition-all duration-300 text-black ${
-                      focusedInput === "name" 
-                        ? "bg-neo-yellow scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
-                        : focusedInput !== null 
-                          ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
-                          : "bg-white opacity-100 scale-100 shadow-neo"
+                      isSendingEmail
+                        ? "bg-zinc-100 opacity-50 cursor-not-allowed shadow-[2px_2px_0px_0px_#000]"
+                        : focusedInput === "name" 
+                          ? "bg-neo-yellow scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
+                          : focusedInput !== null 
+                            ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
+                            : "bg-white opacity-100 scale-100 shadow-neo"
                     }`}
                     required
+                    disabled={isSendingEmail}
                   />
                 </div>
 
@@ -2935,13 +2968,16 @@ export default function Home() {
                     onBlur={() => setFocusedInput(null)}
                     placeholder={lang === "id" ? "Masukkan email Anda..." : "Enter your email..."}
                     className={`form-input w-full px-4 py-4 border-4 border-black font-black focus:outline-none transition-all duration-300 text-black ${
-                      focusedInput === "email" 
-                        ? "bg-neo-pink scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
-                        : focusedInput !== null 
-                          ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
-                          : "bg-white opacity-100 scale-100 shadow-neo"
+                      isSendingEmail
+                        ? "bg-zinc-100 opacity-50 cursor-not-allowed shadow-[2px_2px_0px_0px_#000]"
+                        : focusedInput === "email" 
+                          ? "bg-neo-pink scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
+                          : focusedInput !== null 
+                            ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
+                            : "bg-white opacity-100 scale-100 shadow-neo"
                     }`}
                     required
+                    disabled={isSendingEmail}
                   />
                 </div>
 
@@ -2959,13 +2995,16 @@ export default function Home() {
                     onBlur={() => setFocusedInput(null)}
                     placeholder={lang === "id" ? "Masukkan subjek pesan..." : "Enter message subject..."}
                     className={`form-input w-full px-4 py-4 border-4 border-black font-black focus:outline-none transition-all duration-300 text-black ${
-                      focusedInput === "subject" 
-                        ? "bg-neo-yellow scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
-                        : focusedInput !== null 
-                          ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
-                          : "bg-white opacity-100 scale-100 shadow-neo"
+                      isSendingEmail
+                        ? "bg-zinc-100 opacity-50 cursor-not-allowed shadow-[2px_2px_0px_0px_#000]"
+                        : focusedInput === "subject" 
+                          ? "bg-neo-yellow scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
+                          : focusedInput !== null 
+                            ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
+                            : "bg-white opacity-100 scale-100 shadow-neo"
                     }`}
                     required
+                    disabled={isSendingEmail}
                   />
                 </div>
 
@@ -2983,24 +3022,31 @@ export default function Home() {
                     rows={5}
                     placeholder={lang === "id" ? "Tulis pesan Anda disini..." : "Write your message here..."}
                     className={`form-input w-full px-4 py-4 border-4 border-black font-black focus:outline-none transition-all duration-300 text-black ${
-                      focusedInput === "message" 
-                        ? "bg-neo-pink scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
-                        : focusedInput !== null 
-                          ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
-                          : "bg-white opacity-100 scale-100 shadow-neo"
+                      isSendingEmail
+                        ? "bg-zinc-100 opacity-50 cursor-not-allowed shadow-[2px_2px_0px_0px_#000]"
+                        : focusedInput === "message" 
+                          ? "bg-neo-pink scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
+                          : focusedInput !== null 
+                            ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
+                            : "bg-white opacity-100 scale-100 shadow-neo"
                     }`}
                     required
+                    disabled={isSendingEmail}
                   ></textarea>
                 </div>
 
                 {/* Neobrutalist Slide to Send Slider */}
                 <div 
                   ref={sliderRef}
-                  className="relative w-full h-16 sm:h-20 bg-zinc-950 border-4 border-black shadow-neo flex items-center justify-start select-none overflow-hidden"
+                  className={`relative w-full h-16 sm:h-20 border-4 border-black shadow-neo flex items-center justify-start select-none overflow-hidden transition-all duration-300 ${
+                    isSendingEmail ? "bg-zinc-800" : "bg-zinc-950"
+                  }`}
                 >
                   <div 
-                    className="absolute left-0 top-0 bottom-0 bg-neo-green/30 border-r-2 border-black/20"
-                    style={{ width: `${sliderX}px` }}
+                    className={`absolute left-0 top-0 bottom-0 border-r-2 border-black/20 transition-all ${
+                      isSendingEmail ? "bg-neo-yellow/30 w-full animate-pulse" : "bg-neo-green/30"
+                    }`}
+                    style={isSendingEmail ? {} : { width: `${sliderX}px` }}
                   />
 
                   <div
@@ -3008,20 +3054,39 @@ export default function Home() {
                     onTouchStart={(e) => {
                       if (e.touches.length > 0) handleSliderStart(e.touches[0].clientX);
                     }}
-                    className="absolute top-0 bottom-0 w-20 sm:w-28 bg-neo-green border-r-4 border-black cursor-grab active:cursor-grabbing flex items-center justify-center text-black shadow-[2px_0px_5px_rgba(0,0,0,0.15)]"
-                    style={{ 
-                      transform: `translate3d(${sliderX}px, 0, 0)`,
-                      transition: isDraggingSlider ? "none" : "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-                    }}
+                    className={`absolute top-0 bottom-0 w-20 sm:w-28 border-r-4 border-black flex items-center justify-center text-black shadow-[2px_0px_5px_rgba(0,0,0,0.15)] transition-all ${
+                      isSendingEmail
+                        ? "bg-neo-yellow cursor-not-allowed left-1/2 -translate-x-1/2 scale-95 animate-pulse"
+                        : "bg-neo-green cursor-grab active:cursor-grabbing"
+                    }`}
+                    style={
+                      isSendingEmail 
+                        ? { transform: "none" } 
+                        : { 
+                            transform: `translate3d(${sliderX}px, 0, 0)`,
+                            transition: isDraggingSlider ? "none" : "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                          }
+                    }
                   >
-                    <div className="flex flex-col items-center select-none pointer-events-none">
-                      <i className="fas fa-paper-plane text-xs sm:text-sm animate-pulse mb-0.5"></i>
-                      <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider">{lang === "id" ? "GESER" : "DRAG"}</span>
-                    </div>
+                    {isSendingEmail ? (
+                      <div className="flex flex-col items-center select-none pointer-events-none">
+                        <i className="fas fa-spinner animate-spin text-xs sm:text-sm mb-0.5"></i>
+                        <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider">{lang === "id" ? "KIRIM..." : "SENDING..."}</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center select-none pointer-events-none">
+                        <i className="fas fa-paper-plane text-xs sm:text-sm animate-pulse mb-0.5"></i>
+                        <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider">{lang === "id" ? "GESER" : "DRAG"}</span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="w-full text-center font-mono font-black text-[9px] sm:text-xs text-white/40 tracking-widest uppercase pointer-events-none select-none z-0 pr-4 sm:pr-8 pl-20 sm:pl-28">
-                    {lang === "id" ? "Geser ke kanan untuk mengirim >>>" : "Slide to right to send >>>"}
+                  <div className={`w-full text-center font-mono font-black text-[9px] sm:text-xs tracking-widest uppercase pointer-events-none select-none z-0 pr-4 sm:pr-8 transition-colors duration-300 ${
+                    isSendingEmail ? "text-neo-yellow pl-4" : "text-white/40 pl-20 sm:pl-28"
+                  }`}>
+                    {isSendingEmail 
+                      ? (lang === "id" ? "SEDANG MENGIRIM PESAN..." : "SENDING MESSAGE...")
+                      : (lang === "id" ? "Geser ke kanan untuk mengirim >>>" : "Slide to right to send >>>")}
                   </div>
                 </div>
               </form>
