@@ -511,6 +511,7 @@ export default function Home() {
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const sliderStartPos = useRef(0);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const snakeCanvasRef = useRef<HTMLCanvasElement>(null);
   const [activeImageLightbox, setActiveImageLightbox] = useState<string | null>(null);
   const hasDraggedCard = useRef(false);
   const [activeDropdownIndex, setActiveDropdownIndex] = useState<number | null>(null);
@@ -821,6 +822,312 @@ export default function Home() {
     animationFrameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationFrameId);
   }, []);
+
+  // Snake animation logic
+  useEffect(() => {
+    if (!mounted) return;
+    const canvas = snakeCanvasRef.current;
+    if (!canvas) return;
+
+    let animId: number;
+    let isInitialized = false;
+
+    // Snake settings
+    const numSegments = 16;
+    const spacing = 5; // how many history steps between each segment
+    const r = 14;      // body segment radius
+    const headR = 17;  // head radius
+    const speed = 2.8;
+    const maxTurnSpeed = 0.055;
+
+    // Snake variables
+    let head = { x: 200, y: 200 };
+    let currentAngle = 0;
+    let trail: { x: number; y: number }[] = [];
+    
+    // Apple variables
+    let apple = { x: 300, y: 300, pulse: 0 };
+    
+    // Eating particles
+    let particles: { x: number; y: number; vx: number; vy: number; color: string; life: number }[] = [];
+
+    // Delay initialization until nameplate animation finishes (2000ms)
+    const initTimer = setTimeout(() => {
+      const parent = canvas.parentElement;
+      if (parent) {
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+        
+        // Spawn snake near center
+        head = { x: canvas.width / 2, y: canvas.height / 2 };
+        currentAngle = Math.random() * Math.PI * 2;
+        
+        // Populate initial trail
+        for (let i = 0; i < numSegments * spacing; i++) {
+          trail.push({ 
+            x: head.x - Math.cos(currentAngle) * (i * (speed / spacing)), 
+            y: head.y - Math.sin(currentAngle) * (i * (speed / spacing)) 
+          });
+        }
+
+        // Spawn first apple
+        spawnNewApple();
+        isInitialized = true;
+      }
+    }, 2000);
+
+    const spawnNewApple = () => {
+      if (!canvas) return;
+      const margin = 100;
+      apple.x = margin + Math.random() * (canvas.width - margin * 2);
+      apple.y = margin + Math.random() * (canvas.height - margin * 2);
+    };
+
+    const spawnParticles = (x: number, y: number) => {
+      for (let i = 0; i < 15; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const vel = 1.5 + Math.random() * 2.5;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * vel,
+          vy: Math.sin(angle) * vel,
+          color: Math.random() > 0.5 ? "#22c55e" : "#ef4444", // green or red crumbs
+          life: 30 + Math.random() * 20
+        });
+      }
+    };
+
+    // Resize handler
+    const handleResize = () => {
+      const parent = canvas.parentElement;
+      if (parent) {
+        const oldW = canvas.width;
+        const oldH = canvas.height;
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+        
+        // Keep snake inside boundaries
+        if (oldW > 0 && oldH > 0) {
+          head.x = (head.x / oldW) * canvas.width;
+          head.y = (head.y / oldH) * canvas.height;
+          apple.x = (apple.x / oldW) * canvas.width;
+          apple.y = (apple.y / oldH) * canvas.height;
+          // Re-populate trail based on head
+          trail = [];
+          for (let i = 0; i < numSegments * spacing; i++) {
+            trail.push({ x: head.x, y: head.y });
+          }
+        }
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Main animation loop
+    const animate = () => {
+      if (!isInitialized) {
+        animId = requestAnimationFrame(animate);
+        return;
+      }
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Update apple pulsing
+      apple.pulse += 0.05;
+
+      // 1. Move Snake towards Apple
+      const targetAngle = Math.atan2(apple.y - head.y, apple.x - head.x);
+      let angleDiff = targetAngle - currentAngle;
+      angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+
+      currentAngle += Math.max(-maxTurnSpeed, Math.min(maxTurnSpeed, angleDiff));
+
+      head.x += Math.cos(currentAngle) * speed;
+      head.y += Math.sin(currentAngle) * speed;
+
+      // Keep inside bounds (safeguard)
+      head.x = Math.max(10, Math.min(canvas.width - 10, head.x));
+      head.y = Math.max(10, Math.min(canvas.height - 10, head.y));
+
+      // Add head to trail
+      trail.unshift({ x: head.x, y: head.y });
+      if (trail.length > numSegments * spacing) {
+        trail.pop();
+      }
+
+      // Check collision with apple
+      const dx = head.x - apple.x;
+      const dy = head.y - apple.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < headR + 10) {
+        spawnParticles(apple.x, apple.y);
+        spawnNewApple();
+      }
+
+      // Update and draw particles
+      particles = particles.filter(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.95; // friction
+        p.vy *= 0.95;
+        p.life--;
+
+        if (p.life > 0) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2.5 * (p.life / 50), 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1;
+          ctx.fill();
+          ctx.stroke();
+          return true;
+        }
+        return false;
+      });
+
+      // 2. Draw Apple (red apple, green leaf, brown stem, highlight)
+      ctx.save();
+      const appleScale = 1.0 + Math.sin(apple.pulse) * 0.08;
+      ctx.translate(apple.x, apple.y);
+      ctx.scale(appleScale, appleScale);
+
+      // Draw shadow
+      ctx.beginPath();
+      ctx.ellipse(0, 10, 10, 5, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(0,0,0,0.15)";
+      ctx.fill();
+
+      // Draw apple body (two overlapping lobes)
+      ctx.beginPath();
+      ctx.arc(-5, 0, 10, 0, Math.PI * 2);
+      ctx.arc(5, 0, 10, 0, Math.PI * 2);
+      ctx.fillStyle = "#ef4444"; // red
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 3.5;
+      ctx.fill();
+      ctx.stroke();
+
+      // Clean up overlay stroke inside
+      ctx.beginPath();
+      ctx.arc(-5, 0, 8.5, 0, Math.PI * 2);
+      ctx.arc(5, 0, 8.5, 0, Math.PI * 2);
+      ctx.fillStyle = "#ef4444";
+      ctx.fill();
+
+      // Highlight
+      ctx.beginPath();
+      ctx.ellipse(-4, -4, 4, 2, -Math.PI / 4, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+
+      // Stem (brown line)
+      ctx.beginPath();
+      ctx.moveTo(0, -6);
+      ctx.quadraticCurveTo(3, -13, 5, -14);
+      ctx.strokeStyle = "#78350f"; // brown
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.stroke();
+
+      // Leaf (green leaf)
+      ctx.beginPath();
+      ctx.ellipse(4, -10, 4.5, 2.2, Math.PI / 6, 0, Math.PI * 2);
+      ctx.fillStyle = "#22c55e"; // green
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1.5;
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+
+      // 3. Draw Snake (tail to head)
+      for (let i = numSegments - 1; i >= 0; i--) {
+        const trailIdx = i * spacing;
+        // Fallback to head if trail is not fully populated yet
+        const pt = trail[trailIdx] || head;
+        const segmentR = i === 0 ? headR : r * (1 - (i / numSegments) * 0.35);
+
+        ctx.save();
+        ctx.translate(pt.x, pt.y);
+
+        // Draw shadow
+        ctx.beginPath();
+        ctx.arc(2, 4, segmentR, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.08)";
+        ctx.fill();
+
+        // Draw segment circle
+        ctx.beginPath();
+        ctx.arc(0, 0, segmentR, 0, Math.PI * 2);
+        ctx.fillStyle = "#22c55e"; // green body
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.fill();
+        ctx.stroke();
+
+        // If head, draw eyes
+        if (i === 0) {
+          // Angle of movement
+          const eyeOffsetAngle = 0.55;
+          const eyeDist = 8.5;
+          
+          const leftEyeX = Math.cos(currentAngle - eyeOffsetAngle) * eyeDist;
+          const leftEyeY = Math.sin(currentAngle - eyeOffsetAngle) * eyeDist;
+          const rightEyeX = Math.cos(currentAngle + eyeOffsetAngle) * eyeDist;
+          const rightEyeY = Math.sin(currentAngle + eyeOffsetAngle) * eyeDist;
+
+          // Draw left eye white
+          ctx.beginPath();
+          ctx.arc(leftEyeX, leftEyeY, 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 2;
+          ctx.fill();
+          ctx.stroke();
+
+          // Draw right eye white
+          ctx.beginPath();
+          ctx.arc(rightEyeX, rightEyeY, 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 2;
+          ctx.fill();
+          ctx.stroke();
+
+          // Pupils (black) offset toward target direction
+          const pupilXOffset = Math.cos(currentAngle) * 1.0;
+          const pupilYOffset = Math.sin(currentAngle) * 1.0;
+
+          ctx.beginPath();
+          ctx.arc(leftEyeX + pupilXOffset, leftEyeY + pupilYOffset, 2, 0, Math.PI * 2);
+          ctx.fillStyle = "#000000";
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(rightEyeX + pupilXOffset, rightEyeY + pupilYOffset, 2, 0, Math.PI * 2);
+          ctx.fillStyle = "#000000";
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      animId = requestAnimationFrame(animate);
+    };
+
+    animId = requestAnimationFrame(animate);
+
+    return () => {
+      clearTimeout(initTimer);
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animId);
+    };
+  }, [mounted]);
 
 
 
@@ -1936,6 +2243,9 @@ export default function Home() {
       >
         {/* Dot pattern background */}
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]" />
+
+        {/* Snake background canvas */}
+        <canvas ref={snakeCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" />
 
         {/* Floating Neobrutalist Shapes (Draggable) */}
         <div className="absolute inset-0 pointer-events-none select-none">
