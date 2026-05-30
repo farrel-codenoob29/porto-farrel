@@ -504,6 +504,11 @@ export default function Home() {
   const [certificatesScrollOffset, setCertificatesScrollOffset] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [sliderX, setSliderX] = useState(0);
+  const [isDraggingSlider, setIsDraggingSlider] = useState(false);
+  const sliderStartPos = useRef(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
   const [activeImageLightbox, setActiveImageLightbox] = useState<string | null>(null);
   const hasDraggedCard = useRef(false);
   const [activeDropdownIndex, setActiveDropdownIndex] = useState<number | null>(null);
@@ -1500,6 +1505,40 @@ export default function Home() {
     };
   }, [isDraggingCard, dragOffset, activeIndex]);
 
+  // Slider Drag window-level registration
+  useEffect(() => {
+    if (!isDraggingSlider) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handleSliderMove(e.clientX);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      handleSliderMove(e.touches[0].clientX);
+    };
+
+    const handleMouseUp = () => {
+      handleSliderEnd();
+    };
+
+    const handleTouchEnd = () => {
+      handleSliderEnd();
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isDraggingSlider, sliderX]);
+
   const getCardStyle = (index: number) => {
     const offset = cardOffsets[index];
 
@@ -1720,16 +1759,52 @@ export default function Home() {
   ];
 
   // Form submission handler
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFormSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    // Validate inputs
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      showToast(lang === "id" ? "⚠ Mohon lengkapi semua bidang isian form!" : "⚠ Please fill out all form fields!");
+      return false;
+    }
     // Simulate successful delivery
     showToast(lang === "id" ? "✓ Pesan berhasil terkirim (Simulasi)!" : "✓ Message sent successfully (Simulated)!");
     setFormData({ name: "", email: "", subject: "", message: "" });
+    return true;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Slider Drag Handlers
+  const handleSliderStart = (clientX: number) => {
+    setIsDraggingSlider(true);
+    sliderStartPos.current = clientX - sliderX;
+  };
+
+  const handleSliderMove = (clientX: number) => {
+    if (!isDraggingSlider || !sliderRef.current) return;
+    const containerWidth = sliderRef.current.clientWidth;
+    const isMobileSize = windowWidth < 640;
+    const handleWidth = isMobileSize ? 80 : 112;
+    const maxRange = containerWidth - handleWidth - 8;
+
+    let newX = clientX - sliderStartPos.current;
+    newX = Math.max(0, Math.min(maxRange, newX));
+    setSliderX(newX);
+
+    if (newX >= maxRange - 2) {
+      setIsDraggingSlider(false);
+      setSliderX(0);
+      handleFormSubmit();
+    }
+  };
+
+  const handleSliderEnd = () => {
+    if (!isDraggingSlider) return;
+    setIsDraggingSlider(false);
+    setSliderX(0);
   };
 
   return (
@@ -2772,22 +2847,44 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="flex items-start p-6 bg-white border-4 border-black shadow-neo">
+                <div 
+                  onClick={() => {
+                    navigator.clipboard.writeText("farreldiego29@gmail.com");
+                    showToast(lang === "id" ? "✓ Email disalin ke clipboard!" : "✓ Email copied to clipboard!");
+                  }}
+                  className="flex items-start p-6 bg-white border-4 border-black shadow-neo cursor-pointer hover:bg-zinc-50 hover:-translate-y-1 active:translate-y-0 active:shadow-neo transition-all duration-150 relative group"
+                >
                   <div className="w-12 h-12 border-2 border-black bg-neo-blue flex items-center justify-center mr-4 flex-shrink-0 text-white text-lg">
                     <i className="fas fa-envelope"></i>
                   </div>
-                  <div>
-                    <h4 className="text-sm sm:text-base font-black mb-1 uppercase">{t("contact-email-title")}</h4>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-sm sm:text-base font-black mb-1 uppercase">{t("contact-email-title")}</h4>
+                      <span className="text-[8px] sm:text-[9px] text-zinc-500 font-mono font-bold tracking-wider uppercase border border-zinc-300 px-1 bg-zinc-100 rounded-none group-hover:bg-neo-yellow group-hover:text-black transition-colors">
+                        {lang === "id" ? "Klik untuk salin" : "Click to copy"}
+                      </span>
+                    </div>
                     <p className="text-black font-black text-sm break-all">farreldiego29@gmail.com</p>
                   </div>
                 </div>
 
-                <div className="flex items-start p-6 bg-white border-4 border-black shadow-neo">
+                <div 
+                  onClick={() => {
+                    navigator.clipboard.writeText("+6282155235200");
+                    showToast(lang === "id" ? "✓ Nomor telepon disalin ke clipboard!" : "✓ Phone number copied to clipboard!");
+                  }}
+                  className="flex items-start p-6 bg-white border-4 border-black shadow-neo cursor-pointer hover:bg-zinc-50 hover:-translate-y-1 active:translate-y-0 active:shadow-neo transition-all duration-150 relative group"
+                >
                   <div className="w-12 h-12 border-2 border-black bg-neo-yellow flex items-center justify-center mr-4 flex-shrink-0 text-black text-lg">
                     <i className="fas fa-phone"></i>
                   </div>
-                  <div>
-                    <h4 className="text-sm sm:text-base font-black mb-1 uppercase">{t("contact-phone-title")}</h4>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-sm sm:text-base font-black mb-1 uppercase">{t("contact-phone-title")}</h4>
+                      <span className="text-[8px] sm:text-[9px] text-zinc-500 font-mono font-bold tracking-wider uppercase border border-zinc-300 px-1 bg-zinc-100 rounded-none group-hover:bg-neo-yellow group-hover:text-black transition-colors">
+                        {lang === "id" ? "Klik untuk salin" : "Click to copy"}
+                      </span>
+                    </div>
                     <p className="text-black font-black text-sm uppercase">+62 821 5523 5200</p>
                   </div>
                 </div>
@@ -2800,76 +2897,133 @@ export default function Home() {
                 {t("contact-message-title")}
               </h3>
               <form onSubmit={handleFormSubmit} className="space-y-6">
-                <div className="relative">
+                <div className="flex flex-col items-start gap-1.5 text-left w-full">
+                  <label htmlFor="name" className="text-black font-black uppercase text-xs tracking-wider select-none">
+                    {t("form-name")}
+                  </label>
                   <input
                     type="text"
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="form-input w-full px-4 py-4 bg-white border-4 border-black font-black focus:outline-none shadow-neo transition-all duration-200 text-black"
-                    placeholder=" "
+                    onFocus={() => setFocusedInput("name")}
+                    onBlur={() => setFocusedInput(null)}
+                    placeholder={lang === "id" ? "Masukkan nama Anda..." : "Enter your name..."}
+                    className={`form-input w-full px-4 py-4 border-4 border-black font-black focus:outline-none transition-all duration-300 text-black ${
+                      focusedInput === "name" 
+                        ? "bg-neo-yellow scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
+                        : focusedInput !== null 
+                          ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
+                          : "bg-white opacity-100 scale-100 shadow-neo"
+                    }`}
                     required
                   />
-                  <label htmlFor="name" className="floating-label absolute left-4 top-4 text-gray-500 font-black uppercase text-xs">
-                    {t("form-name")}
-                  </label>
                 </div>
 
-                <div className="relative">
+                <div className="flex flex-col items-start gap-1.5 text-left w-full">
+                  <label htmlFor="email" className="text-black font-black uppercase text-xs tracking-wider select-none">
+                    {t("form-email")}
+                  </label>
                   <input
                     type="email"
                     id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="form-input w-full px-4 py-4 bg-white border-4 border-black font-black focus:outline-none shadow-neo transition-all duration-200 text-black"
-                    placeholder=" "
+                    onFocus={() => setFocusedInput("email")}
+                    onBlur={() => setFocusedInput(null)}
+                    placeholder={lang === "id" ? "Masukkan email Anda..." : "Enter your email..."}
+                    className={`form-input w-full px-4 py-4 border-4 border-black font-black focus:outline-none transition-all duration-300 text-black ${
+                      focusedInput === "email" 
+                        ? "bg-neo-pink scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
+                        : focusedInput !== null 
+                          ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
+                          : "bg-white opacity-100 scale-100 shadow-neo"
+                    }`}
                     required
                   />
-                  <label htmlFor="email" className="floating-label absolute left-4 top-4 text-gray-500 font-black uppercase text-xs">
-                    {t("form-email")}
-                  </label>
                 </div>
 
-                <div className="relative">
+                <div className="flex flex-col items-start gap-1.5 text-left w-full">
+                  <label htmlFor="subject" className="text-black font-black uppercase text-xs tracking-wider select-none">
+                    {t("form-subject")}
+                  </label>
                   <input
                     type="text"
                     id="subject"
                     name="subject"
                     value={formData.subject}
                     onChange={handleInputChange}
-                    className="form-input w-full px-4 py-4 bg-white border-4 border-black font-black focus:outline-none shadow-neo transition-all duration-200 text-black"
-                    placeholder=" "
+                    onFocus={() => setFocusedInput("subject")}
+                    onBlur={() => setFocusedInput(null)}
+                    placeholder={lang === "id" ? "Masukkan subjek pesan..." : "Enter message subject..."}
+                    className={`form-input w-full px-4 py-4 border-4 border-black font-black focus:outline-none transition-all duration-300 text-black ${
+                      focusedInput === "subject" 
+                        ? "bg-neo-yellow scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
+                        : focusedInput !== null 
+                          ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
+                          : "bg-white opacity-100 scale-100 shadow-neo"
+                    }`}
                     required
                   />
-                  <label htmlFor="subject" className="floating-label absolute left-4 top-4 text-gray-500 font-black uppercase text-xs">
-                    {t("form-subject")}
-                  </label>
                 </div>
 
-                <div className="relative">
+                <div className="flex flex-col items-start gap-1.5 text-left w-full">
+                  <label htmlFor="message" className="text-black font-black uppercase text-xs tracking-wider select-none">
+                    {t("form-message")}
+                  </label>
                   <textarea
                     id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
+                    onFocus={() => setFocusedInput("message")}
+                    onBlur={() => setFocusedInput(null)}
                     rows={5}
-                    className="form-input w-full px-4 py-4 bg-white border-4 border-black font-black focus:outline-none shadow-neo transition-all duration-200 text-black"
-                    placeholder=" "
+                    placeholder={lang === "id" ? "Tulis pesan Anda disini..." : "Write your message here..."}
+                    className={`form-input w-full px-4 py-4 border-4 border-black font-black focus:outline-none transition-all duration-300 text-black ${
+                      focusedInput === "message" 
+                        ? "bg-neo-pink scale-[1.02] shadow-[8px_8px_0px_0px_#000] sm:shadow-[12px_12px_0px_0px_#000] z-10" 
+                        : focusedInput !== null 
+                          ? "bg-white opacity-50 scale-[0.98] shadow-[2px_2px_0px_0px_#000]" 
+                          : "bg-white opacity-100 scale-100 shadow-neo"
+                    }`}
                     required
                   ></textarea>
-                  <label htmlFor="message" className="floating-label absolute left-4 top-4 text-gray-500 font-black uppercase text-xs">
-                    {t("form-message")}
-                  </label>
                 </div>
 
-                <button
-                  type="submit"
-                  className="neo-btn w-full py-4 bg-black text-white text-base sm:text-lg uppercase tracking-widest font-black"
+                {/* Neobrutalist Slide to Send Slider */}
+                <div 
+                  ref={sliderRef}
+                  className="relative w-full h-16 sm:h-20 bg-zinc-950 border-4 border-black shadow-neo flex items-center justify-start select-none overflow-hidden"
                 >
-                  <i className="fas fa-paper-plane mr-2"></i> {t("contact-message-title")}
-                </button>
+                  <div 
+                    className="absolute left-0 top-0 bottom-0 bg-neo-green/30 border-r-2 border-black/20"
+                    style={{ width: `${sliderX}px` }}
+                  />
+
+                  <div
+                    onMouseDown={(e) => handleSliderStart(e.clientX)}
+                    onTouchStart={(e) => {
+                      if (e.touches.length > 0) handleSliderStart(e.touches[0].clientX);
+                    }}
+                    className="absolute top-0 bottom-0 w-20 sm:w-28 bg-neo-green border-r-4 border-black cursor-grab active:cursor-grabbing flex items-center justify-center text-black shadow-[2px_0px_5px_rgba(0,0,0,0.15)]"
+                    style={{ 
+                      transform: `translate3d(${sliderX}px, 0, 0)`,
+                      transition: isDraggingSlider ? "none" : "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                    }}
+                  >
+                    <div className="flex flex-col items-center select-none pointer-events-none">
+                      <i className="fas fa-paper-plane text-xs sm:text-sm animate-pulse mb-0.5"></i>
+                      <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider">{lang === "id" ? "GESER" : "DRAG"}</span>
+                    </div>
+                  </div>
+
+                  <div className="w-full text-center font-mono font-black text-[9px] sm:text-xs text-white/40 tracking-widest uppercase pointer-events-none select-none z-0 pr-4 sm:pr-8 pl-20 sm:pl-28">
+                    {lang === "id" ? "Geser ke kanan untuk mengirim >>>" : "Slide to right to send >>>"}
+                  </div>
+                </div>
               </form>
             </div>
           </div>
