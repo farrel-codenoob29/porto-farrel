@@ -833,7 +833,8 @@ export default function Home() {
     let isInitialized = false;
 
     // Snake settings
-    const numSegments = 16;
+    const baseSegments = 16;
+    let currentSegments = baseSegments;
     const spacing = 5; // how many history steps between each segment
     const r = 14;      // body segment radius
     const headR = 17;  // head radius
@@ -845,43 +846,115 @@ export default function Home() {
     let currentAngle = 0;
     let trail: { x: number; y: number }[] = [];
     
-    // Apple variables
-    let apple = { x: 300, y: 300, pulse: 0 };
+    // Apple variables (2 apples on screen)
+    let apples = [
+      { id: 1, x: 0, y: 0, pulse: 0, active: false },
+      { id: 2, x: 0, y: 0, pulse: 0, active: false }
+    ];
     
     // Eating particles
     let particles: { x: number; y: number; vx: number; vy: number; color: string; life: number }[] = [];
 
-    // Delay initialization until nameplate animation finishes (2000ms)
-    const initTimer = setTimeout(() => {
+    const getNewApplePosition = (): { x: number; y: number } => {
+      if (!canvas) return { x: 300, y: 300 };
+      
+      const margin = 45; // allows slithering near edges/navbar
+      const cW = canvas.width;
+      const cH = canvas.height;
+      
+      // Center zone (nameplate and buttons area)
+      const centerXStart = cW / 2 - 250;
+      const centerXEnd = cW / 2 + 250;
+      const centerYStart = cH / 2 - 150;
+      const centerYEnd = cH / 2 + 150;
+
+      // 85% chance to spawn OUTSIDE center, 15% inside
+      const spawnOutside = Math.random() < 0.85;
+
+      if (spawnOutside) {
+        for (let attempt = 0; attempt < 50; attempt++) {
+          const x = margin + Math.random() * (cW - margin * 2);
+          const y = margin + Math.random() * (cH - margin * 2);
+          const isInsideCenter = (x > centerXStart && x < centerXEnd && y > centerYStart && y < centerYEnd);
+          if (!isInsideCenter) {
+            return { x, y };
+          }
+        }
+      }
+      
+      // Fallback inside margin
+      return {
+        x: margin + Math.random() * (cW - margin * 2),
+        y: margin + Math.random() * (cH - margin * 2)
+      };
+    };
+
+    // Spawn apples after nameplate rope drop finishes (1300ms)
+    const applesTimer = setTimeout(() => {
       const parent = canvas.parentElement;
       if (parent) {
         canvas.width = parent.clientWidth;
         canvas.height = parent.clientHeight;
         
-        // Spawn snake near center
-        head = { x: canvas.width / 2, y: canvas.height / 2 };
-        currentAngle = Math.random() * Math.PI * 2;
+        apples.forEach((ap, idx) => {
+          const pos = getNewApplePosition();
+          ap.x = pos.x;
+          ap.y = pos.y;
+          ap.pulse = idx * Math.PI; // offset phases
+          ap.active = true;
+        });
+      }
+    }, 1300);
+
+    // Spawn snake from off-screen edges after a delay (2300ms)
+    const snakeTimer = setTimeout(() => {
+      const parent = canvas.parentElement;
+      if (parent) {
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
         
-        // Populate initial trail
-        for (let i = 0; i < numSegments * spacing; i++) {
+        // Setup off-screen edge spawning
+        const edge = Math.floor(Math.random() * 4);
+        let startX = 0;
+        let startY = 0;
+        let startAngle = 0;
+        const cW = canvas.width;
+        const cH = canvas.height;
+        const offset = 55; // start completely out of bounds
+
+        if (edge === 0) { // Top edge
+          startX = Math.random() * cW;
+          startY = -offset;
+          startAngle = Math.PI / 2; // face down
+        } else if (edge === 1) { // Bottom edge
+          startX = Math.random() * cW;
+          startY = cH + offset;
+          startAngle = -Math.PI / 2; // face up
+        } else if (edge === 2) { // Left edge
+          startX = -offset;
+          startY = Math.random() * cH;
+          startAngle = 0; // face right
+        } else { // Right edge
+          startX = cW + offset;
+          startY = Math.random() * cH;
+          startAngle = Math.PI; // face left
+        }
+
+        head = { x: startX, y: startY };
+        currentAngle = startAngle;
+        
+        // Populate initial trail straight back from start direction
+        trail = [];
+        for (let i = 0; i < currentSegments * spacing; i++) {
           trail.push({ 
             x: head.x - Math.cos(currentAngle) * (i * (speed / spacing)), 
             y: head.y - Math.sin(currentAngle) * (i * (speed / spacing)) 
           });
         }
 
-        // Spawn first apple
-        spawnNewApple();
         isInitialized = true;
       }
-    }, 2000);
-
-    const spawnNewApple = () => {
-      if (!canvas) return;
-      const margin = 100;
-      apple.x = margin + Math.random() * (canvas.width - margin * 2);
-      apple.y = margin + Math.random() * (canvas.height - margin * 2);
-    };
+    }, 2300);
 
     const spawnParticles = (x: number, y: number) => {
       for (let i = 0; i < 15; i++) {
@@ -911,11 +984,15 @@ export default function Home() {
         if (oldW > 0 && oldH > 0) {
           head.x = (head.x / oldW) * canvas.width;
           head.y = (head.y / oldH) * canvas.height;
-          apple.x = (apple.x / oldW) * canvas.width;
-          apple.y = (apple.y / oldH) * canvas.height;
+          
+          apples.forEach(ap => {
+            ap.x = (ap.x / oldW) * canvas.width;
+            ap.y = (ap.y / oldH) * canvas.height;
+          });
+
           // Re-populate trail based on head
           trail = [];
-          for (let i = 0; i < numSegments * spacing; i++) {
+          for (let i = 0; i < currentSegments * spacing; i++) {
             trail.push({ x: head.x, y: head.y });
           }
         }
@@ -926,11 +1003,6 @@ export default function Home() {
 
     // Main animation loop
     const animate = () => {
-      if (!isInitialized) {
-        animId = requestAnimationFrame(animate);
-        return;
-      }
-
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
@@ -938,36 +1010,70 @@ export default function Home() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Update apple pulsing
-      apple.pulse += 0.05;
+      apples.forEach(ap => {
+        if (ap.active) {
+          ap.pulse += 0.05;
+        }
+      });
 
-      // 1. Move Snake towards Apple
-      const targetAngle = Math.atan2(apple.y - head.y, apple.x - head.x);
-      let angleDiff = targetAngle - currentAngle;
-      angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+      // 2. Draw Apples
+      apples.forEach(ap => {
+        if (!ap.active) return;
 
-      currentAngle += Math.max(-maxTurnSpeed, Math.min(maxTurnSpeed, angleDiff));
+        ctx.save();
+        const appleScale = 1.0 + Math.sin(ap.pulse) * 0.08;
+        ctx.translate(ap.x, ap.y);
+        ctx.scale(appleScale, appleScale);
 
-      head.x += Math.cos(currentAngle) * speed;
-      head.y += Math.sin(currentAngle) * speed;
+        // Draw shadow
+        ctx.beginPath();
+        ctx.ellipse(0, 10, 10, 5, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.fill();
 
-      // Keep inside bounds (safeguard)
-      head.x = Math.max(10, Math.min(canvas.width - 10, head.x));
-      head.y = Math.max(10, Math.min(canvas.height - 10, head.y));
+        // Draw apple body (two overlapping lobes)
+        ctx.beginPath();
+        ctx.arc(-5, 0, 10, 0, Math.PI * 2);
+        ctx.arc(5, 0, 10, 0, Math.PI * 2);
+        ctx.fillStyle = "#ef4444"; // red
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3.5;
+        ctx.fill();
+        ctx.stroke();
 
-      // Add head to trail
-      trail.unshift({ x: head.x, y: head.y });
-      if (trail.length > numSegments * spacing) {
-        trail.pop();
-      }
+        // Clean up overlay stroke inside
+        ctx.beginPath();
+        ctx.arc(-5, 0, 8.5, 0, Math.PI * 2);
+        ctx.arc(5, 0, 8.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#ef4444";
+        ctx.fill();
 
-      // Check collision with apple
-      const dx = head.x - apple.x;
-      const dy = head.y - apple.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < headR + 10) {
-        spawnParticles(apple.x, apple.y);
-        spawnNewApple();
-      }
+        // Highlight
+        ctx.beginPath();
+        ctx.ellipse(-4, -4, 4, 2, -Math.PI / 4, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        // Stem (brown line)
+        ctx.beginPath();
+        ctx.moveTo(0, -6);
+        ctx.quadraticCurveTo(3, -13, 5, -14);
+        ctx.strokeStyle = "#78350f"; // brown
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // Leaf (green leaf)
+        ctx.beginPath();
+        ctx.ellipse(4, -10, 4.5, 2.2, Math.PI / 6, 0, Math.PI * 2);
+        ctx.fillStyle = "#22c55e"; // green
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+      });
 
       // Update and draw particles
       particles = particles.filter(p => {
@@ -990,67 +1096,90 @@ export default function Home() {
         return false;
       });
 
-      // 2. Draw Apple (red apple, green leaf, brown stem, highlight)
-      ctx.save();
-      const appleScale = 1.0 + Math.sin(apple.pulse) * 0.08;
-      ctx.translate(apple.x, apple.y);
-      ctx.scale(appleScale, appleScale);
+      if (!isInitialized) {
+        animId = requestAnimationFrame(animate);
+        return;
+      }
 
-      // Draw shadow
-      ctx.beginPath();
-      ctx.ellipse(0, 10, 10, 5, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(0,0,0,0.15)";
-      ctx.fill();
+      // 1. Move Snake towards closest active Apple
+      let targetX = canvas.width / 2;
+      let targetY = canvas.height / 2;
+      let closestApple: { id: number; x: number; y: number; pulse: number; active: boolean } | null = null;
+      let minDist = Infinity;
 
-      // Draw apple body (two overlapping lobes)
-      ctx.beginPath();
-      ctx.arc(-5, 0, 10, 0, Math.PI * 2);
-      ctx.arc(5, 0, 10, 0, Math.PI * 2);
-      ctx.fillStyle = "#ef4444"; // red
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 3.5;
-      ctx.fill();
-      ctx.stroke();
+      for (const ap of apples) {
+        if (ap.active) {
+          const dx = head.x - ap.x;
+          const dy = head.y - ap.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < minDist) {
+            minDist = dist;
+            closestApple = ap;
+          }
+        }
+      }
 
-      // Clean up overlay stroke inside
-      ctx.beginPath();
-      ctx.arc(-5, 0, 8.5, 0, Math.PI * 2);
-      ctx.arc(5, 0, 8.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#ef4444";
-      ctx.fill();
+      if (closestApple) {
+        targetX = closestApple.x;
+        targetY = closestApple.y;
+      } else {
+        // wander forward if no active apples
+        targetX = head.x + Math.cos(currentAngle) * 100;
+        targetY = head.y + Math.sin(currentAngle) * 100;
+      }
 
-      // Highlight
-      ctx.beginPath();
-      ctx.ellipse(-4, -4, 4, 2, -Math.PI / 4, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
+      const targetAngle = Math.atan2(targetY - head.y, targetX - head.x);
+      let angleDiff = targetAngle - currentAngle;
+      angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
 
-      // Stem (brown line)
-      ctx.beginPath();
-      ctx.moveTo(0, -6);
-      ctx.quadraticCurveTo(3, -13, 5, -14);
-      ctx.strokeStyle = "#78350f"; // brown
-      ctx.lineWidth = 3;
-      ctx.lineCap = "round";
-      ctx.stroke();
+      currentAngle += Math.max(-maxTurnSpeed, Math.min(maxTurnSpeed, angleDiff));
 
-      // Leaf (green leaf)
-      ctx.beginPath();
-      ctx.ellipse(4, -10, 4.5, 2.2, Math.PI / 6, 0, Math.PI * 2);
-      ctx.fillStyle = "#22c55e"; // green
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1.5;
-      ctx.fill();
-      ctx.stroke();
+      head.x += Math.cos(currentAngle) * speed;
+      head.y += Math.sin(currentAngle) * speed;
 
-      ctx.restore();
+      // Keep inside bounds (safeguard)
+      head.x = Math.max(10, Math.min(canvas.width - 10, head.x));
+      head.y = Math.max(10, Math.min(canvas.height - 10, head.y));
+
+      // Add head to trail
+      trail.unshift({ x: head.x, y: head.y });
+      if (trail.length > currentSegments * spacing) {
+        trail.pop();
+      }
+
+      // Check collision with apples
+      apples.forEach(ap => {
+        if (!ap.active) return;
+
+        const dx = head.x - ap.x;
+        const dy = head.y - ap.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < headR + 10) {
+          spawnParticles(ap.x, ap.y);
+          ap.active = false;
+          
+          // Grow snake
+          if (currentSegments < 32) {
+            currentSegments++;
+          }
+
+          // Delay spawning a new apple (800ms delay)
+          setTimeout(() => {
+            if (!isInitialized) return; // safeguard if unmounted
+            const pos = getNewApplePosition();
+            ap.x = pos.x;
+            ap.y = pos.y;
+            ap.active = true;
+          }, 800);
+        }
+      });
 
       // 3. Draw Snake (tail to head)
-      for (let i = numSegments - 1; i >= 0; i--) {
+      for (let i = currentSegments - 1; i >= 0; i--) {
         const trailIdx = i * spacing;
-        // Fallback to head if trail is not fully populated yet
         const pt = trail[trailIdx] || head;
-        const segmentR = i === 0 ? headR : r * (1 - (i / numSegments) * 0.35);
+        const segmentR = i === 0 ? headR : r * (1 - (i / currentSegments) * 0.35);
 
         ctx.save();
         ctx.translate(pt.x, pt.y);
@@ -1072,7 +1201,6 @@ export default function Home() {
 
         // If head, draw eyes
         if (i === 0) {
-          // Angle of movement
           const eyeOffsetAngle = 0.55;
           const eyeDist = 8.5;
           
@@ -1123,13 +1251,13 @@ export default function Home() {
     animId = requestAnimationFrame(animate);
 
     return () => {
-      clearTimeout(initTimer);
+      isInitialized = false;
+      clearTimeout(applesTimer);
+      clearTimeout(snakeTimer);
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animId);
     };
   }, [mounted]);
-
-
 
   const renderNodeIcon = (id: string, textWhite?: boolean) => {
     switch (id) {
