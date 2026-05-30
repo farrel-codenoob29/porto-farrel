@@ -500,6 +500,9 @@ export default function Home() {
     image: string;
     desc: string;
   } | null>(null);
+  const [hoveredPodium, setHoveredPodium] = useState<number | null>(null);
+  const [certificatesScrollOffset, setCertificatesScrollOffset] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeImageLightbox, setActiveImageLightbox] = useState<string | null>(null);
   const hasDraggedCard = useRef(false);
@@ -1361,6 +1364,47 @@ export default function Home() {
     }, 75);
     return () => clearInterval(timer);
   }, [lang, mounted]);
+ 
+  // Track window width on resize for isMobile check
+  useEffect(() => {
+    if (mounted) {
+      setWindowWidth(window.innerWidth);
+      const handleResize = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, [mounted]);
+
+  // Scroll parallax for certificates section
+  useEffect(() => {
+    if (!mounted) return;
+
+    const handleParallaxScroll = () => {
+      const el = document.getElementById("certificates");
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
+      if (rect.top < viewportHeight && rect.bottom > 0) {
+        // Distance from center of viewport
+        const sectionCenter = rect.top + rect.height / 2;
+        const viewportCenter = viewportHeight / 2;
+        const diff = sectionCenter - viewportCenter;
+
+        // Clamp scroll offset to prevent excessive shifts
+        const clamped = Math.max(-400, Math.min(400, diff));
+        setCertificatesScrollOffset(clamped);
+      }
+    };
+
+    window.addEventListener("scroll", handleParallaxScroll, { passive: true });
+    // Trigger once initially
+    handleParallaxScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleParallaxScroll);
+    };
+  }, [mounted]);
 
   // Card stack handlers
   const handleDragStart = (clientX: number, clientY: number) => {
@@ -1651,51 +1695,27 @@ export default function Home() {
   const certificates = [
     {
       id: 1,
-      title: "Cisco CCNA Certificate",
-      org: "Cisco Networking Academy",
+      title: "Sertifikat Juara 1 Tingkat Kota",
+      org: "Lomba Kompetensi Siswa Bidang IT Software Solution For Business",
       year: "2024",
-      image: "/image/ccn.png",
-      desc: "Sertifikasi networking profesional tingkat madya yang memvalidasi kompetensi di bidang perutean (routing), pensaklaran (switching), keamanan IP, serta administrasi infrastruktur jaringan berskala korporasi menggunakan perangkat Cisco.",
-    },
-    {
-      id: 2,
-      title: "Web Development Specialist",
-      org: "Udemy Certified",
-      year: "2024",
-      image: "/image/jscoi.png",
-      desc: "Sertifikasi keahlian komprehensif dalam arsitektur web modern. Memvalidasi kemampuan membangun aplikasi web terstruktur dari awal menggunakan HTML5, CSS3, JavaScript, framework modern (React/Next.js), database SQL/NoSQL, serta teknik integrasi RESTful API.",
-    },
-    {
-      id: 3,
-      title: "Belajar Dasar-dasar AI",
-      org: "Dicoding Indonesia",
-      year: "2024",
-      image: "/image/dicodingbackend.png",
-      desc: "Sertifikasi penyelesaian program pembelajaran kecerdasan buatan dari Dicoding. Fokus pada fondasi Machine Learning, Deep Learning, integrasi API AI generatif (seperti Gemini API), dan penerapan AI untuk automasi sistem web.",
-    },
-    {
-      id: 4,
-      title: "Database Design & SQL Administration",
-      org: "Oracle Academy",
-      year: "2024",
-      image: "/image/filterdata.png",
-      desc: "Sertifikasi spesialisasi administrasi database dari Oracle Academy. Memvalidasi keahlian perancangan diagram hubungan entitas (ERD), normalisasi data, manipulasi data tingkat lanjut menggunakan kueri SQL, dan optimasi performa server database.",
+      image: "/img/certificates/lks1.png",
+      desc: "Sertifikat ini diberikan kepada saya dikarenakan saya berhasil menjuarai Lomba Kompetensi Siswa (LKS) yang diselenggarakan setiap tahun oleh pemerintah dan saya berhasil meraih juara 1 bidang IT Software Solution For Business tingkat kota Balikpapan di tahun 2024 saat saya masih duduk di kelas 10 SMK.",
     },
     {
       id: 5,
-      title: "BNSP Sertifikasi Programmer",
-      org: "Lembaga Sertifikasi BNSP",
-      year: "2025",
-      image: "/img/sertifikat 1.jpeg",
-      desc: "Sertifikasi kompetensi nasional Indonesia untuk Skema Kerja Programmer dari Badan Nasional Sertifikasi Profesi. Menguji kelayakan teknis pengkodean program terstruktur, penerapan standar keamanan web, pengujian algoritma, dan manajemen repositori kode secara formal.",
+      title: "Sertifikat Juara Harapan 3",
+      org: "Axioo UpYourAiSkill",
+      year: "2024",
+      image: "/img/certificates/harapan3.png",
+      desc: "Sertifikat ini diberikan dikarenakan saya berhasil meraih predikit juara harapan 3 dari 10 finalis di kota jakarta karena telah membuat inovasi program berteknologi AI",
     },
     {
       id: 6,
-      title: "Pemrograman Web Interaktif dengan React",
-      org: "Dicoding Indonesia",
-      year: "2024",
-      image: "/img/sertifikat 2.jpeg",
-      desc: "Sertifikasi resmi pengembangan aplikasi front-end berstandar industri. Memvalidasi penguasaan konsep React.js, arsitektur berbasis komponen (component-driven architecture), state management (Redux/Context), rendering siklus hidup komponen, dan routing dinamis.",
+      title: "Sertifikat Juara 2 Tingkat Kota",
+      org: "Lomba Kompetensi Siswa Bidang IT Software Solution For Business",
+      year: "2025",
+      image: "/img/certificates/lks2.png",
+      desc: "Sertifikat ini diberikan kepada saya dikarenakan saya berhasil menjuarai Lomba Kompetensi Siswa (LKS) yang diselenggarakan setiap tahun oleh pemerintah dan saya berhasil meraih juara 2 bidang IT Software Solution For Business tingkat kota Balikpapan di tahun 2025 saat saya masih duduk di kelas 11 SMK.",
     },
   ];
 
@@ -2591,27 +2611,94 @@ export default function Home() {
             </span>
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {certificates.map((cert) => (
-              <div
-                key={cert.id}
-                onClick={() => setSelectedCert(cert)}
-                className="bg-white border-4 border-black shadow-neo-lg p-5 hover:transform hover:-translate-y-2 transition-all duration-200 cursor-pointer reveal reveal-up flex flex-col"
-              >
-                <div className="border-2 border-black mb-4 overflow-hidden aspect-[4/3] bg-black relative flex-shrink-0">
-                  <SafeImage src={cert.image} alt={cert.title} className="w-full h-full object-cover" />
+          <div 
+            className="flex flex-col md:flex-row justify-center items-center md:items-end gap-12 md:gap-4 max-w-5xl mx-auto py-12 px-4 select-none"
+            onMouseLeave={() => setHoveredPodium(null)}
+          >
+            {certificates.map((cert, idx) => {
+              const activePodiumIndex = hoveredPodium !== null ? hoveredPodium : 1;
+              const isActive = activePodiumIndex === idx;
+              const isMobile = windowWidth < 768;
+              
+              // Pedestal settings
+              let pedestalHeight = "";
+              let pedestalBg = "";
+              let pedestalLabel = "";
+              let shadowClass = "";
+              
+              if (idx === 0) {
+                // Left Card (Podium 2)
+                pedestalHeight = "h-16";
+                pedestalBg = "bg-neo-blue text-white";
+                pedestalLabel = "2nd";
+                shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
+              } else if (idx === 1) {
+                // Center Card (Podium 1)
+                pedestalHeight = "h-24";
+                pedestalBg = "bg-neo-yellow text-black";
+                pedestalLabel = "1st";
+                shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
+              } else {
+                // Right Card (Podium 3)
+                pedestalHeight = "h-10";
+                pedestalBg = "bg-neo-pink text-white";
+                pedestalLabel = "3rd";
+                shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
+              }
+
+              // Parallax calculation
+              const parallaxSpeed = idx === 0 ? 0.04 : idx === 1 ? 0.08 : 0.02;
+              const parallaxY = certificatesScrollOffset * parallaxSpeed;
+              
+              // Hover calculation
+              const hoverY = isActive ? (isMobile ? -16 : -24) : 0;
+              const hoverX = isActive ? (idx === 0 ? 8 : idx === 2 ? -8 : 0) : 0;
+              const activeScale = isActive ? (isMobile ? 1.05 : 1.1) : (isMobile ? 0.95 : 0.88);
+              const totalY = hoverY + parallaxY;
+
+              return (
+                <div 
+                  key={cert.id}
+                  className={`w-full max-w-[280px] md:w-1/3 flex flex-col items-center justify-end group/col reveal ${
+                    idx === 0 ? "reveal-left" : idx === 1 ? "reveal-up" : "reveal-right"
+                  }`}
+                  style={{ 
+                    transitionDelay: idx === 0 ? "150ms" : idx === 1 ? "0ms" : "300ms",
+                    willChange: "transform, opacity"
+                  }}
+                  onMouseEnter={() => setHoveredPodium(idx)}
+                >
+                  {/* Certificate Card */}
+                  <div
+                    onClick={() => setSelectedCert(cert)}
+                    className={`bg-white border-4 border-black p-4 cursor-pointer flex flex-col transition-all duration-300 ease-out select-none w-full ${shadowClass}`}
+                    style={{ 
+                      transform: `translate3d(${hoverX}px, ${totalY}px, 0) scale(${activeScale})`,
+                      transformOrigin: "bottom center",
+                      willChange: "transform"
+                    }}
+                  >
+                    <div className="border-2 border-black mb-3 overflow-hidden aspect-[4/3] bg-black relative flex-shrink-0">
+                      <SafeImage src={cert.image} alt={cert.title} className="w-full h-full object-cover" />
+                    </div>
+                    <h3 className="font-black uppercase text-[11px] sm:text-xs text-black tracking-tight mb-1 line-clamp-1">
+                      {cert.title}
+                    </h3>
+                    <p className="text-neo-blue text-[9px] font-black uppercase tracking-wider mb-3">
+                      {cert.org} ({cert.year})
+                    </p>
+                    <button className="neo-btn w-full py-1.5 bg-neo-blue text-white uppercase tracking-wider text-[9px] font-black mt-auto">
+                      {t("btn-details")}
+                    </button>
+                  </div>
+
+                  {/* Pedestal */}
+                  <div className={`hidden md:flex ${pedestalHeight} ${pedestalBg} border-4 border-black shadow-neo w-[90%] mt-4 flex-col items-center justify-center font-mono font-black text-sm tracking-widest transition-transform duration-300 ease-out ${isActive ? "scale-105" : "scale-100"}`}>
+                    {pedestalLabel}
+                  </div>
                 </div>
-                <h3 className="font-black uppercase text-sm sm:text-base text-black tracking-tight mb-2 line-clamp-1">
-                  {cert.title}
-                </h3>
-                <p className="text-neo-blue text-xs font-black uppercase tracking-wider mb-4">
-                  {cert.org} ({cert.year})
-                </p>
-                <button className="neo-btn w-full py-2 bg-neo-blue text-white uppercase tracking-wider text-xs font-black mt-auto">
-                  {t("btn-details")}
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
