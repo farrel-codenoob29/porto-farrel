@@ -2642,66 +2642,91 @@ export default function Home() {
           </h2>
 
           {/* Ubuntu Terminal Console Window Screen (Rendered Directly) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch reveal reveal-up">
-            {/* Command buttons shortcuts bar on the Left */}
-            <div className="lg:col-span-4 flex flex-col justify-center space-y-4">
-              <div className="bg-white border-4 border-black p-4 shadow-neo flex flex-col space-y-3">
-                <div className="text-xs font-black uppercase text-zinc-500 tracking-wider mb-1 text-left select-none">
-                  {lang === "id" ? "Pilih Perintah Shortcut :" : "Select Shortcut Command:"}
+          <div className="relative w-full max-w-4xl mx-auto pl-12 lg:pl-14 reveal reveal-up select-none">
+            {/* Folder Index Tab Shortcuts */}
+            <div className="absolute left-0 top-16 flex flex-col space-y-3 z-20 select-none">
+              {/* Tab 1: profilefetch */}
+              <button
+                onClick={() => startTypingSimulation("profilefetch")}
+                disabled={isTypingSimulated}
+                className="group relative flex items-center h-12 w-12 hover:w-44 sm:hover:w-48 bg-neo-yellow text-black border-4 border-black rounded-r-xl shadow-neo transition-all duration-300 ease-out select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed justify-start overflow-hidden px-3"
+                title="profilefetch"
+              >
+                <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-terminal text-base"></i>
                 </div>
-                
-                <button
-                  onClick={() => startTypingSimulation("profilefetch")}
-                  disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-3 bg-neo-yellow text-black border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-between font-black uppercase text-xs sm:text-sm text-left"
-                >
-                  <span>profilefetch</span>
-                  <i className="fas fa-terminal group-hover:translate-x-1 transition-transform"></i>
-                </button>
-                
-                <button
-                  onClick={() => startTypingSimulation("cat knowledge.md")}
-                  disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-3 bg-neo-blue text-white border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-between font-black uppercase text-xs sm:text-sm text-left"
-                >
-                  <span>cat knowledge.md</span>
-                  <i className="fas fa-file-alt group-hover:translate-x-1 transition-transform"></i>
-                </button>
-                
-                <button
-                  onClick={() => startTypingSimulation("ls skills/")}
-                  disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-3 bg-neo-green text-black border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-between font-black uppercase text-xs sm:text-sm text-left"
-                >
-                  <span>ls skills/</span>
-                  <i className="fas fa-folder-open group-hover:translate-x-1 transition-transform"></i>
-                </button>
-                
-                <button
-                  onClick={() => startTypingSimulation("./contact.sh")}
-                  disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-3 bg-neo-orange text-white border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-between font-black uppercase text-xs sm:text-sm text-left"
-                >
-                  <span>./contact.sh</span>
-                  <i className="fas fa-play group-hover:translate-x-1 transition-transform"></i>
-                </button>
-                
-                <button
-                  onClick={() => {
-                    if (!isTypingSimulated) {
-                      executeTerminalCommand("clear");
-                    }
-                  }}
-                  disabled={isTypingSimulated}
-                  className="neo-btn px-4 py-2 bg-zinc-100 text-black font-black uppercase text-xs text-center border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-200 mt-2"
-                >
-                  {lang === "id" ? "Bersihkan Terminal" : "Clear Terminal"}
-                </button>
-              </div>
+                <span className="font-black text-[10px] sm:text-xs uppercase tracking-wider ml-3 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-[140px] transition-all duration-300 ease-out overflow-hidden whitespace-nowrap">
+                  profilefetch
+                </span>
+              </button>
+
+              {/* Tab 2: cat knowledge.md */}
+              <button
+                onClick={() => startTypingSimulation("cat knowledge.md")}
+                disabled={isTypingSimulated}
+                className="group relative flex items-center h-12 w-12 hover:w-44 sm:hover:w-48 bg-neo-blue text-white border-4 border-black rounded-r-xl shadow-neo transition-all duration-300 ease-out select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed justify-start overflow-hidden px-3"
+                title="cat knowledge.md"
+              >
+                <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-file-alt text-base"></i>
+                </div>
+                <span className="font-black text-[10px] sm:text-xs uppercase tracking-wider ml-3 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-[140px] transition-all duration-300 ease-out overflow-hidden whitespace-nowrap">
+                  knowledge.md
+                </span>
+              </button>
+
+              {/* Tab 3: ls skills/ */}
+              <button
+                onClick={() => startTypingSimulation("ls skills/")}
+                disabled={isTypingSimulated}
+                className="group relative flex items-center h-12 w-12 hover:w-44 sm:hover:w-48 bg-neo-green text-black border-4 border-black rounded-r-xl shadow-neo transition-all duration-300 ease-out select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed justify-start overflow-hidden px-3"
+                title="ls skills/"
+              >
+                <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-folder-open text-base"></i>
+                </div>
+                <span className="font-black text-[10px] sm:text-xs uppercase tracking-wider ml-3 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-[140px] transition-all duration-300 ease-out overflow-hidden whitespace-nowrap">
+                  ls skills/
+                </span>
+              </button>
+
+              {/* Tab 4: ./contact.sh */}
+              <button
+                onClick={() => startTypingSimulation("./contact.sh")}
+                disabled={isTypingSimulated}
+                className="group relative flex items-center h-12 w-12 hover:w-44 sm:hover:w-48 bg-neo-orange text-white border-4 border-black rounded-r-xl shadow-neo transition-all duration-300 ease-out select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed justify-start overflow-hidden px-3"
+                title="./contact.sh"
+              >
+                <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-play text-base"></i>
+                </div>
+                <span className="font-black text-[10px] sm:text-xs uppercase tracking-wider ml-3 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-[140px] transition-all duration-300 ease-out overflow-hidden whitespace-nowrap">
+                  contact.sh
+                </span>
+              </button>
+
+              {/* Tab 5: clear */}
+              <button
+                onClick={() => {
+                  if (!isTypingSimulated) {
+                    executeTerminalCommand("clear");
+                  }
+                }}
+                disabled={isTypingSimulated}
+                className="group relative flex items-center h-12 w-12 hover:w-44 sm:hover:w-48 bg-zinc-200 text-black border-4 border-black rounded-r-xl shadow-neo transition-all duration-300 ease-out select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed justify-start overflow-hidden px-3 hover:bg-zinc-300"
+                title={lang === "id" ? "Bersihkan Terminal" : "Clear Terminal"}
+              >
+                <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-trash-alt text-base"></i>
+                </div>
+                <span className="font-black text-[10px] sm:text-xs uppercase tracking-wider ml-3 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-[140px] transition-all duration-300 ease-out overflow-hidden whitespace-nowrap">
+                  {lang === "id" ? "Bersihkan" : "Clear"}
+                </span>
+              </button>
             </div>
 
-            {/* Terminal Simulator Mock Window on the Right */}
-            <div className="lg:col-span-8 flex flex-col">
+            {/* Terminal Simulator Mock Window */}
+            <div className="flex-1 flex flex-col">
               <div className="bg-[#300A24] border-4 border-black shadow-neo-lg rounded-none flex-1 flex flex-col min-h-[380px] sm:min-h-[440px]">
                 {/* Ubuntu Terminal header bar */}
                 <div className="bg-[#2c001e] border-b-4 border-black px-4 py-3 flex items-center justify-between select-none">
