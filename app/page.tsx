@@ -520,8 +520,8 @@ export default function Home() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
-  // Certificates Reveal State
   const [podiumRevealStage, setPodiumRevealStage] = useState<"curtain" | "revealing" | "reveal3" | "reveal2" | "reveal1">("curtain");
+  const [isSpotlightOverlayFaded, setIsSpotlightOverlayFaded] = useState(false);
   
   interface PodiumConfetti {
     id: number;
@@ -543,17 +543,17 @@ export default function Home() {
     const newParticles: PodiumConfetti[] = [];
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 1.5 + Math.random() * 4.5;
+      const speed = 1.0 + Math.random() * 3.5;
       newParticles.push({
         id: Math.random() + Date.now() + i,
         x: centerXPercent,
         y: centerYPercent,
-        vx: Math.cos(angle) * speed * 0.7,
-        vy: (Math.sin(angle) * speed - 2.5) * 0.7,
+        vx: Math.cos(angle) * speed * 0.6,
+        vy: (Math.sin(angle) * speed - 2.0) * 0.6, // upward initial force
         color: colors[Math.floor(Math.random() * colors.length)],
-        size: 8 + Math.random() * 12,
+        size: 6 + Math.random() * 10,
         rotate: Math.random() * 360,
-        vRotate: (Math.random() - 0.5) * 15,
+        vRotate: (Math.random() - 0.5) * 8,
         isRound: Math.random() > 0.4,
         opacity: 1.0,
       });
@@ -563,22 +563,29 @@ export default function Home() {
 
   const startPodiumReveal = () => {
     setPodiumConfetti([]);
+    setIsSpotlightOverlayFaded(false);
     setPodiumRevealStage("revealing");
     
     setTimeout(() => {
       setPodiumRevealStage("reveal3");
-    }, 900);
+    }, 1800);
 
     setTimeout(() => {
       setPodiumRevealStage("reveal2");
-    }, 2200);
+    }, 3600);
 
     setTimeout(() => {
       setPodiumRevealStage("reveal1");
-      spawnConfetti(50, 45, 120);
-      setTimeout(() => spawnConfetti(25, 60, 40), 300);
-      setTimeout(() => spawnConfetti(75, 60, 40), 600);
-    }, 3600);
+      // Spawn massive confetti centered at 1st place
+      spawnConfetti(50, 45, 260);
+      // Staggered side bursts for extra grandeur
+      setTimeout(() => spawnConfetti(25, 60, 80), 300);
+      setTimeout(() => spawnConfetti(75, 60, 80), 600);
+    }, 5600);
+
+    setTimeout(() => {
+      setIsSpotlightOverlayFaded(true);
+    }, 7600);
   };
 
   useEffect(() => {
@@ -587,18 +594,23 @@ export default function Home() {
     const updateConfetti = () => {
       setPodiumConfetti(prev => {
         const updated = prev.map(p => {
-          const nextVy = p.vy + 0.08;
-          const nextVx = p.vx * 0.98;
+          // Slow float physics: lower gravity (0.025) and higher drag/air resistance (0.95)
+          const nextVy = p.vy * 0.95 + 0.025;
+          const nextVx = p.vx * 0.95;
+          
+          // Realistic swaying/fluttering back and forth using a sine wave
+          const sway = Math.sin((p.id % 50) + (p.y * 0.15)) * 0.12;
+
           return {
             ...p,
-            x: p.x + nextVx,
+            x: p.x + nextVx + sway,
             y: p.y + nextVy,
             vx: nextVx,
             vy: nextVy,
             rotate: p.rotate + p.vRotate,
-            opacity: p.opacity - 0.012,
+            opacity: p.opacity - 0.005, // Slower decay rate (lasts ~3-4 seconds)
           };
-        }).filter(p => p.opacity > 0 && p.y < 120 && p.x > -10 && p.x < 110);
+        }).filter(p => p.opacity > 0 && p.y < 120 && p.x > -20 && p.x < 120);
         
         if (updated.length > 0) {
           animFrame = requestAnimationFrame(updateConfetti);
@@ -3319,6 +3331,53 @@ export default function Home() {
               />
             ))}
 
+            {/* Dynamic Circular Spotlight Follow Darkness Overlay */}
+            {(() => {
+              const isMobileSpotlight = windowWidth < 768;
+              let circularSpotlightX = "50%";
+              let circularSpotlightY = "50%";
+              if (isMobileSpotlight) {
+                if (podiumRevealStage === "reveal3" || podiumRevealStage === "revealing") {
+                  circularSpotlightX = "50%";
+                  circularSpotlightY = "76%";
+                } else if (podiumRevealStage === "reveal2") {
+                  circularSpotlightX = "50%";
+                  circularSpotlightY = "20%";
+                } else if (podiumRevealStage === "reveal1") {
+                  circularSpotlightX = "50%";
+                  circularSpotlightY = "47%";
+                }
+              } else {
+                if (podiumRevealStage === "reveal3" || podiumRevealStage === "revealing") {
+                  circularSpotlightX = "78%";
+                  circularSpotlightY = "45%";
+                } else if (podiumRevealStage === "reveal2") {
+                  circularSpotlightX = "22%";
+                  circularSpotlightY = "42%";
+                } else if (podiumRevealStage === "reveal1") {
+                  circularSpotlightX = "50%";
+                  circularSpotlightY = "32%";
+                }
+              }
+              let spotlightRadius = isMobileSpotlight ? "110px" : "150px";
+              if (podiumRevealStage === "reveal1") {
+                spotlightRadius = isMobileSpotlight ? "140px" : "210px";
+              }
+              const showCircularSpotlight = podiumRevealStage === "revealing" || podiumRevealStage === "reveal3" || podiumRevealStage === "reveal2" || podiumRevealStage === "reveal1";
+
+              return showCircularSpotlight ? (
+                <div 
+                  className={`absolute inset-0 z-20 pointer-events-none ${
+                    isSpotlightOverlayFaded ? "opacity-0" : "opacity-100"
+                  }`}
+                  style={{
+                    background: `radial-gradient(circle ${spotlightRadius} at ${circularSpotlightX} ${circularSpotlightY}, transparent 0%, transparent 85%, rgba(0, 0, 0, 0.75) 100%)`,
+                    transition: "background 700ms ease-in-out, opacity 1000ms ease-in-out",
+                  }}
+                />
+              ) : null;
+            })()}
+
             {/* Spotlight Beam for 1st Place */}
             {podiumRevealStage === "reveal1" && (
               <div 
@@ -3335,7 +3394,7 @@ export default function Home() {
               <div className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden bg-black/40">
                 {/* Left Curtain */}
                 <div 
-                  className="absolute top-0 left-0 bottom-0 w-1/2 bg-neo-purple border-r-4 border-black transition-transform duration-1000 ease-in-out flex flex-col justify-between p-8"
+                  className="absolute top-0 left-0 bottom-0 w-1/2 bg-neo-purple border-r-4 border-black transition-transform duration-1500 ease-in-out flex flex-col justify-between p-8"
                   style={{
                     transform: podiumRevealStage === "revealing" ? "translateX(-100%)" : "translateX(0)"
                   }}
@@ -3346,7 +3405,7 @@ export default function Home() {
                 
                 {/* Right Curtain */}
                 <div 
-                  className="absolute top-0 right-0 bottom-0 w-1/2 bg-neo-pink border-l-4 border-black transition-transform duration-1000 ease-in-out flex flex-col justify-between p-8"
+                  className="absolute top-0 right-0 bottom-0 w-1/2 bg-neo-pink border-l-4 border-black transition-transform duration-1500 ease-in-out flex flex-col justify-between p-8"
                   style={{
                     transform: podiumRevealStage === "revealing" ? "translateX(100%)" : "translateX(0)"
                   }}
@@ -3525,7 +3584,10 @@ export default function Home() {
             {podiumRevealStage === "reveal1" && (
               <div className="flex justify-center mt-12 w-full z-20 relative animate-fade-in">
                 <button
-                  onClick={() => setPodiumRevealStage("curtain")}
+                  onClick={() => {
+                    setPodiumRevealStage("curtain");
+                    setIsSpotlightOverlayFaded(false);
+                  }}
                   className="neo-btn px-6 py-2.5 bg-neo-pink text-white font-black uppercase text-xs sm:text-sm tracking-widest flex items-center gap-2 hover:bg-neo-pink/90"
                 >
                   <i className="fas fa-redo"></i> {lang === "id" ? "REVEAL ULANG" : "REPLAY REVEAL"}
