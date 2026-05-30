@@ -3366,15 +3366,37 @@ export default function Home() {
               const showCircularSpotlight = podiumRevealStage === "revealing" || podiumRevealStage === "reveal3" || podiumRevealStage === "reveal2" || podiumRevealStage === "reveal1";
 
               return showCircularSpotlight ? (
-                <div 
-                  className={`absolute inset-0 z-20 pointer-events-none ${
-                    isSpotlightOverlayFaded ? "opacity-0" : "opacity-100"
-                  }`}
-                  style={{
-                    background: `radial-gradient(circle ${spotlightRadius} at ${circularSpotlightX} ${circularSpotlightY}, transparent 0%, transparent 85%, rgba(0, 0, 0, 0.75) 100%)`,
-                    transition: "background 700ms ease-in-out, opacity 1000ms ease-in-out",
-                  }}
-                />
+                <svg className="absolute inset-0 w-full h-full z-20 pointer-events-none">
+                  <defs>
+                    <filter id="spotlight-blur">
+                      <feGaussianBlur stdDeviation="22" />
+                    </filter>
+                    <mask id="spotlight-mask">
+                      {/* Everything white stays dark */}
+                      <rect width="100%" height="100%" fill="white" />
+                      {/* Black circle cuts transparent hole */}
+                      <circle 
+                        cx={circularSpotlightX} 
+                        cy={circularSpotlightY} 
+                        r={spotlightRadius} 
+                        fill="black" 
+                        filter="url(#spotlight-blur)"
+                        style={{
+                          transition: "cx 700ms cubic-bezier(0.25, 1, 0.5, 1), cy 700ms cubic-bezier(0.25, 1, 0.5, 1), r 700ms cubic-bezier(0.25, 1, 0.5, 1)"
+                        }}
+                      />
+                    </mask>
+                  </defs>
+                  <rect 
+                    width="100%" 
+                    height="100%" 
+                    fill="rgba(0, 0, 0, 0.75)" 
+                    mask="url(#spotlight-mask)"
+                    className={`transition-opacity duration-1000 ${
+                      isSpotlightOverlayFaded ? "opacity-0" : "opacity-100"
+                    }`}
+                  />
+                </svg>
               ) : null;
             })()}
 
