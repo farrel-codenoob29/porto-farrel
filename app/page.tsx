@@ -945,7 +945,7 @@ export default function Home() {
         
         // Populate initial trail straight back from start direction
         trail = [];
-        for (let i = 0; i < currentSegments * spacing; i++) {
+        for (let i = 0; i < currentSegments * spacing + 120; i++) {
           trail.push({ 
             x: head.x - Math.cos(currentAngle) * (i * (speed / spacing)), 
             y: head.y - Math.sin(currentAngle) * (i * (speed / spacing)) 
@@ -992,7 +992,7 @@ export default function Home() {
 
           // Re-populate trail based on head
           trail = [];
-          for (let i = 0; i < currentSegments * spacing; i++) {
+          for (let i = 0; i < currentSegments * spacing + 120; i++) {
             trail.push({ x: head.x, y: head.y });
           }
         }
@@ -1143,7 +1143,7 @@ export default function Home() {
 
       // Add head to trail
       trail.unshift({ x: head.x, y: head.y });
-      if (trail.length > currentSegments * spacing) {
+      if (trail.length > currentSegments * spacing + 120) {
         trail.pop();
       }
 
@@ -1174,6 +1174,58 @@ export default function Home() {
           }, 800);
         }
       });
+
+      // Draw Sand Trail behind the snake's tail
+      const tailStart = currentSegments * spacing;
+      const trailExtra = 110; // length of fading track
+
+      for (let i = tailStart; i < Math.min(trail.length - 1, tailStart + trailExtra); i++) {
+        const pt1 = trail[i];
+        const pt2 = trail[i + 1];
+
+        const age = i - tailStart;
+        const opacityFactor = 1 - age / trailExtra;
+        const opacity = 0.085 * opacityFactor;
+
+        if (opacity <= 0) continue;
+
+        // Calculate perpendicular offsets for parallel borders
+        const angle = Math.atan2(pt2.y - pt1.y, pt2.x - pt1.x);
+        const perpX = Math.cos(angle + Math.PI / 2);
+        const perpY = Math.sin(angle + Math.PI / 2);
+        const offset = 6.0; // distance from center line
+
+        ctx.save();
+
+        // 1. Draw central depressed shadow (thick, very soft black)
+        ctx.beginPath();
+        ctx.moveTo(pt1.x, pt1.y);
+        ctx.lineTo(pt2.x, pt2.y);
+        ctx.strokeStyle = `rgba(0, 0, 0, ${opacity * 0.7})`;
+        ctx.lineWidth = 12;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // 2. Draw left border line (slightly darker)
+        ctx.beginPath();
+        ctx.moveTo(pt1.x + perpX * offset, pt1.y + perpY * offset);
+        ctx.lineTo(pt2.x + perpX * offset, pt2.y + perpY * offset);
+        ctx.strokeStyle = `rgba(0, 0, 0, ${opacity * 1.3})`;
+        ctx.lineWidth = 1.6;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // 3. Draw right border line (slightly darker)
+        ctx.beginPath();
+        ctx.moveTo(pt1.x - perpX * offset, pt1.y - perpY * offset);
+        ctx.lineTo(pt2.x - perpX * offset, pt2.y - perpY * offset);
+        ctx.strokeStyle = `rgba(0, 0, 0, ${opacity * 1.3})`;
+        ctx.lineWidth = 1.6;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        ctx.restore();
+      }
 
       // 3. Draw Snake (tail to head)
       for (let i = currentSegments - 1; i >= 0; i--) {
