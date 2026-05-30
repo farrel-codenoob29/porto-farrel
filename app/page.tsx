@@ -520,6 +520,96 @@ export default function Home() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
+  // Certificates Reveal State
+  const [podiumRevealStage, setPodiumRevealStage] = useState<"curtain" | "revealing" | "reveal3" | "reveal2" | "reveal1">("curtain");
+  
+  interface PodiumConfetti {
+    id: number;
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    color: string;
+    size: number;
+    rotate: number;
+    vRotate: number;
+    isRound: boolean;
+    opacity: number;
+  }
+  const [podiumConfetti, setPodiumConfetti] = useState<PodiumConfetti[]>([]);
+
+  const spawnConfetti = (centerXPercent: number, centerYPercent: number, count: number) => {
+    const colors = ["#FFD600", "#FF006E", "#3A86FF", "#00FF66", "#FB5607", "#8338EC"];
+    const newParticles: PodiumConfetti[] = [];
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 4.5;
+      newParticles.push({
+        id: Math.random() + Date.now() + i,
+        x: centerXPercent,
+        y: centerYPercent,
+        vx: Math.cos(angle) * speed * 0.7,
+        vy: (Math.sin(angle) * speed - 2.5) * 0.7,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 8 + Math.random() * 12,
+        rotate: Math.random() * 360,
+        vRotate: (Math.random() - 0.5) * 15,
+        isRound: Math.random() > 0.4,
+        opacity: 1.0,
+      });
+    }
+    setPodiumConfetti(prev => [...prev, ...newParticles]);
+  };
+
+  const startPodiumReveal = () => {
+    setPodiumConfetti([]);
+    setPodiumRevealStage("revealing");
+    
+    setTimeout(() => {
+      setPodiumRevealStage("reveal3");
+    }, 900);
+
+    setTimeout(() => {
+      setPodiumRevealStage("reveal2");
+    }, 2200);
+
+    setTimeout(() => {
+      setPodiumRevealStage("reveal1");
+      spawnConfetti(50, 45, 120);
+      setTimeout(() => spawnConfetti(25, 60, 40), 300);
+      setTimeout(() => spawnConfetti(75, 60, 40), 600);
+    }, 3600);
+  };
+
+  useEffect(() => {
+    if (podiumConfetti.length === 0) return;
+    let animFrame: number;
+    const updateConfetti = () => {
+      setPodiumConfetti(prev => {
+        const updated = prev.map(p => {
+          const nextVy = p.vy + 0.08;
+          const nextVx = p.vx * 0.98;
+          return {
+            ...p,
+            x: p.x + nextVx,
+            y: p.y + nextVy,
+            vx: nextVx,
+            vy: nextVy,
+            rotate: p.rotate + p.vRotate,
+            opacity: p.opacity - 0.012,
+          };
+        }).filter(p => p.opacity > 0 && p.y < 120 && p.x > -10 && p.x < 110);
+        
+        if (updated.length > 0) {
+          animFrame = requestAnimationFrame(updateConfetti);
+        }
+        return updated;
+      });
+    };
+    animFrame = requestAnimationFrame(updateConfetti);
+    return () => cancelAnimationFrame(animFrame);
+  }, [podiumConfetti.length]);
+
   // Terminal Simulator State
   const [terminalHistory, setTerminalHistory] = useState<Array<{ command: string; result: React.ReactNode }>>([]);
   const [terminalInput, setTerminalInput] = useState("");
@@ -3206,94 +3296,243 @@ export default function Home() {
             </span>
           </h2>
 
-          <div 
-            className="flex flex-col md:flex-row justify-center items-center md:items-end gap-12 md:gap-4 max-w-5xl mx-auto py-12 px-4 select-none"
-            onMouseLeave={() => setHoveredPodium(null)}
-          >
-            {certificates.map((cert, idx) => {
-              const activePodiumIndex = hoveredPodium !== null ? hoveredPodium : 1;
-              const isActive = activePodiumIndex === idx;
-              const isMobile = windowWidth < 768;
-              
-              // Pedestal settings
-              let pedestalHeight = "";
-              let pedestalBg = "";
-              let pedestalLabel = "";
-              let shadowClass = "";
-              
-              if (idx === 0) {
-                // Left Card (Podium 2)
-                pedestalHeight = "h-16";
-                pedestalBg = "bg-neo-blue text-white";
-                pedestalLabel = "2nd";
-                shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
-              } else if (idx === 1) {
-                // Center Card (Podium 1)
-                pedestalHeight = "h-24";
-                pedestalBg = "bg-neo-yellow text-black";
-                pedestalLabel = "1st";
-                shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
-              } else {
-                // Right Card (Podium 3)
-                pedestalHeight = "h-10";
-                pedestalBg = "bg-neo-pink text-white";
-                pedestalLabel = "3rd";
-                shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
-              }
+          {/* Grand Neobrutalist Stage Box */}
+          <div className="relative overflow-hidden border-8 border-black bg-white/20 shadow-neo-xl max-w-5xl mx-auto py-12 px-4 select-none rounded-none min-h-[450px] flex flex-col justify-center">
+            
+            {/* Confetti Overlay */}
+            {podiumConfetti.map(p => (
+              <div
+                key={p.id}
+                className="absolute pointer-events-none border-2 border-black"
+                style={{
+                  left: `${p.x}%`,
+                  top: `${p.y}%`,
+                  width: `${p.size}px`,
+                  height: `${p.size}px`,
+                  backgroundColor: p.color,
+                  transform: `translate3d(-50%, -50%, 0) rotate(${p.rotate}deg)`,
+                  borderRadius: p.isRound ? "50%" : "0px",
+                  opacity: p.opacity,
+                  willChange: "transform, opacity",
+                  zIndex: 25,
+                }}
+              />
+            ))}
 
-              // Parallax calculation
-              const parallaxSpeed = idx === 0 ? 0.04 : idx === 1 ? 0.08 : 0.02;
-              const parallaxY = certificatesScrollOffset * parallaxSpeed;
-              
-              // Hover calculation
-              const hoverY = isActive ? (isMobile ? -16 : -24) : 0;
-              const hoverX = isActive ? (idx === 0 ? 8 : idx === 2 ? -8 : 0) : 0;
-              const activeScale = isActive ? (isMobile ? 1.05 : 1.1) : (isMobile ? 0.95 : 0.88);
-              const totalY = hoverY + parallaxY;
+            {/* Spotlight Beam for 1st Place */}
+            {podiumRevealStage === "reveal1" && (
+              <div 
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] md:w-[600px] h-[550px] md:h-[700px] bg-gradient-to-b from-neo-yellow/40 to-transparent pointer-events-none z-20 origin-top animate-spotlight-sweep"
+                style={{
+                  clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
+                  mixBlendMode: "screen",
+                }}
+              />
+            )}
 
-              return (
+            {/* Curtains Overlay */}
+            {(podiumRevealStage === "curtain" || podiumRevealStage === "revealing") && (
+              <div className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden bg-black/40">
+                {/* Left Curtain */}
                 <div 
-                  key={cert.id}
-                  className={`w-full max-w-[280px] md:w-1/3 flex flex-col items-center justify-end group/col reveal ${
-                    idx === 0 ? "reveal-left" : idx === 1 ? "reveal-up" : "reveal-right"
-                  }`}
-                  style={{ 
-                    transitionDelay: idx === 0 ? "150ms" : idx === 1 ? "0ms" : "300ms",
-                    willChange: "transform, opacity"
+                  className="absolute top-0 left-0 bottom-0 w-1/2 bg-neo-purple border-r-4 border-black transition-transform duration-1000 ease-in-out flex flex-col justify-between p-8"
+                  style={{
+                    transform: podiumRevealStage === "revealing" ? "translateX(-100%)" : "translateX(0)"
                   }}
-                  onMouseEnter={() => setHoveredPodium(idx)}
                 >
-                  {/* Certificate Card */}
-                  <div
-                    onClick={() => setSelectedCert(cert)}
-                    className={`bg-white border-4 border-black p-4 cursor-pointer flex flex-col transition-all duration-300 ease-out select-none w-full ${shadowClass}`}
-                    style={{ 
-                      transform: `translate3d(${hoverX}px, ${totalY}px, 0) scale(${activeScale})`,
-                      transformOrigin: "bottom center",
-                      willChange: "transform"
-                    }}
-                  >
-                    <div className="border-2 border-black mb-3 overflow-hidden aspect-[4/3] bg-black relative flex-shrink-0">
-                      <SafeImage src={cert.image} alt={cert.title} className="w-full h-full object-cover" />
+                  <div className="text-6xl sm:text-8xl font-black text-white/10 select-none transform -rotate-45 leading-none">WINNER</div>
+                  <div className="text-6xl sm:text-8xl font-black text-white/10 select-none transform rotate-12 self-end leading-none">FARREL</div>
+                </div>
+                
+                {/* Right Curtain */}
+                <div 
+                  className="absolute top-0 right-0 bottom-0 w-1/2 bg-neo-pink border-l-4 border-black transition-transform duration-1000 ease-in-out flex flex-col justify-between p-8"
+                  style={{
+                    transform: podiumRevealStage === "revealing" ? "translateX(100%)" : "translateX(0)"
+                  }}
+                >
+                  <div className="text-6xl sm:text-8xl font-black text-white/10 select-none transform rotate-45 leading-none">AWARD</div>
+                  <div className="text-6xl sm:text-8xl font-black text-white/10 select-none transform -rotate-12 self-start leading-none">CHAMPION</div>
+                </div>
+
+                {/* Start Reveal Card */}
+                {podiumRevealStage === "curtain" && (
+                  <div className="relative z-10 bg-white border-4 border-black shadow-neo-xl p-6 sm:p-8 max-w-md mx-4 text-center transform -rotate-1 hover:rotate-1 transition-transform duration-300">
+                    <div className="w-16 h-16 bg-neo-yellow border-4 border-black rounded-full flex items-center justify-center mx-auto mb-4 shadow-neo">
+                      <i className="fas fa-trophy text-2xl text-black animate-bounce-slow"></i>
                     </div>
-                    <h3 className="font-black uppercase text-[11px] sm:text-xs text-black tracking-tight mb-1 line-clamp-1">
-                      {cert.title}
+                    <h3 className="text-2xl sm:text-3xl font-black text-black mb-2 uppercase">
+                      {lang === "id" ? "PENGHARGAAN" : "AWARDS & HONORS"}
                     </h3>
-                    <p className="text-neo-blue text-[9px] font-black uppercase tracking-wider mb-3">
-                      {cert.org} ({cert.year})
+                    <p className="text-zinc-600 font-bold text-xs sm:text-sm mb-6 max-w-xs mx-auto">
+                      {lang === "id" 
+                        ? "Buka tirai untuk melihat podium sertifikat prestasi Farrel Diego Akbar secara interaktif!" 
+                        : "Reveal Farrel Diego Akbar's achievement certificates interactively!"}
                     </p>
-                    <button className="neo-btn w-full py-1.5 bg-neo-blue text-white uppercase tracking-wider text-[9px] font-black mt-auto">
-                      {t("btn-details")}
+                    <button 
+                      onClick={startPodiumReveal}
+                      className="neo-btn w-full py-3 bg-neo-yellow text-black uppercase tracking-widest text-xs sm:text-sm font-black"
+                    >
+                      {lang === "id" ? "MULAI REVEAL" : "START REVEAL"}
                     </button>
                   </div>
+                )}
+              </div>
+            )}
 
-                  {/* Pedestal */}
-                  <div className={`hidden md:flex ${pedestalHeight} ${pedestalBg} border-4 border-black shadow-neo w-[90%] mt-4 flex-col items-center justify-center font-mono font-black text-sm tracking-widest transition-transform duration-300 ease-out ${isActive ? "scale-105" : "scale-100"}`}>
-                    {pedestalLabel}
+            {/* Cards Stage Layout */}
+            <div 
+              className="flex flex-col md:flex-row justify-center items-center md:items-end gap-12 md:gap-4 w-full px-4 select-none relative z-10"
+              onMouseLeave={() => setHoveredPodium(null)}
+            >
+              {certificates.map((cert, idx) => {
+                const activePodiumIndex = hoveredPodium !== null ? hoveredPodium : 1;
+                const isActive = activePodiumIndex === idx;
+                const isMobile = windowWidth < 768;
+                
+                // Pedestal settings
+                let pedestalHeight = "";
+                let pedestalBg = "";
+                let pedestalLabel = "";
+                let shadowClass = "";
+                
+                if (idx === 0) {
+                  // Left Card (Podium 2)
+                  pedestalHeight = "h-16";
+                  pedestalBg = "bg-neo-blue text-white";
+                  pedestalLabel = "2nd";
+                  shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
+                } else if (idx === 1) {
+                  // Center Card (Podium 1)
+                  pedestalHeight = "h-24";
+                  pedestalBg = "bg-neo-yellow text-black";
+                  pedestalLabel = "1st";
+                  shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
+                } else {
+                  // Right Card (Podium 3)
+                  pedestalHeight = "h-10";
+                  pedestalBg = "bg-neo-pink text-white";
+                  pedestalLabel = "3rd";
+                  shadowClass = isActive ? "shadow-neo-xl" : "shadow-neo";
+                }
+
+                // Parallax calculation
+                const parallaxSpeed = idx === 0 ? 0.04 : idx === 1 ? 0.08 : 0.02;
+                const parallaxY = certificatesScrollOffset * parallaxSpeed;
+                
+                // Hover calculation
+                const hoverY = isActive ? (isMobile ? -16 : -24) : 0;
+                const hoverX = isActive ? (idx === 0 ? 8 : idx === 2 ? -8 : 0) : 0;
+                const activeScale = isActive ? (isMobile ? 1.05 : 1.1) : (isMobile ? 0.95 : 0.88);
+                const totalY = hoverY + parallaxY;
+
+                // Staggered reveal logic
+                const isRevealed = 
+                  (idx === 2 && (podiumRevealStage === "reveal3" || podiumRevealStage === "reveal2" || podiumRevealStage === "reveal1")) ||
+                  (idx === 0 && (podiumRevealStage === "reveal2" || podiumRevealStage === "reveal1")) ||
+                  (idx === 1 && (podiumRevealStage === "reveal1"));
+
+                // Dynamic shake intensity for suspense
+                let shakeClass = "";
+                if (idx === 1) {
+                  if (podiumRevealStage === "reveal2") {
+                    shakeClass = "animate-shake-hard";
+                  } else if (podiumRevealStage === "reveal3") {
+                    shakeClass = "animate-shake-medium";
+                  } else if (podiumRevealStage === "revealing") {
+                    shakeClass = "animate-shake-soft";
+                  }
+                } else if (idx === 0) {
+                  if (podiumRevealStage === "reveal3") {
+                    shakeClass = "animate-shake-medium";
+                  } else if (podiumRevealStage === "revealing") {
+                    shakeClass = "animate-shake-soft";
+                  }
+                } else if (idx === 2) {
+                  if (podiumRevealStage === "revealing") {
+                    shakeClass = "animate-shake-soft";
+                  }
+                }
+
+                return (
+                  <div 
+                    key={cert.id}
+                    className={`w-full max-w-[280px] md:w-1/3 flex flex-col items-center justify-end group/col reveal ${
+                      idx === 0 ? "reveal-left" : idx === 1 ? "reveal-up" : "reveal-right"
+                    }`}
+                    style={{ 
+                      transitionDelay: idx === 0 ? "150ms" : idx === 1 ? "0ms" : "300ms",
+                      willChange: "transform, opacity"
+                    }}
+                    onMouseEnter={() => setHoveredPodium(idx)}
+                  >
+                    {isRevealed ? (
+                      /* Certificate Card */
+                      <div
+                        onClick={() => setSelectedCert(cert)}
+                        className={`bg-white border-4 border-black p-4 cursor-pointer flex flex-col transition-all duration-300 ease-out select-none w-full animate-scale-in ${shadowClass}`}
+                        style={{ 
+                          transform: `translate3d(${hoverX}px, ${totalY}px, 0) scale(${activeScale})`,
+                          transformOrigin: "bottom center",
+                          willChange: "transform"
+                        }}
+                      >
+                        <div className="border-2 border-black mb-3 overflow-hidden aspect-[4/3] bg-black relative flex-shrink-0">
+                          <SafeImage src={cert.image} alt={cert.title} className="w-full h-full object-cover" />
+                        </div>
+                        <h3 className="font-black uppercase text-[11px] sm:text-xs text-black tracking-tight mb-1 line-clamp-1">
+                          {cert.title}
+                        </h3>
+                        <p className="text-neo-blue text-[9px] font-black uppercase tracking-wider mb-3">
+                          {cert.org} ({cert.year})
+                        </p>
+                        <button className="neo-btn w-full py-1.5 bg-neo-blue text-white uppercase tracking-wider text-[9px] font-black mt-auto">
+                          {t("btn-details")}
+                        </button>
+                      </div>
+                    ) : (
+                      /* Vibrating Mystery Box */
+                      <div
+                        className={`bg-white border-4 border-black p-4 flex flex-col transition-all duration-300 ease-out select-none w-full h-[230px] sm:h-[260px] md:h-[300px] items-center justify-center cursor-default ${shadowClass} ${shakeClass}`}
+                        style={{ 
+                          transform: `translate3d(${hoverX}px, ${totalY}px, 0) scale(${activeScale})`,
+                          transformOrigin: "bottom center",
+                          willChange: "transform"
+                        }}
+                      >
+                        <div className={`w-16 h-16 sm:w-20 sm:h-20 border-4 border-black rounded-none flex items-center justify-center mb-4 sm:mb-6 shadow-neo transform ${
+                          idx === 0 ? "bg-neo-blue text-white" : idx === 1 ? "bg-neo-yellow text-black" : "bg-neo-pink text-white"
+                        }`}>
+                          <span className="text-3xl sm:text-4xl font-black select-none animate-bounce-slow">?</span>
+                        </div>
+                        
+                        <div className="bg-black text-white px-3 py-1 border-2 border-black font-black uppercase text-[9px] sm:text-xs tracking-wider">
+                          {idx === 0 ? (lang === "id" ? "Peringkat 2" : "2nd Place") : idx === 1 ? (lang === "id" ? "Juara 1!" : "1st Place!") : (lang === "id" ? "Peringkat 3" : "3rd Place")}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Pedestal */}
+                    <div className={`hidden md:flex ${pedestalHeight} ${pedestalBg} border-4 border-black shadow-neo w-[90%] mt-4 flex-col items-center justify-center font-mono font-black text-sm tracking-widest transition-transform duration-300 ease-out ${isActive ? "scale-105" : "scale-100"}`}>
+                      {pedestalLabel}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+
+            {/* Replay Button */}
+            {podiumRevealStage === "reveal1" && (
+              <div className="flex justify-center mt-12 w-full z-20 relative animate-fade-in">
+                <button
+                  onClick={() => setPodiumRevealStage("curtain")}
+                  className="neo-btn px-6 py-2.5 bg-neo-pink text-white font-black uppercase text-xs sm:text-sm tracking-widest flex items-center gap-2 hover:bg-neo-pink/90"
+                >
+                  <i className="fas fa-redo"></i> {lang === "id" ? "REVEAL ULANG" : "REPLAY REVEAL"}
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
       </section>
