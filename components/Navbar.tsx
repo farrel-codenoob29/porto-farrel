@@ -99,7 +99,6 @@ export const Navbar = ({
       <div className="container mx-auto px-4 sm:px-6 py-4">
         <div className="flex justify-between items-center">
           <a href="#" className="text-xl sm:text-2xl font-black text-black uppercase tracking-tighter flex items-center gap-2">
-            <img src="/img/logo.png" alt="F" className="w-8 h-8 sm:w-10 sm:h-10 object-contain border-2 border-black bg-neo-yellow p-0.5" />
             <span className="bg-neo-yellow px-2 py-0.5 border-2 border-black mr-1">Farrel</span>
             <span className="hidden sm:inline">Diego Akbar</span>
           </a>
