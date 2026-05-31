@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${inter.variable} h-full antialiased scroll-smooth`}>
+    <html lang="id" className={`${inter.variable} h-full antialiased scroll-smooth overflow-x-hidden`}>
       <head>
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
