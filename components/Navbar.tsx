@@ -98,13 +98,14 @@ export const Navbar = ({
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b-4 border-black">
       <div className="container mx-auto px-4 sm:px-6 py-4">
         <div className="flex justify-between items-center">
-          <a href="#" className="text-xl sm:text-2xl font-black text-black uppercase tracking-tighter flex items-center">
+          <a href="#" className="text-xl sm:text-2xl font-black text-black uppercase tracking-tighter flex items-center gap-2">
+            <img src="/img/logo.png" alt="F" className="w-8 h-8 sm:w-10 sm:h-10 object-contain border-2 border-black bg-neo-yellow p-0.5" />
             <span className="bg-neo-yellow px-2 py-0.5 border-2 border-black mr-1">Farrel</span>
             <span className="hidden sm:inline">Diego Akbar</span>
           </a>
 
           {/* Navigation Desktop */}
-          <nav 
+          <nav
             className="relative hidden lg:flex items-center gap-1"
             onMouseLeave={handleMouseLeave}
           >
@@ -148,9 +149,8 @@ export const Navbar = ({
 
         {/* Mobile Menu */}
         <div
-          className={`lg:hidden mt-4 pb-4 space-y-2 bg-white border-t-2 border-black p-4 shadow-neo ${
-            mobileMenuOpen ? "block" : "hidden"
-          }`}
+          className={`lg:hidden mt-4 pb-4 space-y-2 bg-white border-t-2 border-black p-4 shadow-neo ${mobileMenuOpen ? "block" : "hidden"
+            }`}
         >
           {navItems.map((item) => {
             const isActive = activeSection === item.id;
@@ -166,9 +166,8 @@ export const Navbar = ({
                 key={item.id}
                 href={`#${item.id}`}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 font-black uppercase px-2 transition-colors duration-200 ${
-                  isActive ? `${activeBg}` : "text-black hover:bg-gray-100"
-                }`}
+                className={`block py-2 font-black uppercase px-2 transition-colors duration-200 ${isActive ? `${activeBg}` : "text-black hover:bg-gray-100"
+                  }`}
               >
                 {t(`nav-${item.id}` as TranslationKey)}
               </a>
