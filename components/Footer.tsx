@@ -8,7 +8,6 @@ export function Footer({ lang }: { lang: Lang }) {
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="mb-2 md:mb-0">
             <a href="#" className="text-xl sm:text-2xl font-black uppercase tracking-tighter flex items-center gap-2">
-              <img src="/img/logo.png" alt="F" className="w-8 h-8 sm:w-10 sm:h-10 object-contain border-2 border-white bg-neo-yellow p-0.5" />
               <span className="bg-neo-yellow text-black px-2 py-0.5 border-2 border-white mr-1">Farrel</span>
               <span className="hidden sm:inline">Diego Akbar</span>
             </a>
