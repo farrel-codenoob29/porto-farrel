@@ -10,7 +10,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Farrel Diego Akbar - Portofolio Website",
   description: "Official Neobrutalism Portfolio website of Farrel Diego Akbar, a professional Web Developer.",
-  keywords: ["Farrel Diego Akbar", "Farrel Diego", "Farrel Portfolio", "Web Developer Portfolio", "Neobrutalism Portfolio", "Next.js Portfolio"],
+  keywords: ["Farrel Diego Akbar", "Farrel Diego", "Farrel Portfolio", "Web Developer Portofolio", "Neobrutalism Portfolio", "Next.js Portofolio"],
   authors: [{ name: "Farrel Diego Akbar" }],
 };
 

@@ -100,13 +100,13 @@ export const AboutSection = ({ lang, showToast }: AboutSectionProps) => {
             <div className="sm:col-span-8 space-y-1.5 text-xs sm:text-[13px] text-zinc-300">
               <div className="text-neo-orange font-black text-sm sm:text-base">farrel@ubuntu-desktop</div>
               <div className="text-zinc-500 font-bold">---------------------</div>
-              <div><span className="text-neo-pink font-bold">OS:</span> Ubuntu 24.04 LTS</div>
+              <div><span className="text-neo-pink font-bold">OS:</span> Ubuntu 26.04 LTS</div>
               <div><span className="text-neo-pink font-bold">Host:</span> Farrel Diego Akbar</div>
-              <div><span className="text-neo-pink font-bold">Role:</span> Junior Full Stack Developer</div>
+              <div><span className="text-neo-pink font-bold">Role:</span> Full Stack Developer</div>
               <div><span className="text-neo-pink font-bold">Education:</span> Mahasiswa Informatika Institut Teknologi Kalimantan</div>
               <div><span className="text-neo-pink font-bold">Location:</span> Balikpapan, Indonesia</div>
-              <div><span className="text-neo-pink font-bold">Shell:</span> bash 5.2.15</div>
-              <div><span className="text-neo-pink font-bold">WM:</span> Next.js</div>
+              <div><span className="text-neo-pink font-bold">Shell:</span> zsh 5.9</div>
+              <div><span className="text-neo-pink font-bold">WM:</span> Hyprland</div>
             </div>
             {/* Full biography description statement */}
             <div className="sm:col-span-12 border-t border-zinc-800 pt-3 text-zinc-300 leading-relaxed text-justify text-xs mt-2">
@@ -459,7 +459,7 @@ export const AboutSection = ({ lang, showToast }: AboutSectionProps) => {
                 </div>
                 {/* Active Path Label */}
                 <div className="text-zinc-400 font-mono text-xs uppercase tracking-wider font-bold">
-                  farrel@ubuntu-desktop: ~/portfolio
+                  farrel@ubuntu-desktop: ~/portofolio
                 </div>
                 {/* Console indicator */}
                 <div className="text-[10px] text-neo-orange font-mono border border-neo-orange px-1.5 py-0.5 rounded font-black tracking-widest animate-pulse">

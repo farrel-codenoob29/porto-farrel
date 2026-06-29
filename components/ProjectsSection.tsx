@@ -206,8 +206,8 @@ const projects: Project[] = [
   {
     titleId: "Amerta AI",
     titleEn: "Amerta AI",
-    descId: "Amerta AI adalah asisten bisnis pintar berbasis kecerdasan buatan (AI) yang dirancang untuk para pengusaha. Baik untuk bisnis yang baru merintis maupun yang sudah berkembang, Amerta menyederhanakan operasional Anda melalui pencatatan keuangan terintegrasi, manajemen stok barang, dan analisis data cerdas (AI insights) untuk mendukung keputusan bisnis yang lebih baik.",
-    descEn: "Amerta AI is an intelligent, AI-powered business assistant tailored for entrepreneurs and business owners. Whether you are launching a startup or scaling an established enterprise, Amerta streamlines your operations with seamless financial tracking, inventory management, and actionable AI insights to drive smarter business decisions.",
+    descId: "Amerta AI adalah asisten bisnis cerdas yang membantu pengusaha menyederhanakan operasional melalui pencatatan keuangan terintegrasi, manajemen stok, dan analisis AI untuk keputusan yang lebih tepat.",
+    descEn: "Amerta AI is an AI-powered business assistant that streamlines operations for entrepreneurs through seamless financial tracking, inventory management, and actionable AI insights.",
     image: "/img/projects-preview/amerta.png",
     tags: [
       { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white", url: "https://laravel.com/" },
@@ -220,8 +220,8 @@ const projects: Project[] = [
   {
     titleId: "Sistem Monitor Otomatis LibreNMS",
     titleEn: "Automatic Monitoring System LibreNMS",
-    descId: "LibreNMS Report Automator adalah platform manajemen jaringan yang mengotomatisasi pemantauan data dari LibreNMS. Sistem ini dirancang khusus untuk menyederhanakan pengelolaan infrastruktur perangkat keras berskala besar—seperti router dan server—dengan melacak status perangkat secara real-time dan menghasilkan laporan harian otomatis berformat PDF secara efisien.",
-    descEn: "LibreNMS Report Automator is a network management platform that automates device monitoring from LibreNMS. Tailored to streamline the administration of large-scale hardware infrastructures—such as routers and servers—this system tracks real-time device status and efficiently generates automated daily PDF reports for effortless network oversight.",
+    descId: "LibreNMS Report Automator adalah platform yang menyederhanakan pengelolaan infrastruktur jaringan skala besar dengan melacak status perangkat secara real-time dari LibreNMS dan menghasilkan laporan harian PDF secara otomatis.",
+    descEn: "LibreNMS Report Automator is a network platform that streamlines large-scale infrastructure management by tracking real-time device status from LibreNMS and generating automated daily PDF reports.",
     image: "/img/projects-preview/libre.png",
     tags: [
       { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white", url: "https://laravel.com/" },
@@ -234,8 +234,8 @@ const projects: Project[] = [
   {
     titleId: "Website Pengaduan Aspirasi Sekolah",
     titleEn: "School Aspirations Complaint Website",
-    descId: "Layanan Pengaduan Siswa adalah platform interaktif yang memudahkan siswa untuk menyampaikan laporan, keluhan, maupun aspirasi secara aman. Sistem ini terintegrasi dengan dasbor admin untuk meninjau dan menindaklanjuti setiap masukan, bertujuan untuk menciptakan lingkungan sekolah yang lebih transparan, responsif, dan nyaman bagi semua pihak.",
-    descEn: "Student Grievance & Aspiration Portal is an interactive platform designed to help students safely submit reports, complaints, and ideas. Equipped with a dedicated admin dashboard for reviewing and processing submissions, this system aims to foster a more transparent, responsive, and supportive school environment for everyone.",
+    descId: "Layanan Pengaduan Siswa adalah platform aman bagi siswa untuk menyampaikan keluhan dan aspirasi, yang dilengkapi dasbor admin untuk menindaklanjuti setiap masukan demi terciptanya lingkungan sekolah yang transparan dan responsif.",
+    descEn: "The Student Grievance & Aspiration Portal is a secure platform for students to submit complaints and ideas, featuring an admin dashboard to process feedback and foster a transparent, responsive school environment.",
     image: "/img/projects-preview/pengaduan.png",
     tags: [
       { name: "React", icon: "fab fa-react", color: "bg-[#61DAFB] text-black", url: "https://react.dev/" },
@@ -251,8 +251,8 @@ const projects: Project[] = [
   {
     titleId: "Komponen UI Website",
     titleEn: "Website UI Components",
-    descId: "Komponen UI Website adalah pustaka komponen UI yang terinspirasi dari gaya desain shadcn/ui, dikembangkan secara khusus menggunakan Laravel dan Tailwind CSS. Projek ini menyediakan koleksi komponen modular yang siap pakai dan mudah disesuaikan—mulai dari navbar, sidebar, hingga dropdown—untuk membantu developer membangun antarmuka web yang modern dan responsif dengan jauh lebih cepat.",
-    descEn: "Website UI Components is a UI component library inspired by the design philosophy of shadcn/ui, built specifically with Laravel and Tailwind CSS. It offers a collection of highly customizable, ready-to-use modular components—including navbars, sidebars, and dropdowns—designed to help developers rapidly build modern and responsive web interfaces.",
+    descId: "Komponen UI Website adalah pustaka komponen modular terinspirasi shadcn/ui yang dibangun dengan Laravel dan Tailwind CSS, dirancang untuk membantu developer membuat antarmuka web modern dengan jauh lebih cepat.",
+    descEn: "Website UI Components is a modular UI library inspired by shadcn/ui, built with Laravel and Tailwind CSS to help developers rapidly create modern and responsive web interfaces.",
     image: "/img/projects-preview/uicom.png",
     tags: [
       { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white", url: "https://laravel.com/" },
@@ -264,8 +264,8 @@ const projects: Project[] = [
   {
     titleId: "Website Pengelolaan Tiket Pesawat",
     titleEn: "Airline Ticket Management Website",
-    descId: "TiketPesawat adalah platform pemesanan penerbangan komprehensif yang terinspirasi dari aplikasi travel terkemuka. Dirancang dengan arsitektur kode yang rapi dan terstruktur (Separation of Concerns), website ini tidak hanya memudahkan pengguna mengeksplorasi destinasi wisata impian, tetapi juga mengelola informasi kompleks terkait jadwal pesawat, maskapai, dan operasional bandara secara efisien.",
-    descEn: "TiketPesawat is a comprehensive flight booking platform inspired by leading travel applications. Developed with a clean and structured architecture (Separation of Concerns), this website provides an intuitive interface for users to explore dream destinations while efficiently managing complex data across flight schedules, airlines, and airports.",
+    descId: "TiketPesawat adalah platform pemesanan penerbangan yang dibangun dengan arsitektur terstruktur (Separation of Concerns), memudahkan pengguna mengeksplorasi destinasi sekaligus mengelola data jadwal, maskapai, dan bandara secara efisien.",
+    descEn: "TiketPesawat is a flight booking platform built with a Separation of Concerns (SoC) architecture, allowing users to explore destinations while efficiently managing complex flight, airline, and airport data.",
     image: "/img/projects-preview/pesawat.png",
     tags: [
       { name: "Laravel", icon: "fab fa-laravel", color: "bg-[#FF2D20] text-white", url: "https://laravel.com/" },
@@ -277,8 +277,8 @@ const projects: Project[] = [
   {
     titleId: "Ninja Game",
     titleEn: "Ninja Game",
-    descId: "Game Ninja adalah permainan platformer 2D yang dikembangkan sepenuhnya menggunakan bahasa pemrograman Python. Pemain mengendalikan seorang ninja dengan mekanik pergerakan dinamis—berjalan, melompat, dan menunduk—untuk bertahan hidup dan melawan sekumpulan ninja jahat. Menawarkan sistem progressive scaling, tingkat kesulitan musuh dan rintangan akan terus meningkat seiring berjalannya permainan, memberikan tantangan yang tiada henti.",
-    descEn: "Ninja Game is an action-packed 2D platformer game built entirely with Python. Players control a ninja equipped with dynamic movement mechanics—including running, jumping, and crouching—to survive and battle rogue, evil ninjas. Featuring a progressive scaling system, the difficulty of enemies and obstacles increases the longer you play, delivering an endlessly challenging gameplay experience.",
+    descId: "Game Ninja adalah permainan platformer 2D berbasis Python di mana pemain menggunakan pergerakan dinamis untuk bertahan hidup dan melawan musuh. Game ini dilengkapi sistem progressive scaling, sehingga tingkat kesulitan musuh dan rintangan akan terus meningkat seiring berjalannya waktu.",
+    descEn: "Ninja Game is a Python-based 2D platformer where players use dynamic movement mechanics to survive and battle enemies. It features a progressive scaling system, continuously increasing the difficulty of obstacles and enemies over time.",
     image: "/img/projects-preview/ninja.png",
     tags: [
       {
